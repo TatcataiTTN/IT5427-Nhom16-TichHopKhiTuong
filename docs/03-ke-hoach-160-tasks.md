@@ -1,6 +1,6 @@
 # Kế hoạch chi tiết 160 tác vụ — IT5427, Nhóm 16
 
-**Đề tài:** Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định trong nông nghiệp, năng lượng, vận hành UAV khu vực Đông Nam Á
+**Đề tài:** Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định đa ngành khu vực Đông Nam Á
 **Nguồn dữ liệu:** ERA5 (Copernicus CDS) · NOAA ISD/GHCN (AWS S3) · NASA POWER · Open-Meteo Historical
 **Thời lượng:** 4 tuần (26/9 – 8/11/2026) · 4 thành viên · 10 tác vụ/người/tuần = **160 tác vụ**
 **Mốc lớn:** 26/9 Chốt nhóm → 5/10 Nộp đề cương → 20/10 Báo cáo tiến độ → 27/10 Test → 8/11 Báo cáo cuối kỳ

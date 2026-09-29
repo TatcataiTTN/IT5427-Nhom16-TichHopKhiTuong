@@ -1,4 +1,4 @@
-# Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định trong nông nghiệp, năng lượng, vận hành UAV khu vực Đông Nam Á
+# Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định đa ngành khu vực Đông Nam Á
 
 **Học phần:** IT5427 — Tích hợp và xử lý dữ liệu lớn
 **Giảng viên:** TS. Vũ Tuyết Trinh — Trường Công nghệ Thông tin và Truyền thông, Đại học Bách khoa Hà Nội

@@ -1,6 +1,6 @@
 # Đề xuất đề tài Project — IT5427 Tích hợp và xử lý dữ liệu lớn
 
-## Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định trong nông nghiệp, năng lượng, vận hành UAV khu vực Đông Nam Á
+## Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định đa ngành khu vực Đông Nam Á
 
 **Nhóm:** 16 (4 thành viên — xem đội hình đầy đủ tại `README.md` gốc repo) · **Giảng viên:** TS. Vũ Tuyết Trinh
 **Hướng thực hiện:** Direction 1 — Xây dựng kiến trúc big data có tích hợp và xử lý dữ liệu, kèm dashboard phân tích

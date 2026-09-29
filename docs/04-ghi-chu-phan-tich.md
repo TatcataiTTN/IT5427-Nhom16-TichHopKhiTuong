@@ -46,6 +46,6 @@ Bản nháp ban đầu dùng "vi khí hậu" (microclimate) — thuật ngữ ch
 
 ## Kết luận sơ bộ dẫn tới đề xuất chính thức
 
-Chốt hướng: **Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định trong nông nghiệp, năng lượng, vận hành UAV khu vực Đông Nam Á**, tích hợp ERA5 (lưới tái phân tích) với NOAA ISD/GHCN (trạm mặt đất) và NASA POWER (bức xạ) thành một kho dữ liệu chuẩn hoá, xử lý bằng Apache Spark (batch + Structured Streaming giả lập), có tuỳ chọn mô hình vật lý-học máy (PINN) và dashboard trực quan hoá theo không gian/thời gian. Ảnh vệ tinh (SAR/quang học/khí tượng) được giữ như nguồn mở rộng tùy chọn, không bắt buộc trong lõi tiến độ.
+Chốt hướng: **Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định đa ngành khu vực Đông Nam Á**, tích hợp ERA5 (lưới tái phân tích) với NOAA ISD/GHCN (trạm mặt đất) và NASA POWER (bức xạ) thành một kho dữ liệu chuẩn hoá, xử lý bằng Apache Spark (batch + Structured Streaming giả lập), có tuỳ chọn mô hình vật lý-học máy (PINN) và dashboard trực quan hoá theo không gian/thời gian. Ảnh vệ tinh (SAR/quang học/khí tượng) được giữ như nguồn mở rộng tùy chọn, không bắt buộc trong lõi tiến độ.
 
 Nội dung đầy đủ (nguồn dữ liệu, kiến trúc, 5V, phân công, timeline) đã được viết thành đề xuất chính thức trong file `01-de-xuat-de-tai.md` cùng thư mục.
