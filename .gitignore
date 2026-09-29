@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Data (không đẩy dữ liệu thô lên repo)
+data/
+*.nc
+*.grib
+*.parquet
+*.csv
+!docs/**/*.csv
+
+# Credentials
+.cdsapirc
+.env
+*.key
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Spark / Jupyter
+*.ipynb_checkpoints/
+spark-warehouse/
+metastore_db/

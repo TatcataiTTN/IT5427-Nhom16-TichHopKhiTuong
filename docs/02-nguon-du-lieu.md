@@ -1,0 +1,110 @@
+# Danh sách mở rộng: Nguồn dữ liệu khí tượng/khí hậu quá khứ — 100% miễn phí
+
+Tài liệu này bổ sung cho `Ke-hoach-160-tasks.md`, liệt kê **càng nhiều nguồn dữ liệu thời tiết/khí hậu lịch sử miễn phí càng tốt**, gom theo nhóm chức năng để nhóm dễ chọn phối hợp — vẫn giữ 4 nguồn lõi đã chốt trong đề cương (ERA5, NOAA ISD/GHCN, NASA POWER, Open-Meteo) làm xương sống, các nguồn còn lại dùng để **làm giàu Variety**, **đối chiếu Veracity (cross-validation)**, hoặc **mở rộng Volume** nếu cần.
+
+> Tiêu chí chọn: (1) miễn phí vĩnh viễn cho mục đích học thuật/nghiên cứu, (2) không cần thẻ tín dụng, (3) có API hoặc bulk download rõ ràng. Nguồn nào cần đăng ký tài khoản (miễn phí) sẽ ghi rõ.
+
+---
+
+## A. Dữ liệu tái phân tích lưới toàn cầu (Gridded Reanalysis)
+
+Dùng làm **backbone không gian** — mô phỏng khí quyển liên tục theo lưới, chuẩn cho việc nội suy về trạm điểm.
+
+| # | Nguồn | Mô tả | Độ phân giải | Giai đoạn | Định dạng | Truy cập | Đăng ký |
+|---|---|---|---|---|---|---|---|
+| 1 | **ERA5** (Copernicus CDS) | Tái phân tích khí quyển hàng đầu của ECMWF, đồng hoá vệ tinh + trạm mặt đất | 0.25° (~28km), giờ | 1940–nay | NetCDF4/GRIB2 | `cdsapi` (Python), REST API | Cần tài khoản CDS (miễn phí) |
+| 2 | **ERA5 trên AWS Open Data** | Bản ERA5 dạng Zarr, tối ưu cho truy vấn cloud, khỏi cần tải nguyên file | 0.25°, giờ | 2008–nay (một phần biến) | Zarr (đọc bằng `xarray` + `s3fs`) | `s3://era5-pds/` (Requester Pays = 0đ vì cùng region AWS us-east-1) | Không cần key |
+| 3 | **NCEP/NCAR Reanalysis 1** (NOAA PSL) | Tái phân tích lâu đời nhất, độ phân giải thô hơn nhưng chuỗi thời gian rất dài | ~2.5°, ngày/tháng | 1948–nay | NetCDF | HTTP trực tiếp từ `psl.noaa.gov` | Không cần đăng ký |
+| 4 | **MERRA-2** (NASA GMAO) | Tái phân tích của NASA, mạnh về aerosol/bức xạ — hữu ích để đối chiếu chéo với ERA5 | 0.5°×0.625°, giờ | 1980–nay | NetCDF4/HDF5 | NASA Earthdata (`disc.gsfc.nasa.gov`), OPeNDAP subset theo vùng | Cần tài khoản NASA Earthdata (miễn phí) |
+| 5 | **JRA-55** (Cơ quan Khí tượng Nhật Bản) | Tái phân tích độc lập của Nhật, tốt để đối chiếu chéo với ERA5 | 1.25°, 6 giờ | 1958–nay | GRIB | NCAR RDA (`rda.ucar.edu`) | Cần tài khoản RDA (miễn phí, học thuật) |
+
+---
+
+## B. Dữ liệu quan trắc trạm mặt đất (Point / Station Time-series)
+
+Dùng làm **ground truth** để hiệu chỉnh và kiểm chuẩn lưới ở mục A.
+
+| # | Nguồn | Mô tả | Số trạm | Giai đoạn | Định dạng | Truy cập | Đăng ký |
+|---|---|---|---|---|---|---|---|
+| 6 | **NOAA GHCN-Daily** | Nhiệt độ max/min, mưa, tuyết theo ngày | ~100.000 trạm toàn cầu | 1750–nay (tuỳ trạm) | CSV/Fixed-width | `s3://noaa-ghcn-pds/` (AWS, không cần key) hoặc FTP NCEI | Không cần |
+| 7 | **NOAA ISD / Global Hourly** | Nhiệt độ, gió, áp suất, tầm nhìn xa theo giờ — chi tiết hơn GHCN | ~14.000 trạm | 1901–nay | CSV/Fixed-width | `s3://noaa-global-hourly-pds/` (AWS) | Không cần |
+| 8 | **NOAA GSOD** (Global Summary of the Day) | Tổng hợp ngày từ ISD, dễ dùng hơn ISD thô | ~9.000 trạm | 1929–nay | CSV | `s3://noaa-gsod-pds/` (AWS) | Không cần |
+| 9 | **Meteostat** | Nền tảng tổng hợp dữ liệu từ NOAA, DWD, ECCC... thành 1 API/thư viện Python thống nhất | Hàng chục nghìn trạm + dữ liệu mô hình | Tuỳ trạm, nhiều trạm >30 năm | JSON/CSV, thư viện `meteostat` (pandas-ready) | REST API + Python package `pip install meteostat` | Không cần key (free tier rộng) |
+| 10 | **ECA&D** (European Climate Assessment & Dataset) | Chuỗi ngày chất lượng cao, hữu ích để đối chiếu phương pháp QC | ~11.000 trạm (chủ yếu châu Âu) | Nhiều trạm >100 năm | TXT/CSV | Tải bulk từ `ecad.eu` | Không cần |
+| 11 | **Iowa Environmental Mesonet (IEM) — ASOS/METAR** | Dữ liệu METAR sân bay toàn cầu tần suất cao (5–60 phút), hợp phần "dữ liệu hàng không/nhiễu động" trong outline gốc | Hàng nghìn sân bay | Khác nhau theo sân bay, nhiều nơi >20 năm | CSV qua form request hoặc API | `mesonet.agron.iastate.edu/request/download.phtml` | Không cần |
+
+---
+
+## C. Dữ liệu mưa vệ tinh độ phân giải cao (Satellite Precipitation)
+
+Bổ sung cho biến lượng mưa — vốn ERA5/trạm thường sai số lớn ở vùng nhiệt đới/núi.
+
+| # | Nguồn | Mô tả | Độ phân giải | Giai đoạn | Định dạng | Truy cập | Đăng ký |
+|---|---|---|---|---|---|---|---|
+| 12 | **CHIRPS** (Climate Hazards Group) | Kết hợp vệ tinh + trạm, rất phổ biến cho vùng nhiệt đới/Đông Nam Á | 0.05° (~5km), ngày/tháng | 1981–nay | GeoTIFF/NetCDF | Bulk download `chc.ucsb.edu/data/chirps`, hoặc qua Google Earth Engine | Không cần |
+| 13 | **GPM IMERG** (NASA/JAXA) | Vệ tinh đo mưa toàn cầu độ phân giải cao, cập nhật gần thời gian thực và có bản lịch sử | 0.1° (~10km), 30 phút | 2000–nay | HDF5/NetCDF4 | NASA Earthdata (`disc.gsfc.nasa.gov`, dataset GPM_3IMERGHH) | Cần tài khoản Earthdata (miễn phí) |
+
+---
+
+## D. Bức xạ mặt trời & năng lượng (Radiative)
+
+| # | Nguồn | Mô tả | Độ phân giải | Giai đoạn | Định dạng | Truy cập | Đăng ký |
+|---|---|---|---|---|---|---|---|
+| 14 | **NASA POWER** | Bức xạ sóng ngắn, nhiệt độ, gió phục vụ nông nghiệp/năng lượng — đã có trong đề cương | 0.5°, giờ/ngày | 1981–nay | JSON/CSV | REST API `power.larc.nasa.gov/api` | Không cần |
+
+---
+
+## E. Nguồn tổng hợp qua API tiện lợi (Aggregator APIs — dễ tích hợp nhất)
+
+Nhóm này phù hợp để **demo nhanh** hoặc làm nguồn đối chiếu thứ 4–5 mà không tốn nhiều công parse.
+
+| # | Nguồn | Mô tả | Giai đoạn | Định dạng | Truy cập | Giới hạn free |
+|---|---|---|---|---|---|---|
+| 15 | **Open-Meteo Historical API** | Nội suy từ ERA5/DWD/NOAA, rất dễ dùng — đã có trong đề cương | 1940–nay | JSON/Parquet | REST, không cần key | Không giới hạn cho non-commercial |
+| 16 | **Meteostat API** | Như mục B.9, có thể dùng như API tổng hợp thay vì chỉ điểm trạm | Tuỳ trạm | JSON/CSV | REST + thư viện Python | Free tier rộng, có thể tự host (open-source) |
+| 17 | **Visual Crossing Weather API** | Dữ liệu lịch sử theo toạ độ, dễ dùng, có UI truy vấn nhanh | ~2000s–nay | JSON/CSV | REST API | 1.000 record/ngày miễn phí (cần đăng ký email) |
+| 18 | **Weatherbit Historical API** | Dữ liệu lịch sử theo giờ/ngày | Vài chục năm gần đây | JSON | REST API | Free tier giới hạn số request/ngày (cần đăng ký) |
+
+---
+
+## F. Sol khí & chất lượng không khí (Aerosol/AQ)
+
+Nhóm dữ liệu bổ sung cho Veracity/Variety — mây, sương mù, nồng độ sol khí (AOD) là các biến khí quyển có tương tác phi tuyến với nhiệt độ/bức xạ, hữu ích để đối chiếu chéo và làm phong phú bộ đặc trưng cho mô hình dự báo vi khí hậu.
+
+| # | Nguồn | Mô tả | Độ phân giải | Giai đoạn | Định dạng | Truy cập | Đăng ký |
+|---|---|---|---|---|---|---|---|
+| 19 | **AERONET** (NASA) | Mạng lưới trạm mặt đất đo Aerosol Optical Depth (AOD) trực tiếp bằng sun-photometer — độ chính xác cao nhất cho AOD | Điểm trạm, phút/giờ | 1993–nay (tuỳ trạm) | CSV/TXT | `aeronet.gsfc.nasa.gov` | Không cần |
+| 20 | **MODIS/VIIRS Aerosol & Cloud Products** (NASA) | AOD và độ che phủ mây dạng lưới vệ tinh, bổ sung không gian cho AERONET | 1–10km, ngày | 2000 (MODIS)/2012 (VIIRS)–nay | HDF/NetCDF | NASA Earthdata hoặc Google Earth Engine catalog | Cần Earthdata (miễn phí) |
+| 21 | **Copernicus Sentinel-5P (TROPOMI)** | Thành phần khí quyển: aerosol index, mây, NO₂, hơi nước cột — độ phân giải rất cao | ~5.5×3.5km, ngày | 2018–nay | NetCDF | Copernicus Data Space Ecosystem (`dataspace.copernicus.eu`) | Cần tài khoản (miễn phí) |
+| 22 | **OpenAQ** | Dữ liệu chất lượng không khí (PM2.5, PM10...) từ mạng lưới trạm quan trắc mở toàn cầu — proxy cho sol khí gần mặt đất | Điểm trạm, giờ | 2015–nay (tuỳ trạm/thành phố) | JSON (REST API) | `openaq.org` API | Cần API key miễn phí (đăng ký nhanh) |
+
+---
+
+## G. Nền tảng truy xuất hợp nhất (giảm công sức ghép nhiều nguồn)
+
+Nếu hạ tầng nhóm hạn chế băng thông/lưu trữ, các nền tảng này cho phép **truy vấn trực tiếp trên cloud** thay vì tải toàn bộ file thô về máy — vẫn tính là dữ liệu "đã tải/xử lý" hợp lệ cho pipeline vì output cuối cùng do nhóm tự trích xuất.
+
+| # | Nguồn | Mô tả | Bộ dữ liệu có sẵn liên quan | Truy cập | Đăng ký |
+|---|---|---|---|---|---|
+| 23 | **Google Earth Engine** | Catalog hàng trăm bộ dữ liệu khí hậu/vệ tinh đã tiền xử lý (ERA5, CHIRPS, MODIS, Sentinel-5P...) trong 1 API Python/JavaScript | ERA5, CHIRPS, MODIS AOD, Sentinel-5P, GPM | `earthengine.google.com` + `earthengine-api` (Python) | Cần tài khoản Google + đăng ký non-commercial (miễn phí) |
+| 24 | **NOAA CDO / Climate Data Online** | Giao diện tìm kiếm hợp nhất cho GHCN, ISD, và nhiều bộ NOAA khác, có API token | GHCN, ISD, Storm Events... | `www.ncdc.noaa.gov/cdo-web/` | Cần token miễn phí qua email |
+
+---
+
+## Gợi ý phối hợp theo hướng nghiên cứu
+
+| Mục tiêu | Nguồn chính | Nguồn đối chiếu/bổ sung |
+|---|---|---|
+| Dự báo/mô phỏng vi khí hậu (nhiệt, ẩm, gió) | ERA5 + NOAA ISD/GHCN | NCEP/NCAR (kiểm tra xu hướng dài hạn), Meteostat (điền khuyết trạm) |
+| Đánh giá lượng mưa cực đoan vùng nhiệt đới | CHIRPS + GPM IMERG | NOAA GHCN-Daily (đối chiếu trạm), Open-Meteo |
+| Giám sát chất lượng không khí đô thị | OpenAQ + AERONET (AOD) | MODIS/VIIRS Aerosol, Sentinel-5P |
+| Năng lượng tái tạo (điện mặt trời) | NASA POWER | MERRA-2, Sentinel-5P (che phủ mây) |
+
+---
+
+## Lưu ý khi triển khai
+
+- **Không cần key**: ERA5-AWS Zarr, NCEP/NCAR, NOAA GHCN/ISD/GSOD (AWS), Open-Meteo, ECA&D, CHIRPS bulk, IEM/ASOS, AERONET — ưu tiên dùng trước nếu muốn giảm thủ tục đăng ký.
+- **Cần đăng ký miễn phí (email, vài phút)**: Copernicus CDS, NASA Earthdata (dùng chung 1 tài khoản cho MERRA-2, GPM IMERG, MODIS/VIIRS), Copernicus Data Space Ecosystem, Google Earth Engine, OpenAQ, NOAA CDO, Visual Crossing, Weatherbit.
+- **Giấy phép/license**: mọi nguồn trên đều cho phép dùng cho mục đích nghiên cứu/học thuật phi thương mại — TV1 vẫn nên lưu lại điều khoản sử dụng (attribution) của từng nguồn để trích dẫn trong báo cáo (đã có tác vụ "Kiểm tra bảo mật/license dữ liệu" ở Tuần 4, #7 trong kế hoạch 160 tác vụ).
+- **Khuyến nghị số lượng thực tế**: không cần dùng hết 24 nguồn — chọn 4 nguồn lõi (đã chốt) + 2–3 nguồn đối chiếu (VD: CHIRPS cho mưa, MERRA-2/Meteostat để điền khuyết và đối chiếu trạm) là đủ để chứng minh **Variety** ở mức "Đạt tuyệt đối" mà không làm vỡ khối lượng công việc của nhóm 4 người trong 6 tuần.
