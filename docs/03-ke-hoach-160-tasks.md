@@ -1,6 +1,6 @@
 # Kế hoạch chi tiết 160 tác vụ — IT5427, Nhóm 16
 
-**Đề tài:** Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ mô phỏng và dự báo vi khí hậu khu vực Đông Nam Á
+**Đề tài:** Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định trong nông nghiệp, năng lượng, vận hành UAV khu vực Đông Nam Á
 **Nguồn dữ liệu:** ERA5 (Copernicus CDS) · NOAA ISD/GHCN (AWS S3) · NASA POWER · Open-Meteo Historical
 **Thời lượng:** 4 tuần (26/9 – 8/11/2026) · 4 thành viên · 10 tác vụ/người/tuần = **160 tác vụ**
 **Mốc lớn:** 26/9 Chốt nhóm → 5/10 Nộp đề cương → 20/10 Báo cáo tiến độ → 27/10 Test → 8/11 Báo cáo cuối kỳ
@@ -200,7 +200,7 @@
 | 1 | Nâng cấp Dashboard: bản đồ nhiệt động có time slider cho toàn khu vực | 21/10 | Time slider kéo được, bản đồ cập nhật theo thời gian chọn | Kéo slider qua 3 mốc thời gian, bản đồ đổi dữ liệu tương ứng |
 | 2 | Tích hợp kết quả PINN vào Dashboard (dự báo, residual, bản đồ bất thường) | 22/10 | Panel hiển thị output từ TV3, không còn dữ liệu mock | Dashboard hiển thị đúng kết quả từ file/API của TV3 |
 | 3 | Xây panel cảnh báo bất thường khí tượng (ngưỡng, màu theo mức độ) | 23/10 | Panel đổi màu theo mức độ vượt ngưỡng đã định nghĩa | Test với dữ liệu giả lập vượt ngưỡng, panel hiển thị đúng màu cảnh báo |
-| 4 | Xây panel so sánh dự báo vi khí hậu giữa các nguồn (ERA5 vs NOAA vs Open-Meteo) theo trạm/khu vực | 24/10 | Panel hiển thị song song kết quả 3 nguồn cho cùng 1 điểm/khoảng thời gian | Kết quả tính tay đối chiếu với kết quả trên Dashboard khớp nhau |
+| 4 | Xây panel so sánh giá trị khí tượng giữa các nguồn (ERA5 vs NOAA vs Open-Meteo) theo trạm/khu vực | 24/10 | Panel hiển thị song song kết quả 3 nguồn cho cùng 1 điểm/khoảng thời gian | Kết quả tính tay đối chiếu với kết quả trên Dashboard khớp nhau |
 | 5 | Tối ưu hiệu năng Dashboard (caching truy vấn, giảm độ trễ tải) | 26/10 | Thời gian tải trang giảm rõ rệt so với bản trước | Đo thời gian load trước/sau, ghi lại số liệu (giây) |
 | 6 | Kiểm thử Dashboard trên nhiều kích thước màn hình, sửa lỗi UI | 27/10 | Dashboard hiển thị đúng trên desktop, tablet, mobile | Test bằng DevTools responsive mode ở 3 kích thước, không vỡ layout |
 | 7 | Tổng hợp kết quả kỹ thuật từ 3 thành viên chuẩn bị báo cáo cuối kỳ | 29/10 | Tài liệu tổng hợp có đủ nội dung 3 mảng | Không thiếu phần nào so với outline báo cáo cuối kỳ |

@@ -1,4 +1,4 @@
-# Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ mô phỏng và dự báo vi khí hậu khu vực Đông Nam Á
+# Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định trong nông nghiệp, năng lượng, vận hành UAV khu vực Đông Nam Á
 
 **Học phần:** IT5427 — Tích hợp và xử lý dữ liệu lớn
 **Giảng viên:** TS. Vũ Tuyết Trinh — Trường Công nghệ Thông tin và Truyền thông, Đại học Bách khoa Hà Nội
@@ -9,9 +9,11 @@
 
 ## 1. Tóm tắt đề tài
 
-Xây dựng một hệ thống tích hợp dữ liệu khí tượng lịch sử từ nhiều nguồn mở có bản chất khác nhau — dữ liệu tái phân tích dạng lưới toàn cầu (ERA5), dữ liệu quan trắc trạm mặt đất (NOAA ISD/GHCN), và dữ liệu bức xạ vệ tinh (NASA POWER) — đưa về một lược đồ trung gian (mediated schema) thống nhất, xử lý bằng Apache Spark (batch và streaming giả lập), phục vụ mô phỏng và dự báo vi khí hậu khu vực Đông Nam Á, trực quan hoá kết quả trên dashboard.
+Xây dựng một hệ thống tích hợp dữ liệu khí tượng lịch sử từ nhiều nguồn mở có bản chất khác nhau — dữ liệu tái phân tích dạng lưới toàn cầu (ERA5), dữ liệu quan trắc trạm mặt đất (NOAA ISD/GHCN), và dữ liệu bức xạ vệ tinh (NASA POWER) — đưa về một lược đồ trung gian (mediated schema) thống nhất, tạo thành **kho dữ liệu khí tượng đã chuẩn hoá** làm nền cho các phân tích sau này. Trên kho dữ liệu này, hệ thống thực hiện **phát hiện dị thường khí hậu** theo khu vực/thời điểm và cung cấp thống kê hỗ trợ ra quyết định cho **nông nghiệp, năng lượng tái tạo, và vận hành UAV an toàn** (khuyến nghị khung giờ bay dựa trên gió/mưa), xử lý bằng Apache Spark (batch và streaming giả lập), trực quan hoá kết quả trên dashboard.
 
 Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (**Spatio-Temporal Heterogeneity**) giữa dữ liệu lưới liên tục và dữ liệu điểm rời rạc — đây là dạng dị biệt cấu trúc sâu hơn nhiều so với việc ghép các bảng có cùng định dạng, và là lý do đề tài này bám sát trực tiếp các nội dung lý thuyết cốt lõi của học phần: Schema Alignment, Record Linkage/Entity Resolution, Sources Profiling, Batch vs. Streaming Integration, Governance & Schema Drift.
+
+> **Về tên gọi:** đề tài chủ động dùng "khí hậu"/"dữ liệu khí tượng lịch sử" thay vì "vi khí hậu" (microclimate) — vi khí hậu chỉ quy mô không gian rất nhỏ (mét–km, ví dụ trong một thung lũng/tán rừng), trong khi dữ liệu của nhóm (lưới ERA5 ~28km/ô + trạm điểm) ở quy mô khu vực. Xem lý do chi tiết tại `docs/04-ghi-chu-phan-tich.md`.
 
 ## 2. Đội hình dự án
 

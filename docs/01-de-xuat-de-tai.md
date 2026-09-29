@@ -1,6 +1,6 @@
 # Đề xuất đề tài Project — IT5427 Tích hợp và xử lý dữ liệu lớn
 
-## Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ mô phỏng và dự báo vi khí hậu khu vực Đông Nam Á
+## Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định trong nông nghiệp, năng lượng, vận hành UAV khu vực Đông Nam Á
 
 **Nhóm:** 16 (4 thành viên — xem đội hình đầy đủ tại `README.md` gốc repo) · **Giảng viên:** TS. Vũ Tuyết Trinh
 **Hướng thực hiện:** Direction 1 — Xây dựng kiến trúc big data có tích hợp và xử lý dữ liệu, kèm dashboard phân tích
@@ -16,7 +16,13 @@ Với dữ liệu **thời tiết quá khứ**, bài toán chuyển từ xử l�
 
 ## 2. Mô tả phạm vi
 
-Xây dựng mediated schema tích hợp dữ liệu tái phân tích khí quyển ERA5 (toàn cầu/khu vực) với dữ liệu quan trắc trạm bề mặt NOAA ISD/GHCN và dữ liệu bức xạ NASA POWER (+ Open-Meteo làm nguồn đối chiếu). Sử dụng Apache Spark để xử lý dữ liệu phân tán, kết hợp mô hình vật lý/PINN để đánh giá các chỉ số khí quyển, trực quan hóa trên Dashboard.
+Xây dựng mediated schema tích hợp dữ liệu tái phân tích khí quyển ERA5 (toàn cầu/khu vực) với dữ liệu quan trắc trạm bề mặt NOAA ISD/GHCN và dữ liệu bức xạ NASA POWER (+ Open-Meteo làm nguồn đối chiếu), tạo thành **một kho dữ liệu khí tượng đã chuẩn hoá (standardized weather warehouse)** làm nền tảng dùng lại được cho nhiều bài toán phân tích sau này. Trên kho dữ liệu này, nhóm triển khai:
+
+- **Phát hiện dị thường khí hậu** (climate anomaly detection): điểm/khoảng thời gian có giá trị nhiệt độ, lượng mưa, bức xạ lệch bất thường so với phân bố lịch sử cùng khu vực/mùa vụ.
+- **Hỗ trợ ra quyết định ứng dụng**: thống kê phục vụ nông nghiệp (dự báo điều kiện canh tác theo mùa) và năng lượng tái tạo (ước lượng tiềm năng bức xạ mặt trời/gió theo khu vực); khuyến nghị khung giờ/khu vực bay UAV an toàn dựa trên tốc độ gió và lượng mưa dự kiến.
+- Sử dụng Apache Spark để xử lý dữ liệu phân tán, kết hợp mô hình vật lý/PINN (tuỳ chọn) để đánh giá các chỉ số khí quyển, trực quan hóa toàn bộ trên Dashboard.
+
+> Ảnh vệ tinh quan sát Trái Đất/khí tượng (SAR, quang học) được liệt kê như **nguồn dữ liệu mở rộng tùy chọn** (xem `02-nguon-du-lieu.md`, mục H) — không nằm trong lõi 160 tác vụ để đảm bảo tiến độ, chỉ bổ sung nếu nhóm còn dư thời gian sau khi hoàn thiện 4 nguồn lõi.
 
 ---
 
@@ -41,7 +47,7 @@ Xây dựng mediated schema tích hợp dữ liệu tái phân tích khí quyể
 | **Variety** | Cú pháp: NetCDF4/HDF5 (mảng nhị phân tự mô tả) vs CSV/ASCII (bảng phân tách dấu cách) vs JSON (phân cấp lồng nhau). Cấu trúc: dữ liệu lưới liên tục (gridded spatio-temporal array) đối đầu trực tiếp với chuỗi thời gian rời rạc tại điểm (point time-series). Ngữ nghĩa: đơn vị nhiệt độ (°C/K/°F), áp suất (hPa/Pa/mmHg), chuẩn thời gian (UTC vs Local) | **Đạt tuyệt đối** |
 | **Velocity** | Dữ liệu lịch sử là tĩnh (batch). Áp dụng kiến trúc **Replay Streaming Pipeline**: module Python đọc file lịch sử, bắn vào Apache Kafka với tần suất đẩy nhanh (VD: mô phỏng 10 năm dữ liệu chạy trong 30 phút), Spark Streaming hứng luồng tính cửa sổ trượt (Tumbling/Sliding Window) | **Đạt (qua cơ chế giả lập luồng)** |
 | **Veracity** | Dữ liệu trạm NOAA chứa nhiều giá trị mất mát (`-9999`, null), cảm biến bị trôi giá trị (sensor drift); dữ liệu vệ tinh ERA5 có sai số làm mịn mô hình hóa ở địa hình phức tạp. Cần thuật toán lọc nhiễu, chuẩn hóa ngoại lai (outlier detection), đánh giá độ tin cậy nguồn | **Đạt** |
-| **Value** | Cung cấp mediated view hợp nhất cho phép: phân tích xu hướng nhiệt/mưa cực đoan, phát hiện bất thường khí hậu theo khu vực, hoặc hỗ trợ ra quyết định cho nông nghiệp/năng lượng tái tạo (dự báo bức xạ mặt trời phục vụ vận hành điện mặt trời) | **Đạt** |
+| **Value** | Cung cấp mediated view hợp nhất cho phép: (1) phát hiện dị thường khí hậu theo khu vực/thời điểm, (2) hỗ trợ nông nghiệp và năng lượng tái tạo (ước lượng tiềm năng bức xạ/gió), (3) khuyến nghị khung giờ bay UAV an toàn dựa trên gió/mưa dự kiến, (4) kho dữ liệu chuẩn hoá làm nền cho các phân tích khí hậu tiếp theo | **Đạt** |
 
 ---
 
@@ -79,7 +85,7 @@ $$\frac{\partial u}{\partial t} + u\frac{\partial u}{\partial x} + v\frac{\parti
    - Physics Loss: $\mathcal{L}_{\text{physics}} = \Vert \text{Residue(Navier-Stokes)} \Vert^2 + \Vert \text{Residue(Clausius-Clapeyron)} \Vert^2$
    - Tổng: $\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{data}} + \lambda \mathcal{L}_{\text{physics}}$ (λ là siêu tham số cân bằng)
 
-> **Phương án lùi**: nếu nhóm chưa tự tin với PyTorch/autograd/phương trình vi phân, có thể thay PINN bằng mô hình hồi quy vi khí hậu thông thường (Spark MLlib) — vẫn đáp ứng đủ yêu cầu môn học, PINN chỉ là điểm cộng chứ không bắt buộc.
+> **Phương án lùi**: nếu nhóm chưa tự tin với PyTorch/autograd/phương trình vi phân, có thể thay PINN bằng mô hình hồi quy khí hậu thông thường (Spark MLlib) — vẫn đáp ứng đủ yêu cầu môn học, PINN chỉ là điểm cộng chứ không bắt buộc.
 
 ---
 
@@ -109,7 +115,8 @@ Batch Analytics       Kafka Replay Streaming → Spark Structured Streaming (TV1
                              │
                              ▼
               Dashboard: bản đồ nhiệt, time-series trạm,
-              cảnh báo bất thường khí hậu, kết quả dự báo (TV4)
+              cảnh báo dị thường khí hậu, panel khuyến nghị bay UAV,
+              thống kê hỗ trợ nông nghiệp/năng lượng (TV4)
 ```
 
 ---
@@ -173,5 +180,6 @@ Kế hoạch đầy đủ theo từng tuần/ngày/tiêu chí kiểm thử (Defi
 
 ## Tài liệu liên quan trong thư mục này
 
-- `Ke-hoach-160-tasks.md` — kế hoạch chi tiết 160 tác vụ theo tuần/ngày, có tiêu chí kiểm thử (Definition of Done) cho từng vai trò
-- `Danh-sach-nguon-du-lieu-thoi-tiet-mien-phi.md` — 24 nguồn dữ liệu khí tượng/khí hậu miễn phí mở rộng, dùng để làm giàu Variety/Veracity nếu nhóm còn dư sức sau khi làm chắc 4 nguồn lõi ở trên
+- `03-ke-hoach-160-tasks.md` — kế hoạch chi tiết 160 tác vụ theo tuần/ngày, có tiêu chí kiểm thử (Definition of Done) cho từng vai trò
+- `02-nguon-du-lieu.md` — 24 nguồn dữ liệu khí tượng/khí hậu miễn phí mở rộng (bao gồm mục H: ảnh vệ tinh SAR/quang học/khí tượng tuỳ chọn), dùng để làm giàu Variety/Veracity nếu nhóm còn dư sức sau khi làm chắc 4 nguồn lõi ở trên
+- `04-ghi-chu-phan-tich.md` — phân tích hai mặt + câu hỏi phản biện chuẩn bị trước

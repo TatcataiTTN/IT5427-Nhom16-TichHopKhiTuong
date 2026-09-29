@@ -1,6 +1,6 @@
 # Danh sách mở rộng: Nguồn dữ liệu khí tượng/khí hậu quá khứ — 100% miễn phí
 
-Tài liệu này bổ sung cho `Ke-hoach-160-tasks.md`, liệt kê **càng nhiều nguồn dữ liệu thời tiết/khí hậu lịch sử miễn phí càng tốt**, gom theo nhóm chức năng để nhóm dễ chọn phối hợp — vẫn giữ 4 nguồn lõi đã chốt trong đề cương (ERA5, NOAA ISD/GHCN, NASA POWER, Open-Meteo) làm xương sống, các nguồn còn lại dùng để **làm giàu Variety**, **đối chiếu Veracity (cross-validation)**, hoặc **mở rộng Volume** nếu cần.
+Tài liệu này bổ sung cho `03-ke-hoach-160-tasks.md`, liệt kê **càng nhiều nguồn dữ liệu thời tiết/khí hậu lịch sử miễn phí càng tốt**, gom theo nhóm chức năng để nhóm dễ chọn phối hợp — vẫn giữ 4 nguồn lõi đã chốt trong đề cương (ERA5, NOAA ISD/GHCN, NASA POWER, Open-Meteo) làm xương sống, các nguồn còn lại dùng để **làm giàu Variety**, **đối chiếu Veracity (cross-validation)**, **mở rộng Volume**, hoặc bổ sung ảnh vệ tinh (mục H) làm nguồn dữ liệu tùy chọn cho các ứng dụng hỗ trợ UAV/quan sát khu vực.
 
 > Tiêu chí chọn: (1) miễn phí vĩnh viễn cho mục đích học thuật/nghiên cứu, (2) không cần thẻ tín dụng, (3) có API hoặc bulk download rõ ràng. Nguồn nào cần đăng ký tài khoản (miễn phí) sẽ ghi rõ.
 
@@ -69,7 +69,7 @@ Nhóm này phù hợp để **demo nhanh** hoặc làm nguồn đối chiếu th
 
 ## F. Sol khí & chất lượng không khí (Aerosol/AQ)
 
-Nhóm dữ liệu bổ sung cho Veracity/Variety — mây, sương mù, nồng độ sol khí (AOD) là các biến khí quyển có tương tác phi tuyến với nhiệt độ/bức xạ, hữu ích để đối chiếu chéo và làm phong phú bộ đặc trưng cho mô hình dự báo vi khí hậu.
+Nhóm dữ liệu bổ sung cho Veracity/Variety — mây, sương mù, nồng độ sol khí (AOD) là các biến khí quyển có tương tác phi tuyến với nhiệt độ/bức xạ, hữu ích để đối chiếu chéo và làm phong phú bộ đặc trưng cho mô hình phân tích khí hậu.
 
 | # | Nguồn | Mô tả | Độ phân giải | Giai đoạn | Định dạng | Truy cập | Đăng ký |
 |---|---|---|---|---|---|---|---|
@@ -91,14 +91,32 @@ Nếu hạ tầng nhóm hạn chế băng thông/lưu trữ, các nền tảng n
 
 ---
 
+## H. Ảnh vệ tinh quan sát Trái Đất & khí tượng (tùy chọn — không bắt buộc trong lõi 160 tác vụ)
+
+Nhóm dữ liệu **mở rộng**, dùng nếu nhóm còn dư thời gian sau khi hoàn thiện 4 nguồn lõi (mục A–D). Đây là dữ liệu ảnh raster (khác hẳn NetCDF/CSV/JSON), cần thêm kỹ năng xử lý ảnh — chỉ nên bổ sung ở Tuần 3–4 sau khi pipeline lõi đã ổn định, không đưa vào mốc nộp đề cương 5/10.
+
+| # | Nguồn | Mô tả | Độ phân giải | Giai đoạn | Định dạng | Truy cập | Đăng ký |
+|---|---|---|---|---|---|---|---|
+| 25 | **Sentinel-1 SAR** (Copernicus) | Ảnh radar khẩu độ tổng hợp — xuyên được mây/sương mù, chụp được bất kể điều kiện thời tiết, dùng làm nguồn ảnh mặt đất ưu tiên khi trời xấu | ~5–20m, chu kỳ 6–12 ngày | 2014–nay | GeoTIFF/SAFE | Copernicus Data Space Ecosystem (`dataspace.copernicus.eu`) | Cần tài khoản (miễn phí) |
+| 26 | **Sentinel-2 / Landsat-8,9** (quang học) | Ảnh quang học đa phổ độ phân giải cao — chỉ dùng được khi trời quang (không mây che phủ khu vực chụp) | 10–30m, chu kỳ 5–16 ngày | 2013/2015–nay | GeoTIFF/JP2 | Copernicus Data Space Ecosystem hoặc USGS EarthExplorer | Cần tài khoản (miễn phí) |
+| 27 | **Himawari-8/9** (JMA) hoặc **GOES** (NOAA) | Ảnh vệ tinh khí tượng địa tĩnh — theo dõi mây, bão, đối lưu gần thời gian thực trên toàn khu vực Đông Nam Á | ~500m–2km, 10 phút/lần | 2015–nay | NetCDF/HSD | AWS Open Data (`s3://noaa-himawari8/`) hoặc JAXA P-Tree | Không cần key (AWS) |
+
+**Ứng dụng cụ thể trong đề tài (nếu triển khai):**
+- **Logic chọn ảnh theo thời tiết**: dùng độ che phủ mây từ ERA5/Himawari để quyết định — trời quang thì ưu tiên Sentinel-2/Landsat (ảnh quang học, thông tin phổ phong phú hơn); trời nhiều mây thì bắt buộc dùng Sentinel-1 SAR (không bị mây cản).
+- **Panel dashboard**: hiển thị gợi ý loại ảnh vệ tinh khả dụng cho một khu vực/thời điểm dựa trên dự báo mây từ kho dữ liệu lõi — đây là ví dụ cụ thể cho giá trị gia tăng (Value) của việc tích hợp đa nguồn, không cần crawl/xử lý khối lượng lớn ảnh thật để chứng minh khái niệm.
+
+---
+
 ## Gợi ý phối hợp theo hướng nghiên cứu
 
 | Mục tiêu | Nguồn chính | Nguồn đối chiếu/bổ sung |
 |---|---|---|
-| Dự báo/mô phỏng vi khí hậu (nhiệt, ẩm, gió) | ERA5 + NOAA ISD/GHCN | NCEP/NCAR (kiểm tra xu hướng dài hạn), Meteostat (điền khuyết trạm) |
+| Phát hiện dị thường khí hậu theo khu vực (nhiệt, ẩm, gió) | ERA5 + NOAA ISD/GHCN | NCEP/NCAR (kiểm tra xu hướng dài hạn), Meteostat (điền khuyết trạm) |
 | Đánh giá lượng mưa cực đoan vùng nhiệt đới | CHIRPS + GPM IMERG | NOAA GHCN-Daily (đối chiếu trạm), Open-Meteo |
 | Giám sát chất lượng không khí đô thị | OpenAQ + AERONET (AOD) | MODIS/VIIRS Aerosol, Sentinel-5P |
 | Năng lượng tái tạo (điện mặt trời) | NASA POWER | MERRA-2, Sentinel-5P (che phủ mây) |
+| Hỗ trợ ra quyết định bay UAV an toàn | ERA5/NOAA (gió, mưa) | Himawari-8/9 (mây/đối lưu gần thời gian thực, tuỳ chọn) |
+| Gợi ý chọn ảnh vệ tinh theo thời tiết (tuỳ chọn) | Himawari-8/9 (độ che phủ mây) | Sentinel-1 SAR (khi nhiều mây), Sentinel-2/Landsat (khi trời quang) |
 
 ---
 
@@ -107,4 +125,4 @@ Nếu hạ tầng nhóm hạn chế băng thông/lưu trữ, các nền tảng n
 - **Không cần key**: ERA5-AWS Zarr, NCEP/NCAR, NOAA GHCN/ISD/GSOD (AWS), Open-Meteo, ECA&D, CHIRPS bulk, IEM/ASOS, AERONET — ưu tiên dùng trước nếu muốn giảm thủ tục đăng ký.
 - **Cần đăng ký miễn phí (email, vài phút)**: Copernicus CDS, NASA Earthdata (dùng chung 1 tài khoản cho MERRA-2, GPM IMERG, MODIS/VIIRS), Copernicus Data Space Ecosystem, Google Earth Engine, OpenAQ, NOAA CDO, Visual Crossing, Weatherbit.
 - **Giấy phép/license**: mọi nguồn trên đều cho phép dùng cho mục đích nghiên cứu/học thuật phi thương mại — TV1 vẫn nên lưu lại điều khoản sử dụng (attribution) của từng nguồn để trích dẫn trong báo cáo (đã có tác vụ "Kiểm tra bảo mật/license dữ liệu" ở Tuần 4, #7 trong kế hoạch 160 tác vụ).
-- **Khuyến nghị số lượng thực tế**: không cần dùng hết 24 nguồn — chọn 4 nguồn lõi (đã chốt) + 2–3 nguồn đối chiếu (VD: CHIRPS cho mưa, MERRA-2/Meteostat để điền khuyết và đối chiếu trạm) là đủ để chứng minh **Variety** ở mức "Đạt tuyệt đối" mà không làm vỡ khối lượng công việc của nhóm 4 người trong 6 tuần.
+- **Khuyến nghị số lượng thực tế**: không cần dùng hết 27 nguồn — chọn 4 nguồn lõi (đã chốt) + 2–3 nguồn đối chiếu (VD: CHIRPS cho mưa, MERRA-2/Meteostat để điền khuyết và đối chiếu trạm) là đủ để chứng minh **Variety** ở mức "Đạt tuyệt đối" mà không làm vỡ khối lượng công việc của nhóm 4 người trong 6 tuần. Ảnh vệ tinh (mục H) chỉ nên thêm ở Tuần 3–4 nếu còn dư thời gian, tuyệt đối không đưa vào mốc nộp đề cương 5/10.

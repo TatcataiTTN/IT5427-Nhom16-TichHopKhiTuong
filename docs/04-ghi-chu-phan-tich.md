@@ -2,7 +2,7 @@
 
 ## Bản chất vấn đề
 
-Chuyển trọng tâm sang dữ liệu thời tiết **quá khứ** làm giảm áp lực về Velocity (tốc độ luồng dữ liệu), nhưng đẩy độ phức tạp của Volume và Variety lên mức cao nhất. Bản chất bài toán tích hợp ở đây là xử lý sự không đồng nhất về không gian và thời gian (**Spatio-Temporal Heterogeneity**) giữa dữ liệu viễn thám/tái phân tích dạng lưới và dữ liệu cảm biến điểm, nhằm tạo ra một bộ dữ liệu đồng nhất phục vụ mô phỏng và dự báo vi khí hậu.
+Chuyển trọng tâm sang dữ liệu thời tiết **quá khứ** làm giảm áp lực về Velocity (tốc độ luồng dữ liệu), nhưng đẩy độ phức tạp của Volume và Variety lên mức cao nhất. Bản chất bài toán tích hợp ở đây là xử lý sự không đồng nhất về không gian và thời gian (**Spatio-Temporal Heterogeneity**) giữa dữ liệu viễn thám/tái phân tích dạng lưới và dữ liệu cảm biến điểm, nhằm tạo ra một bộ dữ liệu đồng nhất phục vụ phân tích và phát hiện dị thường khí hậu.
 
 ---
 
@@ -40,8 +40,12 @@ Thời tiết là một hệ động lực học phức tạp, gồm các nhóm 
 
 ---
 
+## Vì sao không dùng từ "vi khí hậu" trong tên đề tài
+
+Bản nháp ban đầu dùng "vi khí hậu" (microclimate) — thuật ngữ chỉ khí hậu ở quy mô không gian rất nhỏ (mét đến vài km, ví dụ trong một thung lũng/tán rừng/khu phố). Dữ liệu thực tế của nhóm (lưới ERA5 ~28km/ô, ghép với trạm điểm) ở quy mô **khu vực (regional/meso-scale)**, chênh lệch hàng trăm lần so với quy mô vi mô thật sự — dùng "vi khí hậu" sẽ không khớp với phần định lượng 5V đã khai báo và dễ bị phản biện chất vấn. Tên đề tài chính thức vì vậy chuyển sang mô tả đúng bản chất: tích hợp dữ liệu khí tượng lịch sử để **phát hiện dị thường khí hậu** và **hỗ trợ ra quyết định** cho các bài toán ứng dụng cụ thể.
+
 ## Kết luận sơ bộ dẫn tới đề xuất chính thức
 
-Chốt hướng: **Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ mô phỏng và dự báo vi khí hậu khu vực Đông Nam Á**, tích hợp ERA5 (lưới tái phân tích) với NOAA ISD/GHCN (trạm mặt đất) và NASA POWER (bức xạ), xử lý bằng Apache Spark (batch + Structured Streaming giả lập), có tuỳ chọn mô hình vật lý-học máy (PINN) và dashboard trực quan hoá theo không gian/thời gian.
+Chốt hướng: **Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định trong nông nghiệp, năng lượng, vận hành UAV khu vực Đông Nam Á**, tích hợp ERA5 (lưới tái phân tích) với NOAA ISD/GHCN (trạm mặt đất) và NASA POWER (bức xạ) thành một kho dữ liệu chuẩn hoá, xử lý bằng Apache Spark (batch + Structured Streaming giả lập), có tuỳ chọn mô hình vật lý-học máy (PINN) và dashboard trực quan hoá theo không gian/thời gian. Ảnh vệ tinh (SAR/quang học/khí tượng) được giữ như nguồn mở rộng tùy chọn, không bắt buộc trong lõi tiến độ.
 
-Nội dung đầy đủ (nguồn dữ liệu, kiến trúc, 5V, phân công, timeline) đã được viết thành đề xuất chính thức trong file `De-xuat-de-tai.md` cùng thư mục.
+Nội dung đầy đủ (nguồn dữ liệu, kiến trúc, 5V, phân công, timeline) đã được viết thành đề xuất chính thức trong file `01-de-xuat-de-tai.md` cùng thư mục.
