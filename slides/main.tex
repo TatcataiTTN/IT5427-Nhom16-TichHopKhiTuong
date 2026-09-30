@@ -343,6 +343,63 @@ có phương án lùi về MLlib hồi quy); ưu tiên tuyệt đối Spark batc
 kiểm thử (Definition of Done) -- xem \texttt{docs/03-ke-hoach-160-tasks.md}.
 \end{frame}
 
+% Frame 12b -- multi-track pipeline timeline, converges at each official milestone
+\begin{frame}{Ba luồng công việc chạy song song suốt 4 tuần và hội tụ đúng tại từng mốc chính thức}
+\begin{center}
+\resizebox{0.98\textwidth}{!}{%
+\begin{tikzpicture}[remember picture,
+  seg/.style={rectangle, draw=hustblue, thick, align=center, font=\scriptsize, minimum height=0.9cm, text width=1.9cm},
+  lane/.style={font=\bfseries\small, color=hustblue},
+  mile/.style={rectangle, rounded corners, draw=warnorange, thick, fill=warnorange!15, minimum height=0.7cm, align=center, font=\scriptsize},
+  conv/.style={-{Latex[length=2.2mm]}, thick, goodgreen}]
+
+% ---- lane labels ----
+\node[lane, anchor=east] at (-0.3,3.4) {TV1};
+\node[lane, anchor=east] at (-0.3,2.2) {TV2};
+\node[lane, anchor=east] at (-0.3,1.0) {TV3+4};
+
+% ---- TV1: Ingestion ----
+\node[seg, minimum width=2.4cm, fill=hustblue!10] at (1.2,3.4) {Đăng ký API,\\crawl mẫu};
+\node[seg, minimum width=3.8cm, fill=hustblue!18] at (4.3,3.4) {Batch crawl\\toàn bộ nguồn};
+\node[seg, minimum width=2.0cm, fill=hustblue!10] at (7.2,3.4) {Veracity,\\outlier, Docker};
+\node[seg, minimum width=3.2cm, fill=hustblue!18] at (9.8,3.4) {Data freeze,\\README};
+
+% ---- TV2: Schema ----
+\node[seg, minimum width=2.4cm, fill=goodgreen!10] at (1.2,2.2) {Thiết kế\\Mediated Schema};
+\node[seg, minimum width=3.8cm, fill=goodgreen!18] at (4.3,2.2) {Warehouse,\\Kriging interp.};
+\node[seg, minimum width=2.0cm, fill=goodgreen!10] at (7.2,2.2) {Record Linkage\\đầy đủ};
+\node[seg, minimum width=3.2cm, fill=goodgreen!18] at (9.8,2.2) {Freeze schema,\\Data Dictionary};
+
+% ---- TV3+4: Spark/PINN + Dashboard/PM ----
+\node[seg, minimum width=2.4cm, fill=warnorange!10] at (1.2,1.0) {Setup Spark,\\roadmap};
+\node[seg, minimum width=3.8cm, fill=warnorange!18] at (4.3,1.0) {Streaming,\\Dashboard khung};
+\node[seg, minimum width=2.0cm, fill=warnorange!10] at (7.2,1.0) {PINN,\\Dashboard nâng cấp};
+\node[seg, minimum width=3.2cm, fill=warnorange!18] at (9.8,1.0) {Inference,\\hoàn thiện Dashboard};
+
+% ---- milestone verticals ----
+\foreach \x/\lbl in {2.4/{5/10\\Đề cương}, 6.2/{20/10\\Tiến độ}, 8.2/{27/10\\Test}} {
+  \draw[dashed, warnorange, thick] (\x,0.45) -- (\x,4.05);
+  \node[mile] at (\x,4.35) {\lbl};
+}
+\node[mile, fill=goodgreen!20, draw=goodgreen] at (0,4.35) {26/9\\\checkmark{} Chốt nhóm};
+\draw[dashed, goodgreen, thick] (0,0.45) -- (0,4.05);
+
+% ---- convergence into final milestone ----
+\draw[conv] (11.4,3.4) -- (12.5,2.2);
+\draw[conv] (11.4,2.2) -- (12.5,2.2);
+\draw[conv] (11.4,1.0) -- (12.5,2.2);
+\node[rectangle, rounded corners, draw=goodgreen, very thick, fill=goodgreen!15,
+      minimum width=2.1cm, minimum height=1.6cm, align=center, font=\bfseries\scriptsize]
+      at (13.7,2.2) {8/11\\BÁO CÁO\\CUỐI KỲ};
+\end{tikzpicture}%
+}
+\end{center}
+\vspace{0.2cm}
+\centering\scriptsize
+Mỗi luồng độc lập theo tuần nhưng \textbf{cùng đứng trước mỗi mốc chính thức} -- không luồng nào
+được phép trễ hơn mốc chung, vì Spark (TV3+4) cần dữ liệu đã chuẩn hoá của TV1/TV2 làm đầu vào.
+\end{frame}
+
 %=============================================================
 \section{Rủi ro \& kết luận}
 %=============================================================
