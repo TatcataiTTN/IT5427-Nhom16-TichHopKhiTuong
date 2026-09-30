@@ -8,8 +8,10 @@ venv/
 data/
 *.nc
 *.grib
+*.grb2
 *.parquet
 *.csv
+*.png
 !docs/**/*.csv
 
 # Credentials

@@ -1,0 +1,45 @@
+{
+  "latitude": -6.221441,
+  "longitude": 106.856186,
+  "generationtime_ms": 0.15151500701904297,
+  "utc_offset_seconds": 25200,
+  "timezone": "Asia/Jakarta",
+  "timezone_abbreviation": "GMT+7",
+  "elevation": 14.0,
+  "daily_units": {
+    "time": "iso8601",
+    "temperature_2m_max": "°C",
+    "temperature_2m_min": "°C",
+    "precipitation_sum": "mm"
+  },
+  "daily": {
+    "time": [
+      "2024-01-01",
+      "2024-01-02",
+      "2024-01-03",
+      "2024-01-04",
+      "2024-01-05"
+    ],
+    "temperature_2m_max": [
+      31.7,
+      32.0,
+      28.2,
+      28.2,
+      31.9
+    ],
+    "temperature_2m_min": [
+      24.2,
+      24.0,
+      23.9,
+      23.6,
+      23.6
+    ],
+    "precipitation_sum": [
+      11.0,
+      8.4,
+      29.5,
+      59.8,
+      15.9
+    ]
+  }
+}
