@@ -55,11 +55,14 @@ Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (*
     │                                     & sửa lỗi so với tài liệu ban đầu (ERA5-AWS, Himawari, OpenAQ...)
     ├── 06-truong-du-lieu-va-tich-hop.md      — trường dữ liệu thật của từng nguồn, Mediated Schema (GAV),
     │                                     khoảng trùng lặp cần Survivorship, khoảng trống vật lý cần PINN
-    └── 07-bang-va-giai-phap-tich-hop.md      — bảng ánh xạ trường tổng hợp + 7 giải pháp tích hợp có code mẫu
-                                          (GAV union, PIVOT, PARSE, Survivorship, derive vật lý, spatial+PINN)
+    ├── 07-bang-va-giai-phap-tich-hop.md      — bảng ánh xạ trường tổng hợp + 7 giải pháp tích hợp có code mẫu
+    │                                     (GAV union, PIVOT, PARSE, Survivorship, derive vật lý, spatial+PINN)
+    └── 08-danh-sach-tram-quan-trac.md         — danh sách trạm GHCN/ISD thật đã lọc cho toàn Đông Nam Á,
+                                          kèm các "bẫy" mã quốc gia (VM/VN, BX/BS) phát hiện được khi lọc
 ```
 
 Script kiểm tra nguồn dữ liệu thật: `scripts/check_data_sources.py` (chạy `python3 scripts/check_data_sources.py`, kết quả lưu ở `data_samples/`).
+Danh sách trạm quan trắc dùng thẳng trong code: `reference/*.csv` (xem `docs/08-danh-sach-tram-quan-trac.md`).
 
 Khi triển khai code (crawler/ingestion, ETL, Spark job, mô hình, dashboard), tạo thêm các thư mục `ingestion/`, `warehouse/`, `model/`, `dashboard/` ở gốc repo theo đúng kiến trúc mô tả trong `docs/01-de-xuat-de-tai.md`.
 
