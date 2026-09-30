@@ -13,6 +13,7 @@ data/
 *.csv
 *.png
 !docs/**/*.csv
+!reference/**/*.csv
 
 # Credentials
 .cdsapirc
