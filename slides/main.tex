@@ -1,0 +1,381 @@
+\documentclass[t, aspectratio=169]{beamer}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{shapes.callouts, positioning, arrows.meta, fit, backgrounds}
+
+\definecolor{hustblue}{RGB}{0,60,113}
+\definecolor{goodgreen}{RGB}{30,120,60}
+\definecolor{warnorange}{RGB}{200,90,20}
+\definecolor{badred}{RGB}{170,30,30}
+
+\def\slideContentLeftMargin{0.5cm}
+\def\slideContentRightMargin{0.5cm}
+\def\hustHeaderHeight{3.0cm}
+\def\slideContentBotMargin{2.8cm}
+
+\usepackage[blue, 169]{beamerthemeHUST}
+\usefonttheme{serif}
+\renewcommand{\familydefault}{\rmdefault}
+
+\setbeamercolor{frametitle}{fg=hustblue}
+\setbeamerfont{frametitle}{size=\fontsize{16}{18}\selectfont, series=\bfseries}
+\setbeamertemplate{frametitle}{
+  \nointerlineskip
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=north west, xshift=0.35cm, yshift=-0.95cm, text width=12.3cm, align=left]
+    at (current page.north west)
+    {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle};
+  \end{tikzpicture}
+}
+\setbeamertemplate{footline}{\vbox to 1.8cm{}}
+
+\renewcommand{\titlePageTitleX}{-0.5cm}
+\renewcommand{\titlePageTitleY}{-0.5cm}
+\renewcommand{\hustTitleAlign}{\alignLeft}
+\renewcommand{\hustSubtitleAlign}{\alignLeft}
+\renewcommand{\hustAuthorAlign}{\alignLeft}
+\renewcommand{\hustInstAlign}{\alignLeft}
+
+\renewcommand{\hustsectionpage}[1]{%
+  {%
+    \setbeamertemplate{background}{\includegraphics[width=\paperwidth,height=\paperheight]{\hustbg{section}}}%
+    \begin{frame}[plain,c]
+      \centering \Huge \textcolor{white}{\textbf{#1}}
+    \end{frame}
+  }%
+}
+
+\graphicspath{{images/}}
+
+% ---- Assertion-Evidence helper: big-number card, direct-labeled ----
+\newcommand{\bignum}[4]{%
+  % #1 = number/value (big), #2 = short caption below, #3 = color, #4 = width
+  \begin{minipage}[t]{#4}
+    \centering
+    {\fontsize{32}{36}\selectfont\bfseries\color{#3} #1}\\[2pt]
+    {\small #2}
+  \end{minipage}%
+}
+% Compact variant for slides that also carry a table/diagram below the numbers
+\newcommand{\bignumS}[4]{%
+  \begin{minipage}[t]{#4}
+    \centering
+    {\fontsize{22}{26}\selectfont\bfseries\color{#3} #1}\\[1pt]
+    {\scriptsize #2}
+  \end{minipage}%
+}
+
+\title{\large Tích hợp dữ liệu khí tượng đa nguồn}
+\subtitle{\normalsize Phát hiện dị thường khí hậu \& hỗ trợ ra quyết định đa ngành khu vực Đông Nam Á}
+\author{Ngô Văn Quang \quad $\cdot$ \quad Nguyễn Cao Lương \quad $\cdot$ \quad Trương Tuấn Nghĩa}
+\institute{SoICT, Đại học Bách khoa Hà Nội \\
+IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
+{\small Giảng viên: TS.\ Vũ Tuyết Trinh}}
+
+\begin{document}
+
+% 1. Title
+\husttitlepage
+
+% 2. Outline
+\begin{frame}[shrink=5]{Nội dung}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{enumerate}
+\item \hyperlink{sec1}{Vấn đề \& mục tiêu đề tài}
+\item \hyperlink{sec2}{Nguồn dữ liệu -- đã kiểm chứng thật}
+\item \hyperlink{sec3}{Kiến trúc hệ thống \& tích hợp}
+\end{enumerate}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item \hyperlink{sec4}{Trạm quan trắc \& dung lượng dữ liệu}
+\item \hyperlink{sec5}{Kế hoạch \& đội hình}
+\item \hyperlink{sec6}{Rủi ro \& kết luận}
+\end{enumerate}
+\end{column}
+\end{columns}
+\end{frame}
+
+\resetPageCount
+\showPageNumber
+\useStyleHustFull
+\useThinBar
+
+%=============================================================
+\section{Vấn đề \& mục tiêu}
+%=============================================================
+\hypertarget{sec1}{}
+\hustsectionpage{1. Vấn đề \& mục tiêu\\đề tài}
+
+% Frame 3
+\begin{frame}{Dữ liệu khí tượng đa nguồn buộc phải giải quyết đúng 2 loại dị biệt cốt lõi của môn học}
+\begin{center}
+\resizebox{0.86\textwidth}{!}{%
+\begin{tikzpicture}[remember picture,
+  box/.style={rectangle, rounded corners, draw=hustblue, thick, fill=hustblue!8, align=center, inner sep=6pt, font=\small},
+  arr/.style={-{Latex[length=3mm]}, thick, hustblue}]
+\node[box, minimum width=5.5cm, minimum height=1.6cm] (p1) at (-4.2,1.6) {\textbf{Structural/Semantic Heterogeneity}\\5 nguồn: lưới liên tục (ERA5) vs.\\điểm rời rạc (trạm), field/đơn vị khác nhau};
+\node[box, minimum width=5.5cm, minimum height=1.6cm, fill=warnorange!10, draw=warnorange] (p2) at (4.2,1.6) {\textbf{Instance/Identity Heterogeneity}\\Cùng 1 đại lượng (nhiệt độ, mưa...)\\được đo bởi tới 5 nguồn trùng nhau};
+\node[box, minimum width=6.2cm, minimum height=1.3cm, fill=goodgreen!10, draw=goodgreen] (s1) at (-4.2,-1.3) {Giải pháp: \textbf{Mediated Schema (GAV)}\\+ Spatial Interpolation};
+\node[box, minimum width=6.2cm, minimum height=1.3cm, fill=goodgreen!10, draw=goodgreen] (s2) at (4.2,-1.3) {Giải pháp: \textbf{Survivorship Rule}\\(Record Linkage / Data Fusion)};
+\draw[arr] (p1) -- (s1);
+\draw[arr] (p2) -- (s2);
+\end{tikzpicture}%
+}
+\end{center}
+\end{frame}
+
+% Frame 4
+\begin{frame}{Đề tài phục vụ 3 nhóm ứng dụng cụ thể, không dừng lại ở việc gộp dữ liệu}
+\centering
+\begin{tabular}{@{}p{3.6cm}p{8.6cm}@{}}
+\toprule
+Ứng dụng & Cách dùng kho dữ liệu đã chuẩn hoá \\
+\midrule
+Phát hiện dị thường khí hậu & So sánh giá trị hiện tại với phân bố lịch sử cùng khu vực/mùa vụ \\
+Nông nghiệp \& năng lượng & Ước lượng tiềm năng bức xạ mặt trời/gió theo khu vực và thời điểm \\
+Vận hành UAV an toàn & Khuyến nghị khung giờ/khu vực bay dựa trên gió và lượng mưa dự kiến \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+
+\small Cả 3 ứng dụng dùng chung một \textbf{kho dữ liệu khí tượng đã chuẩn hoá} (Mediated Schema) --
+xây một lần, tái sử dụng nhiều lần, đúng tinh thần Data Integration của môn học.
+\end{frame}
+
+%=============================================================
+\section{Nguồn dữ liệu}
+%=============================================================
+\hypertarget{sec2}{}
+\hustsectionpage{2. Nguồn dữ liệu --\\đã kiểm chứng thật}
+
+% Frame 5
+\begin{frame}{8/9 nguồn dữ liệu đã gọi API/tải mẫu thật thành công, không chỉ tra tài liệu}
+\begin{center}
+\bignumS{8/9}{nguồn kiểm tra thành công\\(script \texttt{check\_data\_sources.py}, chạy thật 30/9/2026)}{goodgreen}{5.6cm}
+\hspace{0.5cm}
+\bignumS{4/4}{nguồn lõi hoạt động ngay\\KHÔNG cần đăng ký tài khoản}{goodgreen}{5.6cm}
+\end{center}
+\vspace{0.15cm}
+\centering\scriptsize
+\begin{tabular}{@{}llll@{}}
+\toprule
+Nguồn & Trạng thái & Cần đăng ký? & Bằng chứng \\
+\midrule
+NASA POWER & \textcolor{goodgreen}{\textbf{OK}} & Không & HTTP 200, 5 ngày dữ liệu Hà Nội \\
+Open-Meteo Historical & \textcolor{goodgreen}{\textbf{OK}} & Không & HTTP 200, 5 ngày dữ liệu Jakarta \\
+NOAA GHCN-Daily (S3) & \textcolor{goodgreen}{\textbf{OK}} & Không & 44.560 bản ghi, 1958--2025 \\
+NOAA ISD/Global Hourly & \textcolor{goodgreen}{\textbf{OK}} & Không & 16.741 bản ghi/năm, 1 trạm \\
+ERA5 (ARCO, Google Cloud) & \textcolor{goodgreen}{\textbf{OK}} & Không & 35 biến, \texttt{.zmetadata} tải được \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+% Frame 6
+\begin{frame}{Kiểm tra thật đã sửa 3 lỗi và phát hiện 2 nguồn ERA5 miễn phí bị bỏ sót}
+\centering\footnotesize
+\begin{tabular}{@{}p{3.3cm}p{9.3cm}@{}}
+\toprule
+Phát hiện & Nội dung \\
+\midrule
+\textcolor{badred}{\textbf{Sửa}} ERA5 trên AWS & \texttt{era5-pds} là bucket \textit{Requester Pays} -- cần tài khoản AWS thật, KHÔNG miễn phí hoàn toàn như ghi chú ban đầu \\
+\textcolor{badred}{\textbf{Sửa}} OpenAQ & API v1/v2 đã bị khai tử (HTTP 410 Gone) -- phải dùng v3, key qua header khác \\
+\textcolor{goodgreen}{\textbf{Đính chính}} Himawari-8 & Vẫn hoạt động thật (đã tải mẫu file 12/10/2025) -- KHÔNG ngừng vận hành như nhận định sai trước đó \\
+\textcolor{hustblue}{\textbf{Mới}} ARCO-ERA5 & Google Cloud, hoàn toàn miễn phí, không đăng ký -- 35 biến, 1959--2022, 0.25\textdegree{}, hourly \\
+\textcolor{hustblue}{\textbf{Mới}} Planetary Computer & Microsoft, cấp SAS token tự động, không đăng ký tài khoản \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+%=============================================================
+\section{Kiến trúc \& tích hợp}
+%=============================================================
+\hypertarget{sec3}{}
+\hustsectionpage{3. Kiến trúc hệ thống\\\& tích hợp dữ liệu}
+
+% Frame 7
+\begin{frame}{Pipeline xử lý 5 nguồn hội tụ về một Mediated Schema duy nhất trước khi phân tích}
+\begin{center}
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}[remember picture,
+  f/.style={rectangle, rounded corners, draw=hustblue, thick, fill=hustblue!8, minimum width=2.6cm, minimum height=0.9cm, align=center, font=\scriptsize},
+  arr/.style={-{Latex[length=2.5mm]}, thick, hustblue}]
+\node[f] (s1) at (-6.5,2.2) {NASA POWER};
+\node[f] (s2) at (-6.5,1.0) {Open-Meteo};
+\node[f] (s3) at (-6.5,-0.2) {GHCN-Daily\\(PIVOT)};
+\node[f] (s4) at (-6.5,-1.4) {ISD\\(PARSE)};
+\node[f] (s5) at (-6.5,-2.6) {ERA5 (ARCO)};
+\node[f, minimum width=3.2cm, minimum height=2.6cm, fill=warnorange!10, draw=warnorange] (raw) at (-2.2,-0.2) {Raw Zone\\+ chuẩn hoá\\đơn vị/thời gian};
+\node[f, minimum width=3.2cm, minimum height=2.6cm, fill=goodgreen!10, draw=goodgreen] (ms) at (1.6,-0.2) {Mediated\\Schema\\(Survivorship)};
+\node[f, minimum width=3.2cm, minimum height=1.1cm] (spark) at (5.4,1.1) {Spark batch +\\Structured Streaming};
+\node[f, minimum width=3.2cm, minimum height=1.1cm] (dash) at (5.4,-1.5) {Dashboard\\(bản đồ, cảnh báo)};
+\foreach \s in {s1,s2,s3,s4,s5} { \draw[arr] (\s) -- (raw); }
+\draw[arr] (raw) -- (ms);
+\draw[arr] (ms) -- (spark);
+\draw[arr] (ms) -- (dash);
+\end{tikzpicture}%
+}
+\end{center}
+\end{frame}
+
+% Frame 8
+\begin{frame}{Nhiệt độ bị đo trùng bởi cả 5 nguồn -- Survivorship chọn trạm làm ground truth trước}
+\centering\small
+\begin{tabular}{@{}lcccl@{}}
+\toprule
+Hạng ưu tiên & Nguồn & Bản chất & \multicolumn{2}{l}{Lý do xếp hạng} \\
+\midrule
+1 (cao nhất) & ISD / GHCN & Đo trực tiếp tại trạm & \multicolumn{2}{l}{Có QC flag, ground truth thật} \\
+2 & ERA5 & Đồng hoá quan trắc + mô hình & \multicolumn{2}{l}{Độ phân giải cao nhất nhóm mô hình} \\
+3 & Open-Meteo & Nội suy từ ERA5 & \multicolumn{2}{l}{Phái sinh từ hạng 2} \\
+4 (thấp nhất) & NASA POWER & Vệ tinh/MERRA-2 & \multicolumn{2}{l}{Độ phân giải thô nhất (0.5\textdegree)} \\
+\bottomrule
+\end{tabular}
+\vspace{0.35cm}
+
+\small \textbf{Cảnh báo tích hợp sai}: \texttt{pressure\_surface} (POWER) và \texttt{pressure\_msl}
+(Open-Meteo/ISD) là \textbf{2 đại lượng vật lý khác nhau} -- không được gộp trực tiếp, phải giữ
+2 cột riêng trong Mediated Schema.
+\end{frame}
+
+%=============================================================
+\section{Trạm quan trắc \& dung lượng}
+%=============================================================
+\hypertarget{sec4}{}
+\hustsectionpage{4. Trạm quan trắc \&\\dung lượng dữ liệu}
+
+% Frame 9
+\begin{frame}{56 trạm GHCN Việt Nam và 246 trạm ISD toàn Đông Nam Á đã được lọc thật, có toạ độ}
+\begin{center}
+\bignum{56}{trạm GHCN-Daily\\toàn quốc Việt Nam}{hustblue}{3.6cm}
+\bignum{10}{trạm ISD đang hoạt động\\(cập nhật đến 24/8/2025)}{hustblue}{3.6cm}
+\bignum{18}{trạm lõi ưu tiên\\Tuần 1--2 (toàn ĐNA)}{goodgreen}{3.6cm}
+\end{center}
+\vspace{0.3cm}
+\centering\scriptsize
+\begin{tabular}{@{}lcccccccc@{}}
+\toprule
+Nước & VN & Indonesia & Thái Lan & Philippines & Malaysia & Lào & Myanmar & Campuchia/Brunei \\
+\midrule
+Số trạm GHCN & 56 & 104 & 54 & 34 & 16 & 15 & 5 & 1/1 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.2cm}
+\small \textcolor{badred}{Phát hiện khi lọc}: mã quốc gia Việt Nam trong ISD không nhất quán
+(\texttt{VM} và \texttt{VN}); mã Brunei là \texttt{BX}, không phải \texttt{BS} (Bahamas).
+\end{frame}
+
+% Frame 10
+\begin{frame}{Dung lượng dữ liệu trạm thực đo rất nhẹ -- ERA5 mới là phần quyết định tiêu chí Volume}
+\centering\small
+\begin{tabular}{@{}p{4.6cm}p{7.4cm}@{}}
+\toprule
+Nguồn (phạm vi đề xuất) & Dung lượng thật/tính toán \\
+\midrule
+GHCN 16 trạm VN, toàn lịch sử & \textbf{25,85 MB} (đã HEAD-check thật, TB 1,65 MB/trạm) \\
+ISD 10 trạm VN, 1 năm (2024) & \textbf{42,94 MB} (đã HEAD-check thật, TB 4,29 MB/trạm) \\
+ISD 10 trạm VN, 5 năm (ước) & $\approx$ 215 MB \\
+NASA POWER + Open-Meteo & Nhẹ ($<$100 MB, truy vấn theo điểm) \\
+\textbf{ERA5 (ARCO), vùng ĐNA, 8 biến, 5 năm, hourly} & \textbf{$\approx$ 34,8 GB} (tính từ chunk shape thật: 1440$\times$721, float32) \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+
+\small Tổng ước tính \textbf{$\approx$ 35--36 GB} -- vượt khả năng xử lý bằng công cụ đơn máy
+thông thường (đúng tiêu chí Volume của Big Data) nhưng vẫn khả thi để tải/lưu trong 5 tuần với
+nhóm 3 người, thực tế hơn nhiều so với ước tính ban đầu 1,5--2 TB.
+\end{frame}
+
+%=============================================================
+\section{Kế hoạch \& đội hình}
+%=============================================================
+\hypertarget{sec5}{}
+\hustsectionpage{5. Kế hoạch \&\\đội hình}
+
+% Frame 11
+\begin{frame}{Nhóm 3 người thật -- một thành viên kiêm nhiệm cả Spark/PINN và Dashboard/PM}
+\centering\small
+\begin{tabular}{@{}p{3.0cm}p{3.6cm}p{5.6cm}@{}}
+\toprule
+Thành viên & Vai trò & Trọng tâm \\
+\midrule
+Ngô Văn Quang & TV1 -- Ingestion Lead & Thu thập \& làm sạch đa nguồn \\
+Nguyễn Cao Lương & TV2 -- Schema Lead & Mediated Schema, Record Linkage \\
+Trương Tuấn Nghĩa & TV3 + TV4 (kiêm nhiệm) & Spark/PINN \textbf{+} Dashboard/PM \\
+\bottomrule
+\end{tabular}
+\vspace{0.35cm}
+
+\small \textbf{Khuyến nghị giảm tải cho vai trò kiêm nhiệm}: coi PINN là điểm cộng có thể bỏ (đã
+có phương án lùi về MLlib hồi quy); ưu tiên tuyệt đối Spark batch/streaming + Dashboard hoạt động
+đúng trước khi đầu tư vào mô hình vật lý.
+\end{frame}
+
+% Frame 12
+\begin{frame}{Timeline bám sát đúng 5 mốc chính thức của học phần, không có mốc tự đặt thêm}
+\begin{center}
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}[remember picture,
+  m/.style={rectangle, rounded corners, draw=hustblue, thick, fill=hustblue!8, minimum width=2.6cm, minimum height=1.1cm, align=center, font=\small},
+  arr/.style={-{Latex[length=3mm]}, thick, hustblue}]
+\node[m, fill=goodgreen!15, draw=goodgreen] (m1) at (-9,0) {26/9\\Chốt nhóm\\\textcolor{goodgreen}{\checkmark{} Đã qua}};
+\node[m, fill=warnorange!15, draw=warnorange] (m2) at (-4.5,0) {5/10\\Nộp đề cương\\\textbf{Sắp tới}};
+\node[m] (m3) at (0,0) {20/10\\Báo cáo tiến độ};
+\node[m] (m4) at (4.5,0) {27/10\\Test};
+\node[m, fill=hustblue!15] (m5) at (9,0) {8/11\\Báo cáo cuối kỳ};
+\draw[arr] (m1) -- (m2); \draw[arr] (m2) -- (m3); \draw[arr] (m3) -- (m4); \draw[arr] (m4) -- (m5);
+\end{tikzpicture}%
+}
+\end{center}
+\vspace{0.4cm}
+\centering\small
+160 tác vụ chi tiết (4 tuần $\times$ 4 vai trò $\times$ 10 tác vụ/tuần), mỗi tác vụ có tiêu chí
+kiểm thử (Definition of Done) -- xem \texttt{docs/03-ke-hoach-160-tasks.md}.
+\end{frame}
+
+%=============================================================
+\section{Rủi ro \& kết luận}
+%=============================================================
+\hypertarget{sec6}{}
+\hustsectionpage{6. Rủi ro \&\\kết luận}
+
+% Frame 13
+\begin{frame}{Ba rủi ro lớn nhất đều đã có phương án dự phòng cụ thể, không phải giả định suông}
+\centering\footnotesize
+\begin{tabular}{@{}p{3.3cm}p{3.3cm}p{5.4cm}@{}}
+\toprule
+Rủi ro & Mức ảnh hưởng & Phương án dự phòng \\
+\midrule
+Đăng ký CDS chậm & Trung bình & Dùng ARCO-ERA5 (Google Cloud, miễn phí, không đăng ký) song song \\
+Quá tải vai trò kiêm nhiệm & Cao & Bỏ PINN nếu cần, giữ Spark + Dashboard làm lõi bắt buộc \\
+Độ phủ trạm lệch giữa các nước & Thấp--Trung bình & Nêu rõ giới hạn (Campuchia/Brunei chỉ 1 trạm/nước) trong Veracity report \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+% Frame 14
+\begin{frame}{Đề tài đã có đủ nguồn dữ liệu thật, kiến trúc cụ thể, và kế hoạch khả thi cho 3 người}
+\begin{center}
+\bignum{4/4}{nguồn lõi sẵn sàng dùng ngay\\hôm nay, không chờ thủ tục}{goodgreen}{4.2cm}
+\bignum{18}{trạm quan trắc thật\\đã có toạ độ, ID cụ thể}{goodgreen}{4.2cm}
+\bignum{35 GB}{tổng dữ liệu cần thiết\\ước tính có căn cứ, khả thi}{goodgreen}{4.2cm}
+\end{center}
+\vspace{0.4cm}
+\centering\small
+Toàn bộ tài liệu chi tiết (đề xuất, nguồn dữ liệu, kế hoạch, giải pháp tích hợp, danh sách trạm)
+nằm tại repository GitHub riêng của nhóm -- sẵn sàng cho buổi nộp đề cương 5/10.
+\end{frame}
+
+\hustthankyou
+
+\end{document}
