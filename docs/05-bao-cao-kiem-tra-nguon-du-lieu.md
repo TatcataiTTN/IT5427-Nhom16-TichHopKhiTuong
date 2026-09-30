@@ -152,6 +152,13 @@ Google + ECMWF hợp tác public hoá **ARCO-ERA5** (Analysis-Ready, Cloud-Optim
 
 ---
 
+## 8b. Kiểm tra bổ sung: ERA5-Land và Meteostat
+
+- **ERA5-Land** (độ phân giải 9km, hợp địa hình chia cắt ĐNA hơn ERA5 thường 28km): **kiểm tra bucket ARCO-ERA5 (Google Cloud) không có bản Land** — chỉ tồn tại qua Copernicus CDS chính thức (`reanalysis-era5-land`, HTTP 307 redirect tới trang dataset — server sống, dataset tồn tại). Vì đã đăng ký CDS cho ERA5 thường (mục 5), **đăng ký thêm ERA5-Land không tốn thêm thủ tục tài khoản**, chỉ cần đổi tên dataset trong request `cdsapi` — có thể cân nhắc thay ERA5 thường bằng ERA5-Land nếu vùng nghiên cứu tập trung đất liền (không cần dữ liệu trên biển).
+- **Meteostat** (thư viện Python tổng hợp nhiều nguồn trạm): **phát hiện lỗi thực tế** — bản cài hiện tại (`meteostat==2.1.5`) đã viết lại toàn bộ API so với các hướng dẫn/code mẫu phổ biến (`from meteostat import Daily` — cú pháp cũ — **không còn hoạt động**, báo `ImportError`). Thử với cú pháp mới (`meteostat.daily(Point, start, end).fetch()`) cho toạ độ Hà Nội → trả về **"Empty time series"** (không có trạm nào trong bán kính mặc định khớp). **Kết luận: không nên đưa Meteostat vào kế hoạch chính** — cần khảo sát kỹ hơn (cấu hình bán kính tìm trạm, hoặc dùng trực tiếp REST API thay vì thư viện Python) nếu muốn dùng, không "cắm là chạy" như 4 nguồn lõi.
+
+---
+
 ## 9. Các nguồn "nên hoạt động thế nào" trong pipeline của project (tóm tắt khuyến nghị, đã cập nhật)
 
 ```

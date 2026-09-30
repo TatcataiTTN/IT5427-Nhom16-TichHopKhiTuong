@@ -21,10 +21,12 @@ Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (*
 |---|---|---|---|---|
 | **TV1 — Ingestion Lead** | Ngô Văn Quang | 20251243M | Quang.NV251243M@sis.hust.edu.vn | Thu thập & làm sạch dữ liệu đa nguồn (Syntactic/Format Heterogeneity) |
 | **TV2 — Schema Lead** | Nguyễn Cao Lương | 20251244M | Luong.NC251244M@sis.hust.edu.vn | Lược đồ trung gian & kho dữ liệu (Structural/Semantic Heterogeneity, Entity Resolution) |
-| **TV3 — Spark/PINN Lead** | *(cần bổ sung)* | | | Tính toán phân tán & mô hình vật lý-học máy (Scalable Processing, PINN) |
-| **TV4 — Dashboard/PM Lead** | Trương Tuấn Nghĩa | 20251196M | Nghia.TT251196M@sis.hust.edu.vn | Trực quan hoá, quản trị chất lượng & điều phối dự án |
+| **TV3 — Spark/PINN Lead** *+* **TV4 — Dashboard/PM Lead** (kiêm nhiệm cả 2 vai trò) | Trương Tuấn Nghĩa | 20251196M | Nghia.TT251196M@sis.hust.edu.vn | Tính toán phân tán & mô hình vật lý-học máy (Scalable Processing, PINN) **+** Trực quan hoá, quản trị chất lượng & điều phối dự án |
 
-> **Cần nhóm xác nhận:** danh sách gốc của lớp mới ghi 3/4 thành viên nhóm 16 (thiếu 1 dòng). Bổ sung tên/MSSV/email thành viên thứ 4 vào bảng trên (và vào `docs/03-ke-hoach-160-tasks.md`) trước khi nộp đề cương ngày 5/10. Phân vai trong bảng là đề xuất ban đầu — nhóm có thể hoán đổi TV1–TV4 theo thế mạnh thực tế của từng người, miễn giữ đủ 4 mảng trách nhiệm.
+> **Đã xác nhận:** nhóm 16 thực tế chỉ có **3 thành viên**. Trương Tuấn Nghĩa đảm nhiệm gộp cả TV3 và TV4. Vì đây là khối lượng công việc lớn cho 1 người (Spark/PINN + Dashboard/PM), khuyến nghị:
+> - **Ưu tiên phần lõi trước, PINN là điểm cộng có thể bỏ nếu thiếu thời gian** (đã có sẵn "phương án lùi" trong `docs/01-de-xuat-de-tai.md` mục 5.3 — dùng hồi quy MLlib thường thay PINN).
+> - Vai trò "điều phối dự án" (PM) của TV4 nên làm **gọn nhẹ** (chỉ cần roadmap + board quản lý việc), dồn thời gian chính cho phần kỹ thuật (Spark + Dashboard).
+> - Xem `docs/03-ke-hoach-160-tasks.md` để biết chi tiết task theo từng tuần của vai trò gộp này (TV3+TV4 = 20 tác vụ/tuần thay vì 10/tuần như 2 bạn còn lại).
 
 ## 3. Mốc thời gian (bám lịch học IT5427)
 
@@ -44,12 +46,20 @@ Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (*
 └── docs/
     ├── 01-de-xuat-de-tai.md           — đề xuất đề tài đầy đủ (nộp 5/10): lý do chọn, nguồn dữ liệu lõi,
     │                                     3V–5V, kiến trúc hệ thống, phân công, timeline, công nghệ, rủi ro
-    ├── 02-nguon-du-lieu.md            — danh sách mở rộng 24 nguồn dữ liệu khí tượng/khí hậu miễn phí,
-    │                                     gợi ý phối hợp theo mục tiêu nghiên cứu
-    ├── 03-ke-hoach-160-tasks.md       — kế hoạch chi tiết 160 tác vụ (4 tuần × 4 thành viên × 10 tác vụ),
+    ├── 02-nguon-du-lieu.md            — danh sách mở rộng nguồn dữ liệu khí tượng/khí hậu miễn phí,
+    │                                     gợi ý phối hợp theo mục tiêu nghiên cứu (đã kiểm chứng + đính chính, xem 05)
+    ├── 03-ke-hoach-160-tasks.md       — kế hoạch chi tiết 160 tác vụ (4 tuần × 4 vai trò × 10 tác vụ),
     │                                     mỗi tác vụ có deadline, yêu cầu cần đạt, tiêu chí kiểm thử (Definition of Done)
-    └── 04-ghi-chu-phan-tich.md        — ghi chú phân tích hai mặt + câu hỏi phản biện chuẩn bị trước
+    ├── 04-ghi-chu-phan-tich.md        — ghi chú phân tích hai mặt + câu hỏi phản biện chuẩn bị trước
+    ├── 05-bao-cao-kiem-tra-nguon-du-lieu.md  — báo cáo kiểm tra THẬT từng nguồn (tải mẫu, validate), phát hiện
+    │                                     & sửa lỗi so với tài liệu ban đầu (ERA5-AWS, Himawari, OpenAQ...)
+    ├── 06-truong-du-lieu-va-tich-hop.md      — trường dữ liệu thật của từng nguồn, Mediated Schema (GAV),
+    │                                     khoảng trùng lặp cần Survivorship, khoảng trống vật lý cần PINN
+    └── 07-bang-va-giai-phap-tich-hop.md      — bảng ánh xạ trường tổng hợp + 7 giải pháp tích hợp có code mẫu
+                                          (GAV union, PIVOT, PARSE, Survivorship, derive vật lý, spatial+PINN)
 ```
+
+Script kiểm tra nguồn dữ liệu thật: `scripts/check_data_sources.py` (chạy `python3 scripts/check_data_sources.py`, kết quả lưu ở `data_samples/`).
 
 Khi triển khai code (crawler/ingestion, ETL, Spark job, mô hình, dashboard), tạo thêm các thư mục `ingestion/`, `warehouse/`, `model/`, `dashboard/` ở gốc repo theo đúng kiến trúc mô tả trong `docs/01-de-xuat-de-tai.md`.
 

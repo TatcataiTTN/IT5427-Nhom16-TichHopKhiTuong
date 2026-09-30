@@ -127,10 +127,9 @@ Batch Analytics       Kafka Replay Streaming → Spark Structured Streaming (TV1
 |---|---|---|---|---|
 | **TV1** | Ngô Văn Quang | Ingestion Lead | Syntactic/Format Heterogeneity | 26/9–5/10: script tải ERA5 (cdsapi)/NOAA (S3)/POWER (REST). 6/10–20/10: parser NetCDF/CSV, chuẩn hóa UTC + đơn vị, Kafka producer replay. 21/10–8/11: ổn định pipeline, tối ưu I/O, đóng gói Docker |
 | **TV2** | Nguyễn Cao Lương | Schema Lead | Structural/Semantic Heterogeneity, Entity Resolution | 26/9–5/10: thiết kế Mediated Schema (GAV/LAV), ERD. 6/10–20/10: warehouse Parquet partition Year/Month/Region, Kriging/Bilinear interpolation, Record Linkage trạm↔lưới, Survivorship rules. 21/10–8/11: tối ưu Spark SQL, cross-validation sai số nội suy, Data Quality Report |
-| **TV3** | *(cần bổ sung)* | Spark/PINN Lead | Scalable Processing, PINN | 26/9–5/10: dựng Spark (Docker Compose multi-node). 6/10–20/10: transformation tính correlation, chuẩn bị tensor cho PINN, Spark Streaming windowing. 21/10–8/11: huấn luyện PINN (data loss + physics loss), benchmark hiệu năng, pipeline inference |
-| **TV4** | Trương Tuấn Nghĩa | Dashboard/PM Lead | Visualization, PM | 26/9–5/10: roadmap, template đề cương, board quản lý việc. 6/10–20/10: dashboard (Streamlit/Superset) heatmap không gian + time-series trạm, tích hợp dữ liệu thật. 21/10–8/11: tích hợp kết quả PINN, panel cảnh báo bất thường khí hậu, tổng hợp báo cáo/slide bảo vệ |
+| **TV3 + TV4** (1 người kiêm nhiệm cả 2 vai trò) | Trương Tuấn Nghĩa | Spark/PINN Lead + Dashboard/PM Lead | Scalable Processing, PINN, Visualization, PM | 26/9–5/10: dựng Spark (Docker Compose multi-node) + roadmap, template đề cương, board quản lý việc. 6/10–20/10: transformation tính correlation, chuẩn bị tensor cho PINN, Spark Streaming windowing + dashboard (Streamlit/Superset) heatmap không gian + time-series trạm. 21/10–8/11: huấn luyện PINN (data loss + physics loss), benchmark hiệu năng, pipeline inference + tích hợp kết quả vào dashboard, panel cảnh báo bất thường khí hậu, tổng hợp báo cáo/slide bảo vệ |
 
-> Bổ sung tên thành viên thứ 4 (TV3) trước khi nộp đề cương ngày 5/10.
+> **Nhóm chỉ có 3 người thật.** TV3 và TV4 do cùng 1 người đảm nhiệm — khối lượng gấp đôi 2 bạn còn lại. Khuyến nghị: coi PINN là **điểm cộng có thể bỏ** (xem phương án lùi ở mục 5.3) nếu tiến độ 2 vai trò gộp bị chậm, ưu tiên tuyệt đối cho phần lõi (Spark batch/streaming hoạt động đúng + Dashboard hiển thị đủ dữ liệu thật) trước khi đầu tư vào PINN.
 
 ---
 

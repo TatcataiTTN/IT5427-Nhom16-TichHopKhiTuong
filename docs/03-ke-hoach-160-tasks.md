@@ -2,16 +2,16 @@
 
 **Đề tài:** Hệ thống tích hợp và xử lý dữ liệu khí tượng đa nguồn phục vụ phát hiện dị thường khí hậu và hỗ trợ ra quyết định đa ngành khu vực Đông Nam Á
 **Nguồn dữ liệu:** ERA5 (Copernicus CDS) · NOAA ISD/GHCN (AWS S3) · NASA POWER · Open-Meteo Historical
-**Thời lượng:** 4 tuần (26/9 – 8/11/2026) · 4 thành viên · 10 tác vụ/người/tuần = **160 tác vụ**
+**Thời lượng:** 4 tuần (26/9 – 8/11/2026) · **3 thành viên thật** (TV3+TV4 do cùng 1 người đảm nhiệm) · 10 tác vụ/vai trò/tuần = **160 tác vụ** (TV1, TV2: 40 tác vụ/người trong 4 tuần; TV3+TV4 gộp: 80 tác vụ/người trong 4 tuần — gấp đôi)
 **Mốc lớn:** 26/9 Chốt nhóm → 5/10 Nộp đề cương → 20/10 Báo cáo tiến độ → 27/10 Test → 8/11 Báo cáo cuối kỳ
 
 **Vai trò:**
 - **TV1 — Ingestion Lead (Ngô Văn Quang, 20251243M):** Thu thập & làm sạch dữ liệu đa nguồn (Syntactic/Format Heterogeneity)
 - **TV2 — Schema Lead (Nguyễn Cao Lương, 20251244M):** Lược đồ trung gian & kho dữ liệu (Structural/Semantic Heterogeneity, Entity Resolution)
-- **TV3 — Spark/PINN Lead (cần bổ sung tên):** Tính toán phân tán & mô hình vật lý-học máy (Scalable Processing, PINN)
-- **TV4 — Dashboard/PM Lead (Trương Tuấn Nghĩa, 20251196M):** Trực quan hoá, quản trị chất lượng & điều phối dự án
+- **TV3 — Spark/PINN Lead** *và* **TV4 — Dashboard/PM Lead** (**Trương Tuấn Nghĩa, 20251196M — kiêm nhiệm cả 2 vai trò**): Tính toán phân tán & mô hình vật lý-học máy (Scalable Processing, PINN) **+** Trực quan hoá, quản trị chất lượng & điều phối dự án
 
-> Ghi chú: cột **Kiểm thử** là điều kiện xác nhận "Done" (Definition of Done) — mỗi tác vụ chỉ tick hoàn thành khi vượt qua kiểm thử tương ứng. Bổ sung tên thành viên TV3 trước khi nộp đề cương 5/10.
+> **Khối lượng công việc thực tế của Trương Tuấn Nghĩa = tổng 2 bảng TV3 và TV4 dưới đây (80 tác vụ, gấp đôi TV1/TV2).** Khuyến nghị xử lý: (1) làm PINN tối giản — chỉ 2 trường hợp thật cần thiết theo `docs/06-truong-du-lieu-va-tich-hop.md` mục 4b, không làm PINN cho toàn bộ biến; (2) rút gọn phần "PM/điều phối" ở TV4 xuống mức tối thiểu (roadmap + board việc, không cần quy trình PM nặng); (3) nếu tuần 2–3 thấy quá tải, ưu tiên bỏ bớt task PINN trước, giữ nguyên task Spark batch/streaming và Dashboard vì đó là phần lõi bắt buộc.
+> Ghi chú: cột **Kiểm thử** là điều kiện xác nhận "Done" (Definition of Done) — mỗi tác vụ chỉ tick hoàn thành khi vượt qua kiểm thử tương ứng.
 
 ---
 
