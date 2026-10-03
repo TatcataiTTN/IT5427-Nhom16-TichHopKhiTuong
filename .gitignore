@@ -15,6 +15,7 @@ data/
 !docs/**/*.csv
 !reference/**/*.csv
 !slides/images/**/*.png
+!report/figures/**/*.png
 
 # LaTeX build artifacts (giữ lại .tex nguồn và .pdf đã build, bỏ file tạm)
 *.aux
@@ -26,6 +27,8 @@ data/
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+*.lof
+*.lot
 
 # Credentials
 .cdsapirc

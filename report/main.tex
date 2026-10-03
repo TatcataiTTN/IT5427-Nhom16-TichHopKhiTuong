@@ -1,0 +1,557 @@
+\documentclass[12pt,a4paper]{report}
+
+% ===== BASIC PACKAGES =====
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+
+% ===== VIETNAMESE CHAPTER/FIGURE/TABLE LABELS (manual, no polyglossia needed) =====
+\renewcommand{\contentsname}{MỤC LỤC}
+\renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}
+\renewcommand{\listtablename}{DANH MỤC BẢNG}
+\renewcommand{\figurename}{Hình}
+\renewcommand{\tablename}{Bảng}
+\renewcommand{\chaptername}{Chương}
+\renewcommand{\bibname}{TÀI LIỆU THAM KHẢO}
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{30pt}
+
+% ===== PAGE LAYOUT =====
+\usepackage[a4paper,top=3cm,bottom=3cm,left=3.5cm,right=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+
+% ===== GRAPHICS AND TABLES =====
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.callouts, positioning, arrows.meta, fit, backgrounds}
+
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+% ===== MATHEMATICS =====
+\usepackage{amsmath,amssymb}
+
+% ===== GANTT CHART =====
+\usepackage{pgfgantt}
+
+% ===== HYPERLINKS =====
+\usepackage[hidelinks]{hyperref}
+\usepackage{url}
+
+% ===== HEADER AND FOOTER =====
+\usepackage{fancyhdr}
+\setlength{\headheight}{15.1pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\renewcommand{\headrulewidth}{0.5pt}
+
+\fancypagestyle{plain}{%
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+\definecolor{hustblue}{RGB}{0,60,113}
+\definecolor{goodgreen}{RGB}{30,120,60}
+\definecolor{warnorange}{RGB}{200,90,20}
+\definecolor{badred}{RGB}{170,30,30}
+
+% ===== BEGIN DOCUMENT =====
+\begin{document}
+
+% ===== TITLE PAGE =====
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{center}
+    \normalsize{\textbf{ĐẠI HỌC BÁCH KHOA HÀ NỘI}}\\
+    \normalsize{\textbf{TRƯỜNG CÔNG NGHỆ THÔNG TIN VÀ TRUYỀN THÔNG}}\\[0.3cm]
+
+    \vspace{0.2cm}
+    \includegraphics[width=2.5cm]{figures/hust_logo.png}
+    \vspace{0.2cm}
+
+    \Large{\textbf{ĐỀ XUẤT DỰ ÁN}}\\[0.2cm]
+    \Large{\textbf{HỌC PHẦN IT5427 — TÍCH HỢP VÀ XỬ LÝ DỮ LIỆU LỚN}}\\[1cm]
+
+    \LARGE{\textbf{Hệ thống tích hợp và xử lý dữ liệu khí tượng}}\\[0.15cm]
+    \LARGE{\textbf{đa nguồn phục vụ phát hiện dị thường khí hậu}}\\[0.15cm]
+    \LARGE{\textbf{và hỗ trợ ra quyết định đa ngành}}\\[0.3cm]
+
+    \large{\textbf{Khu vực Đông Nam Á}}\\[1.5cm]
+
+    \begin{flushleft}
+    \small
+    \hspace{1.5cm}\begin{tabular}{@{}ll@{}}
+    \textbf{Nhóm:} & 16 \\[0.15cm]
+    \textbf{Thành viên:} & Ngô Văn Quang -- 20251243M \\
+     & Nguyễn Cao Lương -- 20251244M \\
+     & Trương Tuấn Nghĩa -- 20251196M \\[0.15cm]
+    \textbf{Học phần:} & IT5427 -- Tích hợp và xử lý dữ liệu lớn \\[0.15cm]
+    \textbf{Giảng viên hướng dẫn:} & TS. Vũ Tuyết Trinh \\[0.15cm]
+    \textbf{Đơn vị:} & Trường Công nghệ Thông tin và Truyền thông \\[0.4cm]
+    \end{tabular}
+    \end{flushleft}
+
+    \vfill
+
+    \large{\textbf{Hà Nội, Tháng 10/2026}}
+
+\end{center}
+\end{titlepage}
+
+% ===== FRONT MATTER =====
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\tableofcontents
+\clearpage
+
+\listoffigures
+\addcontentsline{toc}{chapter}{DANH MỤC HÌNH VẼ}
+\clearpage
+
+\listoftables
+\addcontentsline{toc}{chapter}{DANH MỤC BẢNG}
+\clearpage
+
+\chapter*{DANH MỤC TỪ VIẾT TẮT}
+\addcontentsline{toc}{chapter}{DANH MỤC TỪ VIẾT TẮT}
+
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Từ viết tắt} & \textbf{Giải nghĩa} \\
+\midrule
+API & Application Programming Interface \\
+ASMC & ASEAN Specialised Meteorological Centre \\
+CDS & Climate Data Store (Copernicus) \\
+ĐNA & Đông Nam Á \\
+ER & Entity Resolution \\
+ERA5 & ECMWF Reanalysis v5 \\
+ETL & Extract, Transform, Load \\
+GAV & Global-as-View \\
+GHCN & Global Historical Climatology Network \\
+ISD & Integrated Surface Database (NOAA) \\
+LAV & Local-as-View \\
+LSH & Locality-Sensitive Hashing \\
+PINN & Physics-Informed Neural Network \\
+QC & Quality Control \\
+SEA & Southeast Asia \\
+TGD & Tuple Generating Dependency \\
+TV & Thành viên \\
+UAV & Unmanned Aerial Vehicle \\
+\bottomrule
+\end{tabular}
+
+\clearpage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% ==========================================================
+\chapter{Giới thiệu}
+% ==========================================================
+
+\section{Bối cảnh và động lực}
+
+Dữ liệu khí tượng là một trong những lĩnh vực minh hoạ rõ nhất cho bài toán tích hợp dữ liệu lớn: nó vừa phải đối mặt với khối lượng khổng lồ (mô hình tái phân tích toàn cầu như ERA5 sinh ra hàng chục terabyte dữ liệu mỗi năm), vừa phải đối mặt với sự đa dạng cực đoan về nguồn gốc và định dạng -- từ dữ liệu lưới liên tục do mô hình số trị sinh ra, tới chuỗi thời gian rời rạc từ hàng chục nghìn trạm quan trắc mặt đất, tới dữ liệu vệ tinh dạng ảnh. Khu vực Đông Nam Á đặc biệt phù hợp làm bối cảnh nghiên cứu vì đây là vùng khí hậu nhiệt đới gió mùa, chịu ảnh hưởng mạnh của các hiện tượng cực đoan (mưa lớn, bão, hạn hán, khói mù xuyên biên giới), nhưng đồng thời lại là khu vực có mật độ trạm quan trắc phân bố rất không đồng đều giữa các quốc gia -- một đặc điểm buộc bài toán tích hợp phải giải quyết triệt để, không thể né tránh.
+
+Về mặt học thuật, đề tài này được chọn vì nó khớp trực tiếp với hai trụ cột lý thuyết cốt lõi của học phần IT5427: \textbf{Schema Alignment} (đối sánh và ánh xạ lược đồ giữa các nguồn có cấu trúc hoàn toàn khác nhau) và \textbf{Record Linkage / Entity Resolution} (liên kết các bản ghi mô tả cùng một hiện tượng vật lý nhưng do các nguồn độc lập đo đạc). Đây không phải là một bài toán thu thập dữ liệu đơn thuần, mà là một bài toán tích hợp dữ liệu lớn đúng nghĩa, đòi hỏi áp dụng cả khung lý thuyết hình thức (GAV/LAV) lẫn các kỹ thuật xử lý phân tán (Apache Spark).
+
+\section{Phát biểu bài toán}
+
+Bài toán cốt lõi mà đề tài giải quyết là: \emph{làm thế nào để hợp nhất năm nguồn dữ liệu khí tượng có bản chất không tương thích -- một nguồn dạng lưới không gian liên tục (ERA5), hai nguồn dạng chuỗi thời gian tại điểm trạm (NOAA GHCN-Daily, NOAA ISD), và hai nguồn dạng truy vấn điểm theo mô hình/vệ tinh (NASA POWER, Open-Meteo) -- thành một kho dữ liệu thống nhất, đáng tin cậy, có thể dùng trực tiếp cho các bài toán phân tích thực tế?}
+
+Bài toán này bộc lộ đầy đủ các mức độ dị biệt (heterogeneity) đã học trong học phần: dị biệt cú pháp (định dạng NetCDF/GRIB2 nhị phân đa chiều so với CSV bảng phẳng so với JSON lồng nhau), dị biệt cấu trúc (schema "long/EAV" của GHCN so với schema "wide" của bốn nguồn còn lại), dị biệt ngữ nghĩa (áp suất bề mặt và áp suất mực nước biển là hai đại lượng vật lý khác nhau nhưng dễ bị nhầm là một), và dị biệt thực thể/định danh (cùng một thời điểm, cùng một khu vực, nhiệt độ được đo/ước lượng độc lập bởi tới năm nguồn khác nhau, cần một quy tắc Survivorship rõ ràng để quyết định giá trị nào được tin dùng).
+
+\section{Mục tiêu đề tài}
+
+Đề tài hướng tới năm mục tiêu cụ thể:
+
+\begin{enumerate}
+    \item Xây dựng một \textbf{kho dữ liệu khí tượng đã chuẩn hoá} (Mediated Schema) tích hợp đầy đủ năm nguồn dữ liệu đã nêu, có khả năng tái sử dụng cho nhiều bài toán phân tích khác nhau, không chỉ phục vụ một ứng dụng đơn lẻ.
+    \item Áp dụng đúng và có kiểm chứng hai kỹ thuật lý thuyết cốt lõi của học phần -- \textbf{Global-as-View schema mapping} và \textbf{Survivorship-based Record Linkage} -- trên một bài toán thực tế có dữ liệu thật, không phải ví dụ minh hoạ.
+    \item Xây dựng pipeline xử lý dữ liệu lớn hoàn chỉnh bằng \textbf{Apache Spark} (batch processing và Structured Streaming), đáp ứng đủ các tiêu chí 5V của dữ liệu lớn với số liệu định lượng cụ thể, không phải ước lượng định tính.
+    \item Triển khai \textbf{phát hiện dị thường khí hậu} theo khu vực và thời điểm trên kho dữ liệu đã tích hợp, làm nền cho ba nhóm ứng dụng thực tế: hỗ trợ nông nghiệp/năng lượng tái tạo, và hỗ trợ ra quyết định vận hành UAV an toàn.
+    \item Xây dựng \textbf{dashboard trực quan hoá} hiển thị kết quả tích hợp và phân tích theo không gian/thời gian, hoàn thiện đúng yêu cầu Direction 1 của đề cương học phần.
+\end{enumerate}
+
+\section{Phạm vi và giới hạn}
+
+Đề tài tập trung vào khu vực Đông Nam Á lục địa và hải đảo (vĩ độ xấp xỉ $-11^\circ$ đến $23^\circ$, kinh độ $92^\circ$ đến $141^\circ$), giai đoạn dữ liệu 5 năm gần nhất. Bốn nguồn dữ liệu lõi (ERA5, NOAA GHCN-Daily, NOAA ISD, NASA POWER, Open-Meteo) được xác định là bắt buộc; các nguồn mở rộng (ảnh vệ tinh Himawari, dữ liệu mưa vệ tinh CHIRPS) được xếp vào diện tuỳ chọn, chỉ triển khai nếu còn dư thời gian sau khi hoàn thiện phần lõi -- một quyết định phạm vi có chủ đích nhằm đảm bảo tính khả thi cho nhóm ba thành viên trong khung thời gian sáu tuần của học phần.
+
+% ==========================================================
+\chapter{Tổng quan tài liệu và cơ sở lý thuyết}
+% ==========================================================
+
+Chương này trình bày cơ sở lý thuyết mà đề tài dựa vào, tổ chức theo bốn nhóm chủ đề tương ứng trực tiếp với các kỹ thuật được áp dụng ở Chương 3.
+
+\section{Đối sánh lược đồ và ngôn ngữ ánh xạ (Schema Matching \& Mapping)}
+
+Bài toán đối sánh lược đồ tự động đã được hệ thống hoá toàn diện bởi Rahm và Bernstein~\cite{rahm2001survey}, người phân loại các phương pháp đối sánh theo cấp độ (schema-level và instance-level) và theo kỹ thuật (dựa trên ngôn ngữ và dựa trên ràng buộc) -- khung phân loại này là cơ sở để nhóm lựa chọn chiến lược ánh xạ trường dữ liệu giữa năm nguồn không đồng nhất (Chương 3, Mục 3.2).
+
+Về mặt hình thức hoá, ba ngôn ngữ ánh xạ schema -- Global-as-View (GAV), Local-as-View (LAV), và GLAV -- có nguồn gốc trực tiếp từ công trình nền tảng của Ullman~\cite{ullman1997logical}, người lần đầu hình thức hoá khái niệm \emph{certain answers} khi trả lời truy vấn thông qua các view biểu diễn nguồn dữ liệu. Levy~\cite{levy2001survey} và Lenzerini~\cite{lenzerini2002theoretical} sau đó tổng hợp thành các bài khảo sát lý thuyết toàn diện, đặt nền móng lý thuyết cho toàn bộ lĩnh vực tích hợp dữ liệu hiện đại. Đề tài áp dụng trực tiếp GAV (Mục 3.2) do tính đơn giản trong reformulation (Query Unfolding) và sự phù hợp với kiến trúc kho dữ liệu tập trung.
+
+Ở quy mô lớn hơn, khi số lượng nguồn dữ liệu vượt xa khả năng thiết kế mediated schema thủ công, Halevy, Franklin và Maier~\cite{halevy2006dataspace} đề xuất mô hình \emph{Dataspace}, còn Das Sarma, Dong và Halevy~\cite{dassarma2008payasyougo} đề xuất triết lý \emph{pay-as-you-go}, chấp nhận mapping không hoàn hảo ban đầu và cải thiện dần theo thời gian. Cafarella và cộng sự~\cite{cafarella2008webtables} (giải thưởng VLDB 10-Year Best Paper 2018) và Talukdar và cộng sự~\cite{talukdar2008learning} mở rộng hướng tích hợp không cần mediated schema tường minh, dựa trên tìm kiếm/xếp hạng bảng dữ liệu. Các công trình này khẳng định rằng lựa chọn GAV tường minh của đề tài -- thay vì các hướng \emph{pay-as-you-go} phức tạp hơn -- là phù hợp với quy mô năm nguồn dữ liệu đã xác định trước, không cần đến độ linh hoạt của Dataspace.
+
+\section{Liên kết bản ghi và giải quyết thực thể (Record Linkage \& Entity Resolution)}
+
+Nền tảng lý thuyết của toàn bộ lĩnh vực Record Linkage bắt nguồn từ mô hình xác suất của Fellegi và Sunter~\cite{fellegi1969theory}, người lần đầu hình thức hoá ba kết luận \emph{match/non-match/possible-match} khi so khớp một cặp bản ghi -- khung khái niệm này được đề tài kế thừa trực tiếp khi thiết kế quy tắc Survivorship có gắn cờ xung đột (Mục 3.3).
+
+Về mặt kỹ thuật, pipeline Entity Resolution bốn bước (Prepare -- Block -- Match -- Cluster) mà đề tài áp dụng dựa trên các nghiên cứu thực nghiệm quy mô lớn của Köpcke, Thor và Rahm~\cite{kopcke2010evaluation}, người đánh giá có hệ thống nhiều phương pháp đối sánh thực thể trên các bài toán thực tế. Bước Blocking sử dụng kỹ thuật Locality-Sensitive Hashing có nguồn gốc từ công trình tiên phong của Gionis, Indyk và Motwani~\cite{gionis1999similarity} về tìm kiếm tương tự trong không gian nhiều chiều. Bước Clustering có thể áp dụng Correlation Clustering theo hình thức hoá của Bansal, Blum và Chawla~\cite{bansal2004correlation}, hoặc phương pháp connected-components đơn giản hơn đã đánh giá bởi Hassanzadeh và cộng sự~\cite{hassanzadeh2009framework}.
+
+Với các trường hợp cần Matching dựa trên học sâu, đề tài tham khảo hai hướng tiếp cận đại diện: DeepER của Ebraheem và cộng sự~\cite{ebraheem2018deeper}, biểu diễn mỗi bộ dữ liệu (tuple) thành vector phân tán bằng mạng nơ-ron hồi quy; và Magellan/DeepMatcher của Mudgal và cộng sự~\cite{mudgal2018deep}, khảo sát không gian thiết kế của các kiến trúc học sâu cho entity matching. Trong bối cảnh dữ liệu gán nhãn khan hiếm -- vấn đề thực tế mà đề tài cũng gặp phải khi không có ground-truth trùng lặp giữa các nguồn khí tượng -- Kasai và cộng sự~\cite{kasai2019lowresource} đề xuất kết hợp transfer learning và active learning để giảm chi phí gán nhãn. Cuối cùng, khung lý thuyết tổng quát nhất cho bài toán liên kết thực thể được hệ thống hoá bởi Burdick và cộng sự~\cite{burdick2017expressive}, người định nghĩa hình thức khái niệm \emph{entity-linking framework} bao trùm cả Record Linkage lẫn các bài toán liên kết rộng hơn. Khi dữ liệu cập nhật liên tục (đúng đặc điểm streaming của đề tài), Gruenheid, Dong và Srivastava~\cite{gruenheid2014incremental} đề xuất thuật toán cập nhật gia tăng (incremental) hiệu quả hơn tính lại toàn bộ.
+
+\section{Tích hợp ràng buộc vật lý qua học máy (Physics-Informed Machine Learning)}
+
+Với các trường dữ liệu không có nguồn quan trắc trực tiếp (ví dụ độ ẩm tương đối tại trạm chỉ đo dew point), đề tài tham khảo khung Physics-Informed Neural Networks (PINN) của Raissi, Perdikaris và Karniadakis~\cite{raissi2019physics}, trong đó phương trình vi phân chi phối hệ vật lý (ở đây là phương trình Clausius-Clapeyron liên hệ nhiệt độ, độ ẩm và áp suất hơi bão hoà) được nhúng trực tiếp vào hàm mất mát của mạng nơ-ron, thay vì chỉ học thuần tuý từ dữ liệu. Đây là kỹ thuật được xác định là \emph{tuỳ chọn nâng cao} trong kế hoạch thực hiện (Mục 5.3), có phương án lùi rõ ràng về mô hình hồi quy thống kê thông thường nếu nguồn lực không cho phép.
+
+\section{Dữ liệu tái phân tích khí quyển ERA5}
+
+Nguồn dữ liệu trung tâm của đề tài, ERA5, được mô tả chi tiết bởi Hersbach và cộng sự~\cite{hersbach2020era5} -- bộ dữ liệu tái phân tích thế hệ thứ năm của ECMWF, đồng hoá đồng thời quan trắc vệ tinh và mặt đất thông qua mô hình dự báo số trị, cung cấp độ phân giải không gian $0.25°$ và độ phân giải thời gian một giờ liên tục từ năm 1940 đến nay. Đặc điểm "dạng lưới, có nguồn gốc từ mô hình" của ERA5 chính là nguyên nhân trực tiếp của bài toán dị biệt cấu trúc trung tâm mà đề tài giải quyết (lưới liên tục đối lập với điểm trạm rời rạc).
+
+\section{Khoảng trống dẫn tới đề tài}
+
+Điểm chung của các công trình trên là chúng giải quyết \emph{độc lập} từng bài toán con (schema matching, record linkage, hoặc physics-informed learning) trên các miền dữ liệu tổng quát (cơ sở dữ liệu doanh nghiệp, bảng web, văn bản). Chưa có công trình nào trong danh mục tham khảo áp dụng \emph{đồng thời cả ba kỹ thuật} -- GAV schema mapping, Survivorship-based record linkage, và physics-informed gap-filling -- trên chính miền dữ liệu khí tượng đa nguồn khu vực Đông Nam Á, nơi bài toán dị biệt không-thời gian (lưới và điểm) bộc lộ rõ nét hơn hẳn so với các miền dữ liệu có cấu trúc bảng quan hệ thông thường mà phần lớn tài liệu gốc sử dụng làm ví dụ minh hoạ. Đây chính là khoảng trống thực nghiệm mà đề tài lấp vào: không đề xuất kỹ thuật mới, mà kiểm chứng và tích hợp có hệ thống các kỹ thuật đã được chứng minh, trên một bài toán thực tế có dữ liệu thật.
+
+% ==========================================================
+\chapter{Phương pháp luận và kiến trúc hệ thống}
+% ==========================================================
+
+\section{Kiến trúc tổng thể}
+
+Hình~\ref{fig:pipeline} trình bày kiến trúc pipeline tổng thể của hệ thống. Năm nguồn dữ liệu đi qua bước chuẩn hoá riêng biệt (Raw Zone) trước khi hội tụ về một Mediated Schema duy nhất, từ đó rẽ nhánh phục vụ đồng thời xử lý theo lô (Spark batch), xử lý luồng giả lập (Spark Structured Streaming), và trực quan hoá (Dashboard).
+
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}[
+  f/.style={rectangle, rounded corners, draw=hustblue, thick, fill=hustblue!8, minimum width=2.8cm, minimum height=0.9cm, align=center, font=\small},
+  arr/.style={-{Latex[length=2.5mm]}, thick, hustblue}]
+\node[f] (s1) at (-6.5,2.4) {NASA POWER};
+\node[f] (s2) at (-6.5,1.2) {Open-Meteo};
+\node[f] (s3) at (-6.5,0) {GHCN-Daily (PIVOT)};
+\node[f] (s4) at (-6.5,-1.2) {NOAA ISD (PARSE)};
+\node[f] (s5) at (-6.5,-2.4) {ERA5 (ARCO)};
+\node[f, minimum width=3.4cm, minimum height=3cm, fill=warnorange!10, draw=warnorange] (raw) at (-2.0,0) {Raw Zone\\+ chuẩn hoá\\đơn vị/thời gian};
+\node[f, minimum width=3.4cm, minimum height=3cm, fill=goodgreen!10, draw=goodgreen] (ms) at (2.0,0) {Mediated Schema\\(GAV + Survivorship)};
+\node[f, minimum width=3.2cm] (spark) at (6.5,1.4) {Spark batch +\\Structured Streaming};
+\node[f, minimum width=3.2cm] (dash) at (6.5,-1.4) {Dashboard\\(bản đồ, cảnh báo)};
+\foreach \s in {s1,s2,s3,s4,s5} { \draw[arr] (\s) -- (raw); }
+\draw[arr] (raw) -- (ms);
+\draw[arr] (ms) -- (spark);
+\draw[arr] (ms) -- (dash);
+\end{tikzpicture}%
+}
+\caption{Kiến trúc pipeline tổng thể của hệ thống}
+\label{fig:pipeline}
+\end{figure}
+
+\section{Ánh xạ lược đồ theo GAV (Mediated Schema)}
+
+Áp dụng đúng công thức GAV đã trình bày ở Mục 2.1 ($G \supseteq Q(\text{sources})$), Mediated Schema trung tâm được định nghĩa như sau:
+
+\begin{quote}
+\ttfamily\footnotesize
+WeatherObs(location\_id, timestamp\_utc, source,\\
+\hspace*{1.2cm} temp\_c, rh\_pct, dewpoint\_c, precip\_mm,\\
+\hspace*{1.2cm} wind\_speed\_ms, wind\_dir\_deg,\\
+\hspace*{1.2cm} pressure\_surface\_hpa, pressure\_msl\_hpa,\\
+\hspace*{1.2cm} solar\_rad\_wm2, cloud\_cover\_pct)
+\end{quote}
+
+Mỗi nguồn được ánh xạ vào schema này qua một view cụ thể; ví dụ với NASA POWER:
+$$\text{WeatherObs}(\text{loc},t,\text{'NASA\_POWER'},\text{temp},\ldots) \supseteq \text{POWER}(\text{loc},t,\text{T2M},\text{RH2M},\ldots)$$
+
+Hai nguồn đòi hỏi bước biến đổi bắt buộc trước khi map: GHCN-Daily lưu dữ liệu ở dạng "long" (một dòng/một biến/một ngày) nên cần \textbf{PIVOT} sang dạng "wide"; NOAA ISD lưu các trường ở dạng chuỗi nén nhiều trường con (ví dụ \texttt{TMP="+0250,1"} gồm giá trị và cờ chất lượng) nên cần \textbf{PARSE} hai tầng trước khi sử dụng.
+
+\section{Xử lý dị biệt thực thể: Quy tắc Survivorship}
+
+Bảng~\ref{tab:survivorship} trình bày quy tắc ưu tiên nguồn khi cùng một đại lượng được đo/ước lượng bởi nhiều nguồn -- áp dụng trực tiếp khung lý thuyết Fellegi--Sunter (Mục 2.2), mở rộng thêm cơ chế gắn cờ xung đột (\emph{conflict flag}) khi độ lệch giữa nguồn ground-truth và nguồn mô hình vượt ngưỡng cho phép.
+
+\begin{table}[H]
+\centering
+\caption{Quy tắc Survivorship theo thứ hạng độ tin cậy nguồn}
+\label{tab:survivorship}
+\begin{tabular}{@{}clL{7cm}@{}}
+\toprule
+\textbf{Hạng} & \textbf{Nguồn} & \textbf{Lý do xếp hạng} \\
+\midrule
+1 (cao nhất) & ISD / GHCN & Đo trực tiếp tại điểm, có cờ kiểm soát chất lượng (QC flag) \\
+2 & ERA5 & Đồng hoá quan trắc thật với mô hình vật lý, độ phân giải cao nhất trong nhóm mô hình \\
+3 & Open-Meteo & Nội suy phái sinh từ ERA5 \\
+4 (thấp nhất) & NASA POWER & Dữ liệu vệ tinh/MERRA-2, độ phân giải không gian thô nhất ($0.5°$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Một phát hiện quan trọng trong quá trình thiết kế: trường áp suất bề mặt (\texttt{pressure\_surface}, có ở NASA POWER và ERA5) và áp suất mực nước biển (\texttt{pressure\_msl}, có ở Open-Meteo và NOAA ISD) là \textbf{hai đại lượng vật lý khác nhau}, không được gộp trực tiếp trong bước Survivorship -- đây là ví dụ cụ thể của dị biệt ngữ nghĩa (semantic heterogeneity) đã trình bày trong lý thuyết môn học, và là lý do Mediated Schema ở Mục 3.2 giữ hai cột riêng biệt thay vì gộp chung một cột "pressure".
+
+\section{Nội suy không gian và vai trò của PINN}
+
+Với khoảng trống giữa lưới ERA5 và trạm điểm, đề tài áp dụng theo đúng thứ tự chi phí tăng dần: (1) nội suy song tuyến tính (Bilinear Interpolation) làm bước bắt buộc và rẻ; (2) Kriging nếu còn thời gian, tận dụng cấu trúc hiệp phương sai không gian; (3) PINN (Mục 2.3) chỉ dành cho hai trường hợp thật sự cần ràng buộc vật lý thay vì nội suy hình học thuần tuý -- suy độ ẩm tương đối từ điểm sương qua phương trình Clausius-Clapeyron, và làm mịn trường gió vector $(u,v)$ tuân thủ ràng buộc Navier-Stokes rút gọn.
+
+\section{Công nghệ triển khai}
+
+Hệ thống được triển khai bằng Python (\texttt{cdsapi}, \texttt{xarray}, \texttt{dask}, \texttt{pykrige}) cho tầng thu thập và tiền xử lý; Apache Spark (PySpark -- Spark SQL, Structured Streaming, MLlib) cho tầng xử lý phân tán; Apache Kafka cho luồng phát lại (replay) giả lập tính chất Velocity của dữ liệu; PyTorch cho thành phần PINN tuỳ chọn; và Streamlit/Apache Superset cho tầng trực quan hoá.
+
+% ==========================================================
+\chapter{Nguồn dữ liệu}
+% ==========================================================
+
+\section{Bốn nguồn dữ liệu lõi -- đã kiểm chứng thực nghiệm}
+
+Khác với phần lớn đề xuất dự án chỉ tra cứu tài liệu, toàn bộ bốn nguồn dữ liệu lõi của đề tài đã được \textbf{kiểm tra thực nghiệm} bằng cách gọi API thật và tải mẫu dữ liệu thật (script \texttt{scripts/check\_data\_sources.py} trong kho mã nguồn của nhóm), thay vì chỉ dựa trên tài liệu API. Bảng~\ref{tab:sources} tổng hợp kết quả.
+
+\begin{table}[H]
+\centering
+\caption{Kết quả kiểm chứng thực nghiệm bốn nguồn dữ liệu lõi (30/9/2026)}
+\label{tab:sources}
+\begin{tabular}{@{}L{3.2cm}L{2cm}L{4.2cm}@{}}
+\toprule
+\textbf{Nguồn} & \textbf{Cần đăng ký?} & \textbf{Bằng chứng thực nghiệm} \\
+\midrule
+NASA POWER & Không & HTTP 200, 5 ngày dữ liệu thật tại Hà Nội \\
+Open-Meteo Historical & Không & HTTP 200, 5 ngày dữ liệu thật tại Jakarta \\
+NOAA GHCN-Daily (AWS S3) & Không & 44.560 bản ghi thật, giai đoạn 1958--2025 \\
+NOAA ISD/Global Hourly & Không & 16.741 bản ghi/năm thật, một trạm mẫu \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Với nguồn ERA5 -- trung tâm về mặt lý thuyết của đề tài (Mục 2.4) -- quá trình kiểm chứng phát hiện một điểm quan trọng: kênh truy cập chính thức qua Copernicus CDS yêu cầu đăng ký tài khoản, nhưng nhóm đã xác định thêm một kênh miễn phí thay thế hoàn toàn không cần đăng ký -- kho dữ liệu ARCO-ERA5 (Analysis-Ready, Cloud-Optimized) trên Google Cloud, đã kiểm chứng thật có đủ 35 biến khí tượng cần thiết, độ phân giải $0.25°$, tần suất giờ, giai đoạn 1959--2022 -- cho phép nhóm bắt đầu xây dựng và kiểm thử pipeline ngay từ tuần đầu tiên mà không phải chờ thủ tục đăng ký.
+
+\section{Trạm quan trắc}
+
+Danh sách trạm quan trắc được lọc trực tiếp từ hai tệp metadata chính thức của GHCN và ISD (không suy đoán), phủ toàn bộ chín quốc gia Đông Nam Á. Bảng~\ref{tab:stations} tổng hợp số liệu.
+
+\begin{table}[H]
+\centering
+\caption{Số lượng trạm GHCN-Daily theo quốc gia Đông Nam Á}
+\label{tab:stations}
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+Nước & VN & Indo. & Thái & Phil. & Malay. & Lào & Myan. & Camp. & Brunei \\
+\midrule
+Số trạm & 56 & 104 & 54 & 34 & 16 & 15 & 5 & 1 & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Nhóm xác định 18 trạm ưu tiên (10 trạm ISD hoạt động tại Việt Nam, phủ đều ba miền, cộng 8 trạm đại diện các nước còn lại) làm tập dữ liệu lõi cho hai tuần đầu tiên, mở rộng ra toàn bộ tập trạm nếu tiến độ cho phép. Quá trình lọc cũng phát hiện hai điểm không nhất quán trong metadata nguồn cần lưu ý khi viết mã thu thập: mã quốc gia Việt Nam trong ISD xuất hiện dưới cả hai dạng \texttt{VM} và \texttt{VN}; mã quốc gia Brunei là \texttt{BX}, dễ nhầm với \texttt{BS} (Bahamas).
+
+\section{Ước tính dung lượng dữ liệu}
+
+Bảng~\ref{tab:volume} trình bày ước tính dung lượng dữ liệu, kết hợp giữa số liệu đo thực nghiệm (đối với dữ liệu trạm) và tính toán từ cấu trúc mảng dữ liệu thật (đối với ERA5).
+
+\begin{table}[H]
+\centering
+\caption{Ước tính dung lượng dữ liệu theo phạm vi đề xuất}
+\label{tab:volume}
+\begin{tabular}{@{}L{6cm}L{6.5cm}@{}}
+\toprule
+\textbf{Nguồn (phạm vi đề xuất)} & \textbf{Dung lượng} \\
+\midrule
+GHCN, 16 trạm VN, toàn lịch sử & 25,85 MB (đo thực nghiệm) \\
+ISD, 10 trạm VN, 1 năm (2024) & 42,94 MB (đo thực nghiệm) \\
+NASA POWER + Open-Meteo & Dưới 100 MB (truy vấn theo điểm) \\
+ERA5 (ARCO), vùng ĐNA, 8 biến, 5 năm, tần suất giờ & Xấp xỉ 34,8 GB (tính từ hình dạng mảng thật: $1440 \times 721$ điểm lưới, kiểu \texttt{float32}) \\
+\midrule
+\textbf{Tổng ước tính} & \textbf{Xấp xỉ 35--36 GB} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Con số 35--36 GB vượt khả năng xử lý thuận tiện bằng công cụ đơn máy thông thường (đúng tiêu chí \emph{Volume} của dữ liệu lớn, cần Spark), nhưng vẫn là một mục tiêu khả thi để tải và xử lý trong khung thời gian sáu tuần với nhóm ba thành viên -- thực tế hơn đáng kể so với ước tính sơ bộ ban đầu (1,5--2 TB) trước khi có số liệu kiểm chứng thực nghiệm.
+
+\section{Đánh giá theo tiêu chí 5V}
+
+\begin{itemize}
+    \item \textbf{Volume}: xấp xỉ 35--36 GB (Mục 4.3), vượt ngưỡng xử lý bằng công cụ truyền thống đơn máy.
+    \item \textbf{Variety}: năm nguồn với ba dạng cấu trúc khác nhau -- lưới đa chiều nhị phân (ERA5), bảng "long" (GHCN), bảng có trường nén (ISD) -- và ba dạng cú pháp (NetCDF/GRIB2, CSV, JSON).
+    \item \textbf{Velocity}: dữ liệu lịch sử tĩnh, mô phỏng tính chất luồng qua kiến trúc Replay Streaming Pipeline (Kafka + Spark Structured Streaming).
+    \item \textbf{Veracity}: độ phủ trạm quan trắc lệch mạnh giữa các nước (Mục 4.2) và xung đột giá trị giữa nguồn trạm/mô hình (Mục 3.3) đòi hỏi quy tắc Survivorship và báo cáo giới hạn tường minh.
+    \item \textbf{Value}: phát hiện dị thường khí hậu, hỗ trợ nông nghiệp/năng lượng tái tạo, hỗ trợ vận hành UAV an toàn (Mục 1.3).
+\end{itemize}
+
+% ==========================================================
+\chapter{Kế hoạch thực hiện}
+% ==========================================================
+
+\section{Đội hình dự án}
+
+Nhóm 16 gồm ba thành viên thực tế; do đó thành viên Trương Tuấn Nghĩa đảm nhiệm gộp hai vai trò Spark/PINN Lead và Dashboard/PM Lead. Bảng~\ref{tab:team} trình bày phân công vai trò.
+
+\begin{table}[H]
+\centering
+\caption{Phân công vai trò nhóm}
+\label{tab:team}
+\begin{tabular}{@{}L{3.2cm}L{3.4cm}L{6cm}@{}}
+\toprule
+\textbf{Thành viên} & \textbf{Vai trò} & \textbf{Trọng tâm} \\
+\midrule
+Ngô Văn Quang & Ingestion Lead & Thu thập \& làm sạch dữ liệu đa nguồn \\
+Nguyễn Cao Lương & Schema Lead & Mediated Schema, Record Linkage \\
+Trương Tuấn Nghĩa & Spark/PINN Lead + Dashboard/PM Lead (kiêm nhiệm) & Xử lý phân tán, mô hình vật lý-học máy, trực quan hoá, điều phối \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Tiến độ tổng thể}
+
+Kế hoạch bám sát đúng năm mốc chính thức của học phần, không có mốc tự đặt thêm. Hình~\ref{fig:gantt} trình bày biểu đồ Gantt tổng thể.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{ganttchart}[
+    vgrid, hgrid,
+    x unit=0.3cm,
+    y unit chart=0.7cm,
+    bar/.append style={fill=hustblue!60},
+    bar height=0.6,
+    milestone/.append style={fill=badred},
+    title height=1,
+    time slot format=isodate
+    ]{2026-09-26}{2026-11-08}
+    \gantttitlecalendar{month=name} \\
+    \ganttbar{TV1 -- Ingestion}{2026-09-26}{2026-11-08} \\
+    \ganttbar{TV2 -- Schema}{2026-09-26}{2026-11-08} \\
+    \ganttbar{TV3+4 -- Spark/PINN/Dashboard}{2026-09-26}{2026-11-08} \\
+    \ganttmilestone{Chốt nhóm 26/9}{2026-09-26} \\
+    \ganttmilestone{Nộp đề cương 5/10}{2026-10-05} \\
+    \ganttmilestone{Báo cáo tiến độ 20/10}{2026-10-20} \\
+    \ganttmilestone{Test 27/10}{2026-10-27} \\
+    \ganttmilestone{Báo cáo cuối kỳ 8/11}{2026-11-08}
+\end{ganttchart}%
+}
+\caption{Biểu đồ Gantt tổng thể theo các mốc chính thức của học phần}
+\label{fig:gantt}
+\end{figure}
+
+\section{Kế hoạch chi tiết theo tuần}
+
+Kế hoạch chi tiết gồm 160 tác vụ cụ thể (4 tuần $\times$ 4 vai trò $\times$ 10 tác vụ/tuần/vai trò), mỗi tác vụ kèm tiêu chí kiểm thử (Definition of Done) rõ ràng -- được trình bày đầy đủ trong Phụ lục và trong tệp \texttt{docs/03-ke-hoach-160-tasks.md} của kho mã nguồn nhóm. Bảng~\ref{tab:weeks} tóm tắt trọng tâm từng tuần.
+
+\begin{table}[H]
+\centering
+\caption{Trọng tâm công việc theo tuần}
+\label{tab:weeks}
+\begin{tabular}{@{}cL{2.6cm}L{8.4cm}@{}}
+\toprule
+\textbf{Tuần} & \textbf{Mốc kết thúc} & \textbf{Trọng tâm} \\
+\midrule
+1 & Nộp đề cương (5/10) & Đăng ký API/tài khoản, script tải mẫu, thiết kế schema nháp, dựng môi trường Spark \\
+2 & Báo cáo tiến độ (20/10) & Tải batch đầy đủ, Mediated Schema chính thức, cụm Spark, streaming cơ bản, dashboard khung \\
+3 & Hội tụ hệ thống (2/11) & Xử lý outlier, Record Linkage đầy đủ, huấn luyện PINN (nếu khả thi), tối ưu data skew \\
+4 & Báo cáo cuối kỳ (8/11) & Data freeze, demo trực tiếp, hoàn thiện báo cáo và bảo vệ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Chiến lược giảm tải cho vai trò kiêm nhiệm}
+
+Vì một thành viên đảm nhiệm gấp đôi khối lượng công việc so với hai thành viên còn lại, nhóm áp dụng ba nguyên tắc quản trị rủi ro tiến độ: (1) coi PINN là hạng mục điểm cộng có thể lược bỏ, với phương án lùi rõ ràng về mô hình hồi quy MLlib thông thường; (2) rút gọn phần điều phối dự án (PM) xuống mức tối thiểu cần thiết (roadmap và board quản lý việc), dồn thời gian cho phần kỹ thuật; (3) ưu tiên tuyệt đối cho hai hạng mục bắt buộc -- pipeline Spark hoạt động đúng và Dashboard hiển thị đủ dữ liệu thật -- trước khi đầu tư thời gian vào bất kỳ hạng mục nâng cao nào.
+
+% ==========================================================
+\chapter{Đóng góp dự kiến}
+% ==========================================================
+
+\section{Đóng góp về sản phẩm}
+
+Sản phẩm cuối cùng của đề tài là một kho dữ liệu khí tượng đã chuẩn hoá cho khu vực Đông Nam Á, có thể tái sử dụng cho nhiều bài toán phân tích khác nhau thay vì chỉ phục vụ một ứng dụng đơn lẻ -- một đặc điểm thiết kế có chủ đích, phân biệt đề tài với các dự án chỉ xây dựng pipeline một chiều cho một mục đích cụ thể. Trên nền kho dữ liệu này, ba ứng dụng cụ thể được triển khai: phát hiện dị thường khí hậu theo khu vực/thời điểm, thống kê hỗ trợ nông nghiệp và năng lượng tái tạo, và khuyến nghị khung giờ bay UAV an toàn dựa trên dự báo gió/mưa.
+
+\section{Đóng góp về phương pháp}
+
+Đề tài không đề xuất kỹ thuật lý thuyết mới, mà đóng góp một trường hợp áp dụng và kiểm chứng có hệ thống các kỹ thuật tích hợp dữ liệu lớn đã được thiết lập (Chương 2) trên một miền dữ liệu có đặc điểm dị biệt không-thời gian rõ nét hơn hẳn các ví dụ minh hoạ dạng bảng quan hệ thường gặp trong tài liệu gốc. Cụ thể, đề tài minh chứng bằng số liệu thực nghiệm: (i) cách một mediated schema GAV đơn giản vẫn xử lý được năm nguồn có tới ba dạng cấu trúc cú pháp khác nhau nếu có bước tiền xử lý PIVOT/PARSE tường minh; (ii) cách một quy tắc Survivorship dựa trên xếp hạng độ tin cậy nguồn (thay vì trung bình cộng ngây thơ) tránh được lỗi tích hợp sai nghiêm trọng giữa các đại lượng vật lý dễ nhầm lẫn (áp suất bề mặt và áp suất mực nước biển); và (iii) ranh giới rõ ràng giữa khi nào chỉ cần nội suy không gian thông thường và khi nào thực sự cần ràng buộc vật lý (PINN) để lấp khoảng trống dữ liệu.
+
+% ==========================================================
+\chapter{Quản lý rủi ro}
+% ==========================================================
+
+Bảng~\ref{tab:risks} tổng hợp các rủi ro chính đã được nhóm nhận diện, kèm phương án dự phòng cụ thể -- không phải các giả định trừu tượng.
+
+\begin{table}[H]
+\centering
+\caption{Rủi ro và phương án dự phòng}
+\label{tab:risks}
+\begin{tabular}{@{}L{3.6cm}L{2.2cm}L{6.6cm}@{}}
+\toprule
+\textbf{Rủi ro} & \textbf{Mức ảnh hưởng} & \textbf{Phương án dự phòng} \\
+\midrule
+Đăng ký tài khoản Copernicus CDS chậm & Trung bình & Sử dụng song song kênh ARCO-ERA5 (Google Cloud, miễn phí, không cần đăng ký) đã kiểm chứng ở Mục 4.1 \\
+Quá tải khối lượng công việc ở vai trò kiêm nhiệm & Cao & Bỏ hạng mục PINN nếu cần, giữ nguyên Spark batch/streaming và Dashboard làm lõi bắt buộc (Mục 5.4) \\
+Độ phủ trạm quan trắc lệch giữa các quốc gia & Thấp--Trung bình & Nêu rõ giới hạn (Campuchia và Brunei chỉ có một trạm GHCN mỗi nước) trong báo cáo đánh giá Veracity, không che giấu hạn chế dữ liệu \\
+Tràn bộ nhớ khi xử lý dữ liệu ERA5 đa chiều & Trung bình & Áp dụng chunking bằng \texttt{xarray}+\texttt{dask}, giới hạn bounding box và số biến ở giai đoạn đầu \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ==========================================================
+\chapter{Kết luận}
+% ==========================================================
+
+Đề tài đã được thiết kế với ba đặc điểm phân biệt so với một đề xuất dự án thông thường: \emph{thứ nhất}, toàn bộ nguồn dữ liệu lõi đã được kiểm chứng bằng thực nghiệm thật (gọi API, tải mẫu, xác minh nội dung) thay vì chỉ tra cứu tài liệu, bao gồm cả việc phát hiện và sửa các sai lệch so với ghi chú ban đầu (ví dụ bản chất "Requester Pays" của ERA5 trên AWS, hay việc phát hiện kênh ARCO-ERA5 miễn phí thay thế); \emph{thứ hai}, hai kỹ thuật lý thuyết cốt lõi của học phần -- GAV schema mapping và Survivorship-based record linkage -- được áp dụng cụ thể, có công thức và bảng quy tắc rõ ràng, không dừng ở mức mô tả định tính; \emph{thứ ba}, kế hoạch thực hiện phản ánh đúng ràng buộc nguồn lực thực tế của nhóm (ba thành viên, một người kiêm nhiệm hai vai trò), kèm chiến lược giảm tải cụ thể thay vì một kế hoạch lý tưởng hoá không tính đến rủi ro nhân sự.
+
+Với nền tảng dữ liệu, kiến trúc, và kế hoạch đã trình bày, nhóm tin rằng đề tài hoàn toàn khả thi để hoàn thành đúng tiến độ năm mốc chính thức của học phần, đồng thời tạo ra một sản phẩm có giá trị sử dụng thực tế vượt ra ngoài phạm vi bài tập học phần.
+
+% ==========================================================
+\begin{thebibliography}{99}
+
+\bibitem{rahm2001survey} E.~Rahm and P.~A.~Bernstein, ``A survey of approaches to automatic schema matching,'' \emph{The VLDB Journal}, vol.~10, pp.~334--350, 2001.
+
+\bibitem{ullman1997logical} J.~D.~Ullman, ``Information integration using logical views,'' in \emph{Proc. 6th International Conference on Database Theory (ICDT)}, 1997, pp.~19--40.
+
+\bibitem{levy2001survey} A.~Y.~Levy, ``Answering queries using views: A survey,'' \emph{The VLDB Journal}, vol.~10, pp.~270--294, 2001.
+
+\bibitem{lenzerini2002theoretical} M.~Lenzerini, ``Data integration: A theoretical perspective,'' in \emph{Proc. 21st ACM SIGMOD-SIGACT-SIGART Symposium on Principles of Database Systems (PODS)}, 2002, pp.~233--246.
+
+\bibitem{halevy2006dataspace} A.~Y.~Halevy, M.~J.~Franklin, and D.~Maier, ``Principles of dataspace systems,'' in \emph{Proc. 25th ACM SIGMOD-SIGACT-SIGART Symposium on Principles of Database Systems (PODS)}, 2006, pp.~1--9.
+
+\bibitem{dassarma2008payasyougo} A.~Das Sarma, X.~Dong, and A.~Y.~Halevy, ``Bootstrapping pay-as-you-go data integration systems,'' in \emph{Proc. ACM SIGMOD International Conference on Management of Data}, 2008, pp.~861--874.
+
+\bibitem{cafarella2008webtables} M.~J.~Cafarella, A.~Halevy, D.~Z.~Wang, E.~Wu, and Y.~Zhang, ``WebTables: exploring the power of tables on the web,'' \emph{Proc. VLDB Endowment}, vol.~1, no.~1, pp.~538--549, 2008.
+
+\bibitem{talukdar2008learning} P.~P.~Talukdar, M.~Jacob, M.~S.~Mehmood, K.~Crammer, Z.~G.~Ives, F.~Pereira, and S.~Guha, ``Learning to create data-integrating queries,'' \emph{Proc. VLDB Endowment}, vol.~1, no.~1, pp.~785--796, 2008.
+
+\bibitem{fellegi1969theory} I.~P.~Fellegi and A.~B.~Sunter, ``A theory for record linkage,'' \emph{Journal of the American Statistical Association}, vol.~64, no.~328, pp.~1183--1210, 1969.
+
+\bibitem{kopcke2010evaluation} H.~Köpcke, A.~Thor, and E.~Rahm, ``Evaluation of entity resolution approaches on real-world match problems,'' \emph{Proc. VLDB Endowment}, vol.~3, no.~1, pp.~484--493, 2010.
+
+\bibitem{gionis1999similarity} A.~Gionis, P.~Indyk, and R.~Motwani, ``Similarity search in high dimensions via hashing,'' in \emph{Proc. 25th International Conference on Very Large Data Bases (VLDB)}, 1999, pp.~518--529.
+
+\bibitem{bansal2004correlation} N.~Bansal, A.~Blum, and S.~Chawla, ``Correlation clustering,'' \emph{Machine Learning}, vol.~56, no.~1, pp.~89--113, 2004.
+
+\bibitem{hassanzadeh2009framework} O.~Hassanzadeh, F.~Chiang, R.~J.~Miller, and H.~C.~Lee, ``Framework for evaluating clustering algorithms in duplicate detection,'' \emph{Proc. VLDB Endowment}, vol.~2, no.~1, pp.~1282--1293, 2009.
+
+\bibitem{ebraheem2018deeper} M.~Ebraheem, S.~Thirumuruganathan, S.~Joty, M.~Ouzzani, and N.~Tang, ``Distributed representations of tuples for entity resolution,'' \emph{Proc. VLDB Endowment}, vol.~11, no.~11, pp.~1454--1467, 2018.
+
+\bibitem{mudgal2018deep} S.~Mudgal, H.~Li, T.~Rekatsinas, A.~Doan, Y.~Park, G.~Krishnan, R.~Deep, E.~Arcaute, and V.~Raghavendra, ``Deep learning for entity matching: A design space exploration,'' in \emph{Proc. ACM SIGMOD International Conference on Management of Data}, 2018, pp.~19--34.
+
+\bibitem{kasai2019lowresource} J.~Kasai, K.~Qian, S.~Gurajada, Y.~Li, and L.~Popa, ``Low-resource deep entity resolution with transfer and active learning,'' in \emph{Proc. 57th Annual Meeting of the Association for Computational Linguistics (ACL)}, 2019, pp.~5851--5861.
+
+\bibitem{burdick2017expressive} D.~Burdick, R.~Fagin, P.~G.~Kolaitis, L.~Popa, and W.-C.~Tan, ``Expressive power of entity-linking frameworks,'' \emph{Journal of Computer and System Sciences}, vol.~100, pp.~44--69, 2019.
+
+\bibitem{gruenheid2014incremental} A.~Gruenheid, X.~L.~Dong, and D.~Srivastava, ``Incremental record linkage,'' \emph{Proc. VLDB Endowment}, vol.~7, no.~9, pp.~697--708, 2014.
+
+\bibitem{raissi2019physics} M.~Raissi, P.~Perdikaris, and G.~E.~Karniadakis, ``Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations,'' \emph{Journal of Computational Physics}, vol.~378, pp.~686--707, 2019.
+
+\bibitem{hersbach2020era5} H.~Hersbach, B.~Bell, P.~Berrisford, et al., ``The ERA5 global reanalysis,'' \emph{Quarterly Journal of the Royal Meteorological Society}, vol.~146, no.~730, pp.~1999--2049, 2020.
+
+\end{thebibliography}
+\addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
+
+\end{document}
