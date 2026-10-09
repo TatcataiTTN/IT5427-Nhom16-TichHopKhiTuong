@@ -17,7 +17,7 @@
 | 4 | **NOAA ISD/Global Hourly** (AWS S3) | ✅ Hoạt động tốt | Không | ✅ (đã test trạm 48900099999 — khu vực Hà Nội) |
 | 5 | **Copernicus CDS** (ERA5 gốc, chính thức) | ⚠️ Server sống, nhưng **cần đăng ký** | **Có** — tài khoản CDS + API key | ✅ (toàn cầu, cắt theo bounding box) |
 | 6 | **ERA5 trên AWS** (`era5-pds`) | ⚠️ Bị từ chối khi không có tài khoản AWS | **Có** — tài khoản AWS thật (Requester Pays) | ✅ nhưng **không miễn phí hoàn toàn như tài liệu cũ ghi** |
-| 6b | **ERA5 trên Google Cloud** (ARCO-ERA5, **mới phát hiện**) | ✅ Hoạt động tốt, đã tải mẫu thật | **Không** — hoàn toàn public, không tài khoản | ✅ toàn cầu, 1959–2022, 0.25°, hourly, 35 biến |
+| 6b | **ERA5 trên Google Cloud** (ARCO-ERA5, **mới phát hiện**) | ✅ Hoạt động tốt, đã test full subset thật (31MB, 9/10/2026) | **Không** — hoàn toàn public, không tài khoản | ✅ toàn cầu, **1959–2021** (sửa lại, xem mục 6b chi tiết), 0.25°, hourly, 35 biến |
 | 6c | **ERA5 trên Microsoft Planetary Computer** (**mới phát hiện**) | ✅ Cấp token tự động thành công | **Không** — token tự cấp, không cần đăng ký | ✅ (cần dùng đúng SDK `planetary-computer`) |
 | 7 | **OpenStreetMap** (Nominatim + Tile) | ⚠️ Không kiểm tra được **từ môi trường sandbox này** (bị chặn DNS ra ngoài) | Không | Có (theo tài liệu chính thức OSM — xem mục 7) |
 | 8 | **CHIRPS** (mưa vệ tinh, tuỳ chọn) | ✅ Hoạt động tốt | Không | ✅ (độ phân giải 5km, phủ toàn ĐNA) |
@@ -97,9 +97,11 @@
 Google + ECMWF hợp tác public hoá **ARCO-ERA5** (Analysis-Ready, Cloud-Optimized ERA5) tại bucket GCS `gcp-public-data-arco-era5` — đây **không phải** bản GRIB2 thô dạng file-theo-ngày như `era5-pds`, mà là **kho Zarr đã re-chunk tối ưu cho truy vấn cục bộ (partial read)**.
 
 - **Đã tải thật:** `.zmetadata` của kho `ar/1959-2022-full_37-1h-0p25deg-chunk-1.zarr-v2` — HTTP 200, 30.7KB, **không cần bất kỳ credential/API key/tài khoản nào**.
-- **Xác nhận nội dung:** kho có **35 biến khí tượng** đầy đủ, gồm đúng các biến cần cho đề tài: `2m_temperature`, `10m_u_component_of_wind`, `10m_v_component_of_wind`, `geopotential`, `land_sea_mask`... — độ phân giải **0.25° (1440×721 điểm lưới)**, tần suất **hàng giờ**, giai đoạn **1959–2022**.
+- **Xác nhận nội dung:** kho có **35 biến khí tượng** đầy đủ, gồm đúng các biến cần cho đề tài: `2m_temperature`, `10m_u_component_of_wind`, `10m_v_component_of_wind`, `geopotential`, `land_sea_mask`... — độ phân giải **0.25° (1440×721 điểm lưới)**, tần suất **hàng giờ**.
+- **⚠️ Sửa lại giai đoạn thời gian (kiểm chứng 9/10/2026):** tên kho ghi "1959-2022" nhưng đọc thật `ds.time.values` cho thấy mốc cuối thực tế là **2021-12-31T23:00**, không phải hết 2022 như tên gợi ý. Giai đoạn chính xác: **1959–2021**.
+- **✅ Đã test full (9/10/2026):** tải thật một subset 3 ngày (15–17/6/2021) × 4 biến (`2m_temperature`, `10m_u/v_component_of_wind`, `total_precipitation`) × trọn vùng bounding box Đông Nam Á (lat -11→23, lon 92→141) → file NetCDF **31 MB**, shape `(72, 137, 197)` mỗi biến, tải xong trong ~95 giây. Suy ra tốc độ ~2,6 MB/biến/ngày cho vùng ĐNA — **khớp với ước tính 34,8 GB** ở `docs/05` mục ước lượng dung lượng (sai lệch ~6%, hợp lý do overhead nén NetCDF). File mẫu: `data_samples/batch_week2/era5_arco/era5_sea_2022-01-01_to_03.nc` (tên file giữ nguyên dù nội dung đã sửa ngày).
 - **⚠️ Lưu ý quan trọng đã kiểm chứng bằng thực nghiệm:** kho `raw/ERA5GRIB/...` (GRIB2 thô, chưa re-chunk) có kích thước **~5.4 GB cho 1 ngày/1 biến** — thử tải trực tiếp 1 file bị treo hơn 2 phút và phải huỷ giữa chừng. **Tuyệt đối không dùng nhánh `raw/`** — phải dùng nhánh `ar/...zarr-v2` (đã re-chunk) và đọc bằng `xarray.open_zarr()`, lúc đó có thể lấy đúng lát cắt bounding box + khoảng thời gian cần mà không phải tải nguyên khối dữ liệu toàn cầu nhiều năm.
-- **Cách dùng trong code (đã kiểm chứng metadata, chưa test full — cần `pip install zarr gcsfs`):**
+- **Cách dùng trong code (đã test full, `pip install zarr gcsfs`):**
   ```python
   import xarray as xr
   ds = xr.open_zarr(
@@ -109,7 +111,7 @@ Google + ECMWF hợp tác public hoá **ARCO-ERA5** (Analysis-Ready, Cloud-Optim
   )
   vn_slice = ds["2m_temperature"].sel(
       latitude=slice(23, 8), longitude=slice(102, 110),   # bounding box Việt Nam
-      time=slice("2020-01-01", "2020-01-31"),
+      time=slice("2020-01-01", "2020-01-31"),              # lưu ý: dữ liệu chỉ có đến 2021-12-31
   )
   ```
 - **Khuyến nghị:** đây là lựa chọn **tốt nhất cho việc build/test pipeline nhanh** — không mất thời gian chờ duyệt tài khoản CDS. Nhóm vẫn nên **song song đăng ký CDS** (mục 5) vì đây là nguồn gốc chính thức, cần trích dẫn đúng chuẩn học thuật trong báo cáo (`cds.climate.copernicus.eu` là nguồn ECMWF công bố chính thức) — nhưng có thể **bắt đầu code ngay bằng ARCO-ERA5 trong lúc chờ duyệt CDS**, không cần block tiến độ tuần 1.

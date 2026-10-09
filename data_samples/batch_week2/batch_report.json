@@ -1,0 +1,273 @@
+{
+  "ghcn_daily": [
+    {
+      "station": "VMM00048820",
+      "ok": true,
+      "rows": 44561,
+      "size_kb": 1530.7,
+      "secs": 2.22
+    },
+    {
+      "station": "VM000048900",
+      "ok": true,
+      "rows": 59046,
+      "size_kb": 2030.8,
+      "secs": 2.42
+    },
+    {
+      "station": "VMM00048855",
+      "ok": true,
+      "rows": 53895,
+      "size_kb": 1848.2,
+      "secs": 2.57
+    },
+    {
+      "station": "VMM00048845",
+      "ok": true,
+      "rows": 51350,
+      "size_kb": 1756.1,
+      "secs": 3.06
+    },
+    {
+      "station": "VMM00048887",
+      "ok": true,
+      "rows": 59968,
+      "size_kb": 2049.4,
+      "secs": 3.67
+    },
+    {
+      "station": "VMM00048917",
+      "ok": true,
+      "rows": 49466,
+      "size_kb": 1695.7,
+      "secs": 2.7
+    },
+    {
+      "station": "VMM00048808",
+      "ok": true,
+      "rows": 42338,
+      "size_kb": 1444.4,
+      "secs": 2.19
+    },
+    {
+      "station": "VMM00048806",
+      "ok": true,
+      "rows": 33103,
+      "size_kb": 1126.1,
+      "secs": 2.12
+    },
+    {
+      "station": "VMM00048826",
+      "ok": true,
+      "rows": 51565,
+      "size_kb": 1762.6,
+      "secs": 2.46
+    },
+    {
+      "station": "VMM00048914",
+      "ok": true,
+      "rows": 59094,
+      "size_kb": 2021.9,
+      "secs": 4.18
+    }
+  ],
+  "isd_2024": [
+    {
+      "station": "48912599999",
+      "name": "CAN THO",
+      "ok": true,
+      "rows": 16583,
+      "size_kb": 6037.4,
+      "secs": 4.51
+    },
+    {
+      "station": "48825199999",
+      "name": "CAT BI INTL ARPT/HAI PHONG",
+      "ok": true,
+      "rows": 16696,
+      "size_kb": 6108.1,
+      "secs": 9.69
+    },
+    {
+      "station": "48855099999",
+      "name": "DANANG INTL",
+      "ok": true,
+      "rows": 19498,
+      "size_kb": 7667.1,
+      "secs": 4.34
+    },
+    {
+      "station": "48877099999",
+      "name": "NHA TRANG",
+      "ok": true,
+      "rows": 2780,
+      "size_kb": 1017.8,
+      "secs": 2.34
+    },
+    {
+      "station": "48820099999",
+      "name": "NOIBAI INTL",
+      "ok": true,
+      "rows": 16705,
+      "size_kb": 6116.1,
+      "secs": 3.71
+    },
+    {
+      "station": "48852099999",
+      "name": "PHUBAI",
+      "ok": true,
+      "rows": 19478,
+      "size_kb": 7615.4,
+      "secs": 8.59
+    },
+    {
+      "station": "48866099999",
+      "name": "PLEIKU",
+      "ok": true,
+      "rows": 2760,
+      "size_kb": 1132.1,
+      "secs": 2.18
+    },
+    {
+      "station": "48870099999",
+      "name": "QUY NHON",
+      "ok": true,
+      "rows": 2781,
+      "size_kb": 1096.3,
+      "secs": 2.0
+    },
+    {
+      "station": "48900099999",
+      "name": "TAN SON NHAT INTL",
+      "ok": true,
+      "rows": 16742,
+      "size_kb": 6129.1,
+      "secs": 5.27
+    },
+    {
+      "station": "48845099999",
+      "name": "VINH",
+      "ok": true,
+      "rows": 2777,
+      "size_kb": 1049.2,
+      "secs": 1.98
+    }
+  ],
+  "nasa_power_2024": [
+    {
+      "point": "hanoi",
+      "ok": true,
+      "days": 366,
+      "size_kb": 36.5,
+      "secs": 1.8
+    },
+    {
+      "point": "hcmc",
+      "ok": true,
+      "days": 366,
+      "size_kb": 36.7,
+      "secs": 0.94
+    },
+    {
+      "point": "jakarta",
+      "ok": true,
+      "days": 366,
+      "size_kb": 36.8,
+      "secs": 1.57
+    },
+    {
+      "point": "bangkok",
+      "ok": true,
+      "days": 366,
+      "size_kb": 36.7,
+      "secs": 1.61
+    },
+    {
+      "point": "manila",
+      "ok": true,
+      "days": 366,
+      "size_kb": 36.5,
+      "secs": 1.67
+    },
+    {
+      "point": "kuala_lumpur",
+      "ok": true,
+      "days": 366,
+      "size_kb": 36.5,
+      "secs": 1.37
+    }
+  ],
+  "openmeteo_2024": [
+    {
+      "point": "hanoi",
+      "ok": true,
+      "hours": 8784,
+      "size_kb": 413.8,
+      "secs": 1.93
+    },
+    {
+      "point": "hcmc",
+      "ok": true,
+      "hours": 8784,
+      "size_kb": 414.7,
+      "secs": 2.0
+    },
+    {
+      "point": "jakarta",
+      "ok": true,
+      "hours": 8784,
+      "size_kb": 412.9,
+      "secs": 1.76
+    },
+    {
+      "point": "bangkok",
+      "ok": true,
+      "hours": 8784,
+      "size_kb": 414.9,
+      "secs": 2.82
+    },
+    {
+      "point": "manila",
+      "ok": true,
+      "hours": 8784,
+      "size_kb": 414.5,
+      "secs": 1.87
+    },
+    {
+      "point": "kuala_lumpur",
+      "ok": true,
+      "hours": 8784,
+      "size_kb": 411.9,
+      "secs": 1.84
+    }
+  ],
+  "era5_arco": {
+    "ok": true,
+    "secs": 95.1,
+    "shape": {
+      "2m_temperature": [
+        72,
+        137,
+        197
+      ],
+      "10m_u_component_of_wind": [
+        72,
+        137,
+        197
+      ],
+      "10m_v_component_of_wind": [
+        72,
+        137,
+        197
+      ],
+      "total_precipitation": [
+        72,
+        137,
+        197
+      ]
+    },
+    "size_mb": 29.66,
+    "note": "Thoi gian thuc te: 2021-06-15 -> 2021-06-17 (du lieu ARCO-ERA5 chi den het 2021-12-31, KHONG den 2022 nhu ghi chu truoc do trong docs/02)",
+    "file": "data_samples/batch_week2/era5_arco/era5_sea_2022-01-01_to_03.nc"
+  }
+}
