@@ -93,6 +93,17 @@ Nếu hạ tầng nhóm hạn chế băng thông/lưu trữ, các nền tảng n
 
 ---
 
+## G2. Ranh giới hành chính (Dashboard) — mới bổ sung 9/10/2026
+
+4 nguồn lõi (A–D) chỉ trả về dữ liệu theo toạ độ điểm/lưới, **không có ranh giới hành chính** — mà TV4/Dashboard cần ranh giới này để vẽ bản đồ và tổng hợp (aggregate) số liệu theo quốc gia/tỉnh. Mục này bổ sung nguồn ranh giới miễn phí, đã kiểm chứng thực nghiệm.
+
+| # | Nguồn | Mô tả | Độ chi tiết | Định dạng | Truy cập | Đăng ký |
+|---|---|---|---|---|---|---|
+| 25 | **Natural Earth** ⭐ *khuyến nghị* | Ranh giới quốc gia/tỉnh chuẩn, nhẹ, dùng rộng rãi trong giới GIS mã nguồn mở | 1:10m / 1:50m / 1:110m (càng số nhỏ càng chi tiết) | Shapefile | `naturalearth.s3.amazonaws.com` — **đã kiểm chứng 9/10/2026: tải thật `ne_50m_admin_0_countries.zip` (800KB), đọc bằng `geopandas`, xác nhận đủ 9 nước ĐNA** | Không cần |
+| 26 | **GADM** | Ranh giới hành chính chi tiết tới cấp huyện/xã (level 2–3), phù hợp nếu cần phân tích dưới cấp tỉnh | Tới level 3–4 tuỳ nước | Shapefile/GeoPackage | `gadm.org/download_country.html` | Không cần (giới hạn dùng phi thương mại) |
+
+---
+
 ## H. Ảnh vệ tinh quan sát Trái Đất & khí tượng (tùy chọn — không bắt buộc trong lõi 160 tác vụ)
 
 Nhóm dữ liệu **mở rộng**, dùng nếu nhóm còn dư thời gian sau khi hoàn thiện 4 nguồn lõi (mục A–D). Đây là dữ liệu ảnh raster (khác hẳn NetCDF/CSV/JSON), cần thêm kỹ năng xử lý ảnh — chỉ nên bổ sung ở Tuần 3–4 sau khi pipeline lõi đã ổn định, không đưa vào mốc nộp đề cương 5/10.

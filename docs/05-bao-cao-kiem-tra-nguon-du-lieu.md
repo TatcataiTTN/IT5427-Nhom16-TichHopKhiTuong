@@ -20,7 +20,8 @@
 | 6b | **ERA5 trên Google Cloud** (ARCO-ERA5, **mới phát hiện**) | ✅ Hoạt động tốt, đã test full subset thật (31MB, 9/10/2026) | **Không** — hoàn toàn public, không tài khoản | ✅ toàn cầu, **1959–2021** (sửa lại, xem mục 6b chi tiết), 0.25°, hourly, 35 biến |
 | 6c | **ERA5 trên Microsoft Planetary Computer** (**mới phát hiện**) | ✅ Cấp token tự động thành công | **Không** — token tự cấp, không cần đăng ký | ✅ (cần dùng đúng SDK `planetary-computer`) |
 | 7 | **OpenStreetMap** (Nominatim + Tile) | ⚠️ Không kiểm tra được **từ môi trường sandbox này** (bị chặn DNS ra ngoài) | Không | Có (theo tài liệu chính thức OSM — xem mục 7) |
-| 8 | **CHIRPS** (mưa vệ tinh, tuỳ chọn) | ✅ Hoạt động tốt | Không | ✅ (độ phân giải 5km, phủ toàn ĐNA) |
+| 8 | **CHIRPS** (mưa vệ tinh, tuỳ chọn) | ✅ Đã tải thật trọn file + đọc giá trị (9/10/2026) | Không | ✅ (độ phân giải 5km, phủ toàn ĐNA) |
+| 9 | **Ranh giới hành chính** (Natural Earth, 1:50m, mới bổ sung) | ✅ Đã tải thật + lọc đủ 9 nước ĐNA | Không | ✅ (dùng cho bản đồ Dashboard, join theo quốc gia) |
 | 9 | **Himawari-8/9** (ảnh vệ tinh khí tượng, tuỳ chọn) | ✅ Đã tải mẫu thật, **vẫn đang hoạt động** (đính chính, xem mục 8) | Không | ✅ (vệ tinh địa tĩnh phủ trọn ĐNA) |
 
 **Kết luận nhanh:** **4 nguồn lõi đã chốt trong đề xuất đề tài (NASA POWER, Open-Meteo, NOAA GHCN, NOAA ISD) đều chạy được ngay hôm nay, không cần đăng ký, có dữ liệu thật cho Đông Nam Á.** Với riêng ERA5, ngoài CDS chính thức (cần đăng ký) và AWS (cần tài khoản AWS trả phí), **kiểm tra lần này phát hiện thêm 2 đường lấy ERA5 hoàn toàn miễn phí và không cần đăng ký gì cả: Google Cloud ARCO-ERA5 và Microsoft Planetary Computer** — xem mục 6b/6c, đây là phát hiện quan trọng nhất của đợt kiểm tra này.
@@ -146,7 +147,8 @@ Google + ECMWF hợp tác public hoá **ARCO-ERA5** (Analysis-Ready, Cloud-Optim
 
 ## 8. Nguồn mở rộng tuỳ chọn (CHIRPS, Himawari) — đã đính chính Himawari
 
-- **CHIRPS:** tải thử header của 1 file `.tif.gz` ngày 1/1/2024 → HTTP 200, file ~3.2MB, không cần đăng ký. Sẵn sàng dùng nếu nhóm mở rộng sang phân tích mưa cực đoan.
+- **CHIRPS:** tải thật trọn file `.tif.gz` ngày 1/1/2024 (3,2MB nén, 57,6MB sau giải nén), giải nén thành công, mở bằng `rioxarray` và đọc giá trị thật trong bbox Việt Nam (lat 8–23, lon 102–110) → pixel 0–18,7mm, trung bình 0,27mm (hợp lý vì đầu tháng 1 là mùa khô ở miền Bắc/Trung). Không cần đăng ký. Sẵn sàng dùng nếu nhóm mở rộng sang phân tích mưa cực đoan.
+- **Ranh giới hành chính (Natural Earth 1:50m, mới bổ sung 9/10/2026):** đây là nguồn **chưa có trong danh mục `docs/02` trước đó** — cần thiết cho TV4/Dashboard để vẽ bản đồ và tổng hợp (aggregate) theo quốc gia/khu vực, vì 4 nguồn lõi chỉ trả về toạ độ điểm/lưới, không có ranh giới hành chính. Đã tải thật `ne_50m_admin_0_countries.zip` (800KB, shapefile) từ `naturalearth.s3.amazonaws.com`, không cần đăng ký, lọc bằng `geopandas` xác nhận đủ 9 nước Đông Nam Á (Việt Nam, Thái Lan, Indonesia, Malaysia, Philippines, Myanmar, Campuchia, Lào, Brunei).
 
 - **Himawari-8 — ĐÍNH CHÍNH:** lần kiểm tra trước (chỉ liệt kê thư mục) kết luận sai rằng *"Himawari-8 đã ngừng vận hành cuối 2022"*. Lần này **tải thật 1MB đầu của 1 file sản phẩm mây** (`AHI-CHGT`, ngày **12/10/2025**, dung lượng gốc 793MB) từ bucket `s3://noaa-himawari8/` → **file HDF5/NetCDF hợp lệ, có header đúng chuẩn (magic number `\x89HDF`)**, `LastModified` xác nhận tháng 10/2025.
   → **Kết luận đúng: Himawari-8 vẫn đang hoạt động và cập nhật dữ liệu đều đặn**, bucket `noaa-himawari8` là nguồn thật, đang được nhiều nhóm nghiên cứu khí tượng dùng (đúng như bạn nhận định). Vệ tinh Himawari-9 (phóng 2016) hiện đóng vai trò vệ tinh vận hành chính (primary) từ cuối 2022, còn Himawari-8 chuyển sang vai trò dự phòng (backup) — **nhưng "backup" không có nghĩa là ngừng phát dữ liệu**, bucket vẫn được NOAA duy trì cập nhật. Bucket `s3://noaa-himawari9/` cũng đã kiểm chứng tồn tại song song (index cập nhật 11/2025).

@@ -5,70 +5,70 @@
       "ok": true,
       "rows": 44561,
       "size_kb": 1530.7,
-      "secs": 2.22
+      "secs": 2.7
     },
     {
       "station": "VM000048900",
       "ok": true,
       "rows": 59046,
       "size_kb": 2030.8,
-      "secs": 2.42
+      "secs": 2.66
     },
     {
       "station": "VMM00048855",
       "ok": true,
       "rows": 53895,
       "size_kb": 1848.2,
-      "secs": 2.57
+      "secs": 2.78
     },
     {
       "station": "VMM00048845",
       "ok": true,
       "rows": 51350,
       "size_kb": 1756.1,
-      "secs": 3.06
+      "secs": 2.66
     },
     {
       "station": "VMM00048887",
       "ok": true,
       "rows": 59968,
       "size_kb": 2049.4,
-      "secs": 3.67
+      "secs": 2.72
     },
     {
       "station": "VMM00048917",
       "ok": true,
       "rows": 49466,
       "size_kb": 1695.7,
-      "secs": 2.7
+      "secs": 3.11
     },
     {
       "station": "VMM00048808",
       "ok": true,
       "rows": 42338,
       "size_kb": 1444.4,
-      "secs": 2.19
+      "secs": 2.7
     },
     {
       "station": "VMM00048806",
       "ok": true,
       "rows": 33103,
       "size_kb": 1126.1,
-      "secs": 2.12
+      "secs": 2.17
     },
     {
       "station": "VMM00048826",
       "ok": true,
       "rows": 51565,
       "size_kb": 1762.6,
-      "secs": 2.46
+      "secs": 2.43
     },
     {
       "station": "VMM00048914",
       "ok": true,
       "rows": 59094,
       "size_kb": 2021.9,
-      "secs": 4.18
+      "secs": 4.71
     }
   ],
   "isd_2024": [
@@ -78,7 +78,7 @@
       "ok": true,
       "rows": 16583,
       "size_kb": 6037.4,
-      "secs": 4.51
+      "secs": 4.52
     },
     {
       "station": "48825199999",
@@ -86,15 +86,13 @@
       "ok": true,
       "rows": 16696,
       "size_kb": 6108.1,
-      "secs": 9.69
+      "secs": 4.75
     },
     {
       "station": "48855099999",
       "name": "DANANG INTL",
-      "ok": true,
-      "rows": 19498,
-      "size_kb": 7667.1,
-      "secs": 4.34
+      "ok": false,
+      "error": "The read operation timed out"
     },
     {
       "station": "48877099999",
@@ -102,7 +100,7 @@
       "ok": true,
       "rows": 2780,
       "size_kb": 1017.8,
-      "secs": 2.34
+      "secs": 2.19
     },
     {
       "station": "48820099999",
@@ -110,7 +108,7 @@
       "ok": true,
       "rows": 16705,
       "size_kb": 6116.1,
-      "secs": 3.71
+      "secs": 4.56
     },
     {
       "station": "48852099999",
@@ -118,7 +116,7 @@
       "ok": true,
       "rows": 19478,
       "size_kb": 7615.4,
-      "secs": 8.59
+      "secs": 4.52
     },
     {
       "station": "48866099999",
@@ -126,7 +124,7 @@
       "ok": true,
       "rows": 2760,
       "size_kb": 1132.1,
-      "secs": 2.18
+      "secs": 3.45
     },
     {
       "station": "48870099999",
@@ -134,7 +132,7 @@
       "ok": true,
       "rows": 2781,
       "size_kb": 1096.3,
-      "secs": 2.0
+      "secs": 2.48
     },
     {
       "station": "48900099999",
@@ -142,7 +140,7 @@
       "ok": true,
       "rows": 16742,
       "size_kb": 6129.1,
-      "secs": 5.27
+      "secs": 5.11
     },
     {
       "station": "48845099999",
@@ -150,7 +148,7 @@
       "ok": true,
       "rows": 2777,
       "size_kb": 1049.2,
-      "secs": 1.98
+      "secs": 1.95
     }
   ],
   "nasa_power_2024": [
@@ -159,42 +157,42 @@
       "ok": true,
       "days": 366,
       "size_kb": 36.5,
-      "secs": 1.8
+      "secs": 1.58
     },
     {
       "point": "hcmc",
       "ok": true,
       "days": 366,
       "size_kb": 36.7,
-      "secs": 0.94
+      "secs": 1.55
     },
     {
       "point": "jakarta",
       "ok": true,
       "days": 366,
       "size_kb": 36.8,
-      "secs": 1.57
+      "secs": 1.55
     },
     {
       "point": "bangkok",
       "ok": true,
       "days": 366,
       "size_kb": 36.7,
-      "secs": 1.61
+      "secs": 1.46
     },
     {
       "point": "manila",
       "ok": true,
       "days": 366,
       "size_kb": 36.5,
-      "secs": 1.67
+      "secs": 0.98
     },
     {
       "point": "kuala_lumpur",
       "ok": true,
       "days": 366,
       "size_kb": 36.5,
-      "secs": 1.37
+      "secs": 1.45
     }
   ],
   "openmeteo_2024": [
@@ -203,35 +201,35 @@
       "ok": true,
       "hours": 8784,
       "size_kb": 413.8,
-      "secs": 1.93
+      "secs": 1.83
     },
     {
       "point": "hcmc",
       "ok": true,
       "hours": 8784,
       "size_kb": 414.7,
-      "secs": 2.0
+      "secs": 2.66
     },
     {
       "point": "jakarta",
       "ok": true,
       "hours": 8784,
       "size_kb": 412.9,
-      "secs": 1.76
+      "secs": 1.87
     },
     {
       "point": "bangkok",
       "ok": true,
       "hours": 8784,
       "size_kb": 414.9,
-      "secs": 2.82
+      "secs": 2.2
     },
     {
       "point": "manila",
       "ok": true,
       "hours": 8784,
       "size_kb": 414.5,
-      "secs": 1.87
+      "secs": 11.19
     },
     {
       "point": "kuala_lumpur",
@@ -243,7 +241,7 @@
   ],
   "era5_arco": {
     "ok": true,
-    "secs": 95.1,
+    "secs": 82.01,
     "shape": {
       "2m_temperature": [
         72,
@@ -267,7 +265,6 @@
       ]
     },
     "size_mb": 29.66,
-    "note": "Thoi gian thuc te: 2021-06-15 -> 2021-06-17 (du lieu ARCO-ERA5 chi den het 2021-12-31, KHONG den 2022 nhu ghi chu truoc do trong docs/02)",
-    "file": "data_samples/batch_week2/era5_arco/era5_sea_2022-01-01_to_03.nc"
+    "file": "/Users/tuannghiat/Downloads/HUST - Tích hợp và xử lý dữ liệu lớn - Vũ Tuyết Trinh/IT5427-Nhom16-TichHopKhiTuong/scripts/../data_samples/batch_week2/era5_arco/era5_sea_2022-01-01_to_03.nc"
   }
 }
