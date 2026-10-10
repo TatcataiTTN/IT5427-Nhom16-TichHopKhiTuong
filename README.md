@@ -81,6 +81,33 @@ Chi tiết đầy đủ 24 nguồn (bao gồm các nguồn mở rộng để là
 
 Python (`cdsapi`, `xarray`, `dask`, `pykrige`) · Apache Spark (PySpark: SQL, Structured Streaming, MLlib) · Apache Kafka (replay streaming giả lập) · Parquet (partition Year/Month/Region) · PyTorch + DeepXDE (PINN, tuỳ chọn) · Streamlit/Apache Superset (dashboard) · Docker Compose (hạ tầng).
 
+## 6b. Môi trường phát triển — đã kiểm chứng thật (10/10/2026)
+
+Mỗi thành viên nên tự kiểm tra máy mình theo danh sách dưới (lệnh kiểm tra kèm theo). Đã test thật trên máy TV3+TV4 (macOS, Python 3.12 Anaconda):
+
+**Bắt buộc, cần cài nếu chưa có:**
+- Python ≥ 3.10 + pip. `python3 --version`
+- `pip install pyspark pandas xarray s3fs zarr gcsfs geopandas rioxarray pykrige boto3`
+- **Java 17 hoặc 21** (⚠️ không phải Java 11!) — PySpark 4.x yêu cầu Java 17+, còn Java 11 sẽ báo lỗi `UnsupportedClassVersionError`. Cài bằng `brew install openjdk@17`, sau đó **luôn set `JAVA_HOME` trỏ đúng bản 17/21 trước khi chạy Spark**, vì máy có thể có sẵn Java 11 làm mặc định:
+  ```bash
+  # macOS + Homebrew — ĐÃ TEST THẬT, dùng lệnh này (không dùng java_home -v 17,
+  # lệnh đó có thể âm thầm trả về Java 11 nếu openjdk@17 chưa symlink hệ thống):
+  export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home
+  # Linux: export JAVA_HOME tới thư mục cài JDK 17/21 (vd update-alternatives --config java)
+  ```
+  Kiểm tra nhanh: `JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home python3 scripts/check_spark_env.py` — đã test thật, in ra "Môi trường Spark sẵn sàng."
+- Git ≥ 2.x
+
+**Tuỳ chọn, cài khi tới task tương ứng:**
+- `pip install cdsapi` — chỉ cần nếu dùng kênh CDS chính thức (có tài khoản). Không bắt buộc vì nhóm dùng ARCO-ERA5 (Google Cloud, miễn phí, không cần key).
+- `pip install planetary-computer` — dự phòng nếu ARCO-ERA5/CDS đều gặp sự cố.
+- `pip install kafka-python` + Docker (chạy Kafka broker local) — cho task Replay Streaming (TV3, Tuần 2-3).
+- `pip install torch` — cho PINN (TV3, tuỳ chọn nâng cao).
+- `pip install streamlit` — cho Dashboard (TV4).
+- Docker + Docker Compose — nếu dựng cluster Spark nhiều node thay vì `local[*]`.
+
+**Đã verify end-to-end thật** (không chỉ cài đặt, mà chạy thử): `SparkSession` khởi động → đọc CSV GHCN-Daily thật (44.560 dòng, trạm Nội Bài) → ghi Parquet → đọc lại → số dòng khớp 100%. Script mẫu: xem `scripts/batch_download_week2.py` để biết cách tải dữ liệu thật trước khi thử Spark.
+
 ## 7. Cách sử dụng repo này
 
 1. Đọc `docs/01-de-xuat-de-tai.md` trước — đây là tài liệu tổng hợp đầy đủ nhất, dùng làm bản nộp đề xuất đề tài ngày 5/10.
