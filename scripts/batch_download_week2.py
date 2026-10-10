@@ -167,7 +167,9 @@ def download_openmeteo_batch():
     }
     outdir = os.path.join(OUT, "openmeteo_2024")
     os.makedirs(outdir, exist_ok=True)
-    hourly_vars = "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,surface_pressure,shortwave_radiation"
+    # Luu y: dung pressure_msl (khop docs/06 mapping GAV cho Open-Meteo), KHONG phai
+    # surface_pressure (phien ban truoc cua script nay dung nham surface_pressure).
+    hourly_vars = "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,wind_direction_10m,pressure_msl,shortwave_radiation"
     results = []
     for name, (lat, lon) in points.items():
         url = (f"https://archive-api.open-meteo.com/v1/archive?"

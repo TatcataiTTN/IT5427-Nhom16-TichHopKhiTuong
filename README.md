@@ -64,7 +64,41 @@ Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (*
 Script kiểm tra nguồn dữ liệu thật: `scripts/check_data_sources.py` (chạy `python3 scripts/check_data_sources.py`, kết quả lưu ở `data_samples/`).
 Danh sách trạm quan trắc dùng thẳng trong code: `reference/*.csv` (xem `docs/08-danh-sach-tram-quan-trac.md`).
 
-Khi triển khai code (crawler/ingestion, ETL, Spark job, mô hình, dashboard), tạo thêm các thư mục `ingestion/`, `warehouse/`, `model/`, `dashboard/` ở gốc repo theo đúng kiến trúc mô tả trong `docs/01-de-xuat-de-tai.md`.
+**Pipeline ETL đã có code chạy thật** (không chỉ thiết kế trên giấy), theo đúng kiến trúc `ingestion/ → warehouse/ → model/ → dashboard/`:
+
+```
+├── scripts/
+│   ├── check_data_sources.py      — kiểm tra nhanh 11 nguồn (header/API, không tải full)
+│   ├── batch_download_week2.py    — tải batch THẬT quy mô lớn (9 nước ĐNA, 2 chế độ: mặc định / sea-priority)
+│   └── check_spark_env.py         — kiểm tra môi trường Spark cục bộ (xem mục 6b)
+├── ingestion/
+│   └── parsers.py                 — parse_ghcn/parse_isd/parse_nasa_power/parse_openmeteo
+│                                     → Mediated Schema WeatherObs (đúng GAV mapping ở docs/06),
+│                                     bao gồm PIVOT (GHCN long→wide), PARSE (ISD packed field),
+│                                     chuẩn hoá đơn vị (kPa→hPa, MJ/m²/ngày→W/m²), Clausius-Clapeyron
+│                                     suy RH% từ dew point (docs/06 mục 4b)
+├── warehouse/
+│   ├── survivorship.py            — quy tắc Survivorship (ISD/GHCN > ERA5 > Open-Meteo > NASA POWER),
+│                                     gắn cờ conflict khi lệch > ngưỡng, KHÔNG bao giờ trộn
+│                                     pressure_surface với pressure_msl (docs/06 mục 3)
+│   ├── build_warehouse.py         — chạy ETL end-to-end: data_samples/ → Parquet partition
+│                                     theo year/source qua Spark (output/ gitignored, tự chạy lại được)
+│   └── output/                    — (gitignored) Parquet thật, chạy `build_warehouse.py` để sinh ra
+├── dashboard/
+│   └── app.py                     — Streamlit đọc TRỰC TIẾP warehouse Parquet thật (không mock)
+├── model/                         — (chưa có code — PINN Clausius-Clapeyron/Navier-Stokes, xem Việc còn lại)
+└── tests/
+    ├── test_parsers.py            — 12 test, chạy trên dữ liệu thật đã tải (không mock)
+    └── test_survivorship.py       — 6 test, gồm test case xung đột giả lập theo đúng yêu cầu kế hoạch
+```
+
+**Chạy thử toàn bộ pipeline** (đã verify thật, 1.068.337 bản ghi, 73 trạm/điểm, 4 nguồn):
+```bash
+python3 -m pytest tests/ -v                                    # 18/18 test pass
+JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home \
+  python3 warehouse/build_warehouse.py                         # sinh warehouse/output/weatherobs.parquet
+streamlit run dashboard/app.py                                 # xem dữ liệu thật trên trình duyệt
+```
 
 ## 5. Nguồn dữ liệu lõi
 
