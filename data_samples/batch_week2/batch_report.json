@@ -266,5 +266,354 @@
     },
     "size_mb": 29.66,
     "file": "/Users/tuannghiat/Downloads/HUST - Tích hợp và xử lý dữ liệu lớn - Vũ Tuyết Trinh/IT5427-Nhom16-TichHopKhiTuong/scripts/../data_samples/batch_week2/era5_arco/era5_sea_2022-01-01_to_03.nc"
-  }
+  },
+  "ghcn_daily_sea_priority": [
+    {
+      "station": "BXM00096315",
+      "ok": true,
+      "rows": 45830,
+      "size_kb": 1569.2,
+      "secs": 2.41
+    },
+    {
+      "station": "CBM00048991",
+      "ok": true,
+      "rows": 25501,
+      "size_kb": 882.3,
+      "secs": 1.88
+    },
+    {
+      "station": "IDM00097230",
+      "ok": true,
+      "rows": 42128,
+      "size_kb": 1450.8,
+      "secs": 2.54
+    },
+    {
+      "station": "IDM00096253",
+      "ok": true,
+      "rows": 40680,
+      "size_kb": 1402.6,
+      "secs": 2.2
+    },
+    {
+      "station": "ID000096745",
+      "ok": true,
+      "rows": 28401,
+      "size_kb": 978.3,
+      "secs": 2.09
+    },
+    {
+      "station": "IDM00096741",
+      "ok": true,
+      "rows": 25706,
+      "size_kb": 885.9,
+      "secs": 1.97
+    },
+    {
+      "station": "IDM00096033",
+      "ok": true,
+      "rows": 30885,
+      "size_kb": 1065.1,
+      "secs": 5.32
+    },
+    {
+      "station": "IDM00096749",
+      "ok": true,
+      "rows": 33502,
+      "size_kb": 1155.6,
+      "secs": 2.07
+    },
+    {
+      "station": "IDM00096935",
+      "ok": true,
+      "rows": 38755,
+      "size_kb": 1336.0,
+      "secs": 2.25
+    },
+    {
+      "station": "IDM00096937",
+      "ok": true,
+      "rows": 25317,
+      "size_kb": 875.7,
+      "secs": 1.95
+    },
+    {
+      "station": "IDM00096933",
+      "ok": true,
+      "rows": 38201,
+      "size_kb": 1318.1,
+      "secs": 2.41
+    },
+    {
+      "station": "LAW00041061",
+      "ok": true,
+      "rows": 9836,
+      "size_kb": 323.5,
+      "secs": 1.49
+    },
+    {
+      "station": "LAW00041051",
+      "ok": true,
+      "rows": 5298,
+      "size_kb": 173.4,
+      "secs": 1.21
+    },
+    {
+      "station": "MYM00096471",
+      "ok": true,
+      "rows": 64167,
+      "size_kb": 2191.8,
+      "secs": 3.74
+    },
+    {
+      "station": "MYM00048650",
+      "ok": true,
+      "rows": 18754,
+      "size_kb": 640.9,
+      "secs": 1.69
+    },
+    {
+      "station": "MY000096413",
+      "ok": true,
+      "rows": 85733,
+      "size_kb": 2928.6,
+      "secs": 6.04
+    },
+    {
+      "station": "MYM00048601",
+      "ok": true,
+      "rows": 59300,
+      "size_kb": 2025.3,
+      "secs": 2.84
+    },
+    {
+      "station": "BMM00048042",
+      "ok": true,
+      "rows": 36867,
+      "size_kb": 1270.0,
+      "secs": 4.59
+    },
+    {
+      "station": "BMM00048097",
+      "ok": true,
+      "rows": 37065,
+      "size_kb": 1278.4,
+      "secs": 2.19
+    },
+    {
+      "station": "RPM00098646",
+      "ok": true,
+      "rows": 54606,
+      "size_kb": 1872.9,
+      "secs": 2.22
+    },
+    {
+      "station": "RPW00041229",
+      "ok": true,
+      "rows": 45926,
+      "size_kb": 1573.4,
+      "secs": 2.29
+    },
+    {
+      "station": "RPW00041227",
+      "ok": true,
+      "rows": 643,
+      "size_kb": 21.4,
+      "secs": 0.73
+    },
+    {
+      "station": "RPW00041228",
+      "ok": true,
+      "rows": 790,
+      "size_kb": 26.5,
+      "secs": 2.03
+    },
+    {
+      "station": "TH000048455",
+      "ok": true,
+      "rows": 95028,
+      "size_kb": 3242.8,
+      "secs": 2.81
+    },
+    {
+      "station": "TH000048327",
+      "ok": true,
+      "rows": 95216,
+      "size_kb": 3247.3,
+      "secs": 5.33
+    },
+    {
+      "station": "TH000048456",
+      "ok": true,
+      "rows": 97582,
+      "size_kb": 3330.4,
+      "secs": 10.56
+    },
+    {
+      "station": "THW00041001",
+      "ok": true,
+      "rows": 10620,
+      "size_kb": 351.5,
+      "secs": 2.22
+    },
+    {
+      "station": "TH000048564",
+      "ok": true,
+      "rows": 88070,
+      "size_kb": 3002.5,
+      "secs": 2.76
+    },
+    {
+      "station": "TH000048565",
+      "ok": true,
+      "rows": 86125,
+      "size_kb": 2935.7,
+      "secs": 3.18
+    },
+    {
+      "station": "THW00041028",
+      "ok": true,
+      "rows": 3013,
+      "size_kb": 99.5,
+      "secs": 1.17
+    },
+    {
+      "station": "THW00041018",
+      "ok": true,
+      "rows": 88737,
+      "size_kb": 3033.1,
+      "secs": 2.7
+    }
+  ],
+  "isd_2024_sea_priority": [
+    {
+      "station": "48327099999",
+      "name": "CHIANG MAI INTL",
+      "ok": true,
+      "rows": 22972,
+      "size_kb": 8615.5,
+      "secs": 6.76
+    },
+    {
+      "station": "48456099999",
+      "name": "BANGKOK INTL / DON MUEANG INTL",
+      "ok": true,
+      "rows": 19543,
+      "size_kb": 7623.3,
+      "secs": 9.2
+    },
+    {
+      "station": "48459099999",
+      "name": "CHON BURI/SATTAHIP / SUVARNABHUMI INTL",
+      "ok": true,
+      "rows": 22934,
+      "size_kb": 8542.9,
+      "secs": 6.3
+    },
+    {
+      "station": "96749099999",
+      "name": "SOEKARNO HATTA INTL",
+      "ok": true,
+      "rows": 21314,
+      "size_kb": 8672.8,
+      "secs": 6.06
+    },
+    {
+      "station": "96935099999",
+      "name": "SURABAYA JUANDA",
+      "ok": true,
+      "rows": 4526,
+      "size_kb": 2044.8,
+      "secs": 4.45
+    },
+    {
+      "station": "97230099999",
+      "name": "DENPASAR NGURAH RAI",
+      "ok": true,
+      "rows": 4004,
+      "size_kb": 1903.9,
+      "secs": 3.59
+    },
+    {
+      "station": "48601099999",
+      "name": "PENANG INTL",
+      "ok": true,
+      "rows": 20805,
+      "size_kb": 8094.5,
+      "secs": 22.44
+    },
+    {
+      "station": "48650099999",
+      "name": "KUALA LUMPUR INTL",
+      "ok": true,
+      "rows": 20837,
+      "size_kb": 8335.6,
+      "secs": 6.37
+    },
+    {
+      "station": "98429099999",
+      "name": "NINOY AQUINO INTL",
+      "ok": true,
+      "rows": 11362,
+      "size_kb": 4726.5,
+      "secs": 4.64
+    },
+    {
+      "station": "98646099999",
+      "name": "MACTAN CEBU INTL",
+      "ok": true,
+      "rows": 11310,
+      "size_kb": 4754.4,
+      "secs": 4.57
+    },
+    {
+      "station": "48991099999",
+      "name": "PHNOM PENH INTL",
+      "ok": true,
+      "rows": 20542,
+      "size_kb": 7669.3,
+      "secs": 14.87
+    },
+    {
+      "station": "48930099999",
+      "name": "LUANG PHABANG INTL",
+      "ok": true,
+      "rows": 6173,
+      "size_kb": 2467.8,
+      "secs": 18.62
+    },
+    {
+      "station": "48940099999",
+      "name": "WATTAY INTL",
+      "ok": true,
+      "rows": 13647,
+      "size_kb": 5253.4,
+      "secs": 4.84
+    },
+    {
+      "station": "48097099999",
+      "name": "YANGON INTL",
+      "ok": true,
+      "rows": 18265,
+      "size_kb": 7078.3,
+      "secs": 8.67
+    },
+    {
+      "station": "48600199999",
+      "name": "MANDALAY INTL",
+      "ok": true,
+      "rows": 3876,
+      "size_kb": 1473.6,
+      "secs": 5.92
+    },
+    {
+      "station": "96315099999",
+      "name": "BRUNEI INTL",
+      "ok": true,
+      "rows": 19389,
+      "size_kb": 8149.3,
+      "secs": 4.13
+    }
+  ]
 }

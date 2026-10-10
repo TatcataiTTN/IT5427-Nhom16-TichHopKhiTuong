@@ -25,24 +25,27 @@ def http_get(url, timeout=30):
         return r.read()
 
 
-# ---------- 1. GHCN-Daily: 10 trạm ưu tiên Việt Nam, toàn lịch sử ----------
-def download_ghcn_batch():
-    stations_vn = [
-        "VMM00048820",  # Noi Bai
-        "VM000048900",  # Tan Son Hoa / HCM
-        "VMM00048855",  # Da Nang
-        "VMM00048845",  # Vinh
-        "VMM00048887",  # Phan Thiet
-        "VMM00048917",  # Phu Quoc
-        "VMM00048808",  # Cao Bang
-        "VMM00048806",  # Son La
-        "VMM00048826",  # Phu Lien (Hai Phong)
-        "VMM00048914",  # Ca Mau
-    ]
-    outdir = os.path.join(OUT, "ghcn_daily")
+# ---------- 1. GHCN-Daily: toàn lịch sử, danh sách trạm truyền vào ----------
+STATIONS_VN_GHCN = [
+    "VMM00048820",  # Noi Bai
+    "VM000048900",  # Tan Son Hoa / HCM
+    "VMM00048855",  # Da Nang
+    "VMM00048845",  # Vinh
+    "VMM00048887",  # Phan Thiet
+    "VMM00048917",  # Phu Quoc
+    "VMM00048808",  # Cao Bang
+    "VMM00048806",  # Son La
+    "VMM00048826",  # Phu Lien (Hai Phong)
+    "VMM00048914",  # Ca Mau
+]
+
+
+def download_ghcn_batch(stations=None, subdir="ghcn_daily"):
+    stations = stations or STATIONS_VN_GHCN
+    outdir = os.path.join(OUT, subdir)
     os.makedirs(outdir, exist_ok=True)
     results = []
-    for sid in stations_vn:
+    for sid in stations:
         url = f"https://noaa-ghcn-pds.s3.amazonaws.com/csv/by_station/{sid}.csv"
         fp = os.path.join(outdir, f"{sid}.csv")
         try:
@@ -60,19 +63,23 @@ def download_ghcn_batch():
     return results
 
 
-# ---------- 2. NOAA ISD / Global Hourly: 11 trạm VN, năm 2024 đầy đủ ----------
-def download_isd_batch():
+def download_ghcn_sea_priority_batch():
+    """31 trạm ưu tiên 8 nước ĐNA còn lại (không tính VN, đã tải riêng)."""
     ref_path = os.path.join(os.path.dirname(__file__), "..", "reference",
-                             "isd_stations_vietnam_active.csv")
+                             "ghcn_stations_sea_priority.csv")
     stations = []
     with open(ref_path, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            stations.append((row["USAF"], row["WBAN"], row["STATION NAME"]))
+            stations.append(row["ID"])
+    return download_ghcn_batch(stations, subdir="ghcn_daily_sea_priority")
 
-    outdir = os.path.join(OUT, "isd_global_hourly_2024")
+
+# ---------- 2. NOAA ISD / Global Hourly: năm truyền vào, danh sách trạm truyền vào ----------
+def download_isd_batch(stations, subdir, year="2024"):
+    """stations: list of (usaf, wban, name) tuples"""
+    outdir = os.path.join(OUT, subdir)
     os.makedirs(outdir, exist_ok=True)
     results = []
-    year = "2024"
     for usaf, wban, name in stations:
         sid = f"{usaf}{wban}"
         url = f"https://noaa-global-hourly-pds.s3.amazonaws.com/{year}/{sid}.csv"
@@ -90,6 +97,27 @@ def download_isd_batch():
             results.append({"station": sid, "name": name, "ok": False, "error": str(e)})
         time.sleep(0.3)
     return results
+
+
+def _load_isd_stations(ref_filename):
+    ref_path = os.path.join(os.path.dirname(__file__), "..", "reference", ref_filename)
+    stations = []
+    with open(ref_path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            name = row.get("STATION NAME") or row.get("STATION_NAME") or ""
+            stations.append((row["USAF"], row["WBAN"], name))
+    return stations
+
+
+def download_isd_vn_batch():
+    stations = _load_isd_stations("isd_stations_vietnam_active.csv")
+    return download_isd_batch(stations, subdir="isd_global_hourly_2024", year="2024")
+
+
+def download_isd_sea_priority_batch():
+    """16 trạm ưu tiên 8 nước ĐNA còn lại."""
+    stations = _load_isd_stations("isd_stations_sea_priority.csv")
+    return download_isd_batch(stations, subdir="isd_global_hourly_2024_sea_priority", year="2024")
 
 
 # ---------- 3. NASA POWER: 6 toạ độ đại diện ĐNA, 1 năm (2024), daily ----------
@@ -192,14 +220,14 @@ def download_era5_arco_subset():
     return result
 
 
-if __name__ == "__main__":
+def run_full():
     report = {}
     print("== 1/5: GHCN-Daily (10 trạm VN, toàn lịch sử) ==")
     report["ghcn_daily"] = download_ghcn_batch()
     print(json.dumps(report["ghcn_daily"], ensure_ascii=False, indent=2))
 
-    print("== 2/5: NOAA ISD Global Hourly (11 trạm VN, năm 2024) ==")
-    report["isd_2024"] = download_isd_batch()
+    print("== 2/5: NOAA ISD Global Hourly (10 trạm VN, năm 2024) ==")
+    report["isd_2024"] = download_isd_vn_batch()
     print(json.dumps(report["isd_2024"], ensure_ascii=False, indent=2))
 
     print("== 3/5: NASA POWER (6 điểm, năm 2024, daily) ==")
@@ -213,7 +241,37 @@ if __name__ == "__main__":
     print("== 5/5: ERA5 ARCO (Zarr GCS, subset bbox ĐNA, 3 ngày) ==")
     report["era5_arco"] = download_era5_arco_subset()
     print(json.dumps(report["era5_arco"], ensure_ascii=False, indent=2))
+    return report
 
-    with open(os.path.join(OUT, "batch_report.json"), "w", encoding="utf-8") as f:
-        json.dump(report, f, ensure_ascii=False, indent=2)
-    print("\n== XONG. Báo cáo đầy đủ: data_samples/batch_week2/batch_report.json ==")
+
+def run_sea_priority():
+    """Mở rộng GHCN + ISD ra 8 nước ĐNA còn lại (ngoài VN)."""
+    report = {}
+    print("== 1/2: GHCN-Daily (31 trạm ưu tiên, 8 nước ĐNA, toàn lịch sử) ==")
+    report["ghcn_daily_sea_priority"] = download_ghcn_sea_priority_batch()
+    print(json.dumps(report["ghcn_daily_sea_priority"], ensure_ascii=False, indent=2))
+
+    print("== 2/2: NOAA ISD Global Hourly (16 trạm ưu tiên, 8 nước ĐNA, năm 2024) ==")
+    report["isd_2024_sea_priority"] = download_isd_sea_priority_batch()
+    print(json.dumps(report["isd_2024_sea_priority"], ensure_ascii=False, indent=2))
+    return report
+
+
+if __name__ == "__main__":
+    import sys
+    mode = sys.argv[1] if len(sys.argv) > 1 else "full"
+    report_path = os.path.join(OUT, "batch_report.json")
+    existing = {}
+    if os.path.exists(report_path):
+        with open(report_path, encoding="utf-8") as f:
+            existing = json.load(f)
+
+    if mode == "sea-priority":
+        new_report = run_sea_priority()
+    else:
+        new_report = run_full()
+
+    existing.update(new_report)
+    with open(report_path, "w", encoding="utf-8") as f:
+        json.dump(existing, f, ensure_ascii=False, indent=2)
+    print(f"\n== XONG (mode={mode}). Báo cáo đầy đủ: data_samples/batch_week2/batch_report.json ==")
