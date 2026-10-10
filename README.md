@@ -57,8 +57,13 @@ Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (*
     │                                     khoảng trùng lặp cần Survivorship, khoảng trống vật lý cần PINN
     ├── 07-bang-va-giai-phap-tich-hop.md      — bảng ánh xạ trường tổng hợp + 7 giải pháp tích hợp có code mẫu
     │                                     (GAV union, PIVOT, PARSE, Survivorship, derive vật lý, spatial+PINN)
-    └── 08-danh-sach-tram-quan-trac.md         — danh sách trạm GHCN/ISD thật đã lọc cho toàn Đông Nam Á,
-                                          kèm các "bẫy" mã quốc gia (VM/VN, BX/BS) phát hiện được khi lọc
+    ├── 08-danh-sach-tram-quan-trac.md         — danh sách trạm GHCN/ISD thật đã lọc cho toàn Đông Nam Á,
+    │                                     kèm các "bẫy" mã quốc gia (VM/VN, BX/BS) phát hiện được khi lọc
+    ├── 09-viec-ban-can-tu-lam.md       — việc CHỈ người dùng mới làm được (đăng ký, quyết định, nộp bài,
+    │                                     Docker Desktop) — lọc ra từ 160 tác vụ, phần còn lại đã tự động hoá
+    ├── 10-ket-qua-ky-thuat-tuan-2.md   — số liệu thật từ ETL/warehouse/Spark analytics, dùng cho báo cáo tiến độ
+    └── 11-data-model-design.md         — ERD (Mermaid), naming convention, so sánh Kriging/Bilinear,
+                                          so sánh Streamlit/Grafana/Superset
 ```
 
 Script kiểm tra nguồn dữ liệu thật: `scripts/check_data_sources.py` (chạy `python3 scripts/check_data_sources.py`, kết quả lưu ở `data_samples/`).
@@ -78,27 +83,53 @@ Danh sách trạm quan trắc dùng thẳng trong code: `reference/*.csv` (xem `
 │                                     chuẩn hoá đơn vị (kPa→hPa, MJ/m²/ngày→W/m²), Clausius-Clapeyron
 │                                     suy RH% từ dew point (docs/06 mục 4b)
 ├── warehouse/
+│   ├── location.py                — bảng Location (dimension): 119 vị trí (113 trạm + 6 điểm),
+│                                     gộp từ reference/*.csv + toạ độ NASA POWER/Open-Meteo
+│   ├── interpolation.py           — Bilinear Interpolation ERA5 (lưới) → toạ độ trạm (điểm),
+│                                     đồng thời là bước Record Linkage trạm↔lưới (docs/03 TV2 #5)
 │   ├── survivorship.py            — quy tắc Survivorship (ISD/GHCN > ERA5 > Open-Meteo > NASA POWER),
 │                                     gắn cờ conflict khi lệch > ngưỡng, KHÔNG bao giờ trộn
 │                                     pressure_surface với pressure_msl (docs/06 mục 3)
 │   ├── build_warehouse.py         — chạy ETL end-to-end: data_samples/ → Parquet partition
 │                                     theo year/source qua Spark (output/ gitignored, tự chạy lại được)
+│   ├── spark_analytics.py         — ma trận tương quan, kiểm tra data skew, benchmark partition
+│                                     (số liệu thật tại docs/10)
 │   └── output/                    — (gitignored) Parquet thật, chạy `build_warehouse.py` để sinh ra
 ├── dashboard/
-│   └── app.py                     — Streamlit đọc TRỰC TIẾP warehouse Parquet thật (không mock)
-├── model/                         — (chưa có code — PINN Clausius-Clapeyron/Navier-Stokes, xem Việc còn lại)
+│   └── app.py                     — Streamlit đọc TRỰC TIẾP warehouse Parquet thật (không mock),
+│                                     có bản đồ + time slider theo biến/ngày
+├── model/
+│   ├── train_demo.py              — PINN chuẩn (phương trình nhiệt 1D), xác nhận framework PyTorch
+│   ├── pinn_rh_from_dewpoint.py   — physics loss Clausius-Clapeyron thật trên dữ liệu ISD
+│   └── navier_stokes_autograd_check.py — kiểm tra autograd cho ràng buộc bảo toàn khối lượng 2D
+├── docker-compose.spark.yml       — cụm Spark 1 master + 2 worker (cú pháp đã validate)
+├── docker-compose.kafka.yml       — Kafka broker (KRaft, không cần Zookeeper)
+├── ingestion/kafka_producer.py    — producer replay dữ liệu lịch sử vào topic Kafka
 └── tests/
     ├── test_parsers.py            — 12 test, chạy trên dữ liệu thật đã tải (không mock)
-    └── test_survivorship.py       — 6 test, gồm test case xung đột giả lập theo đúng yêu cầu kế hoạch
+    ├── test_survivorship.py       — 6 test, gồm test case xung đột giả lập theo đúng yêu cầu kế hoạch
+    ├── test_location.py           — 4 test, bao gồm referential integrity (100% khớp)
+    └── test_model_pinn.py         — 3 test tích hợp, chạy thật cả 3 script PINN (đánh dấu `slow`)
 ```
 
-**Chạy thử toàn bộ pipeline** (đã verify thật, 1.068.337 bản ghi, 73 trạm/điểm, 4 nguồn):
+**Chạy thử toàn bộ pipeline** (đã verify thật, 1.076.473 bản ghi, 119 vị trí, 5 nguồn gồm cả ERA5):
 ```bash
-python3 -m pytest tests/ -v                                    # 18/18 test pass
+python3 -m pytest tests/ -v                                    # 25/25 test pass
 JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home \
   python3 warehouse/build_warehouse.py                         # sinh warehouse/output/weatherobs.parquet
+JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home \
+  python3 warehouse/spark_analytics.py                         # correlation, data skew, benchmark
+python3 model/train_demo.py && python3 model/navier_stokes_autograd_check.py \
+  && python3 model/pinn_rh_from_dewpoint.py                    # 3 ví dụ PINN, đều chạy thật
 streamlit run dashboard/app.py                                 # xem dữ liệu thật trên trình duyệt
+
+# Cần Docker Desktop đang chạy:
+docker compose -f docker-compose.spark.yml up -d                # cụm Spark nhiều node
+docker compose -f docker-compose.kafka.yml up -d                # Kafka broker
+python3 ingestion/kafka_producer.py --limit 100                 # replay dữ liệu vào Kafka
 ```
+
+Chi tiết số liệu/phát hiện kỹ thuật: `docs/10-ket-qua-ky-thuat-tuan-2.md`. Việc cần bạn tự làm (đăng ký, quyết định, Docker Desktop): `docs/09-viec-ban-can-tu-lam.md`.
 
 ## 5. Nguồn dữ liệu lõi
 

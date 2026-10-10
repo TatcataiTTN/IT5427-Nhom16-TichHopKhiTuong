@@ -17,9 +17,12 @@ import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from ingestion.parsers import parse_ghcn, parse_isd, parse_nasa_power, parse_openmeteo
+from warehouse.interpolation import bilinear_interpolate_era5
+from warehouse.location import build_location_table
 
 DATA = os.path.join(os.path.dirname(__file__), "..", "data_samples", "batch_week2")
 OUT = os.path.join(os.path.dirname(__file__), "output")
+ERA5_NC = os.path.join(DATA, "era5_arco", "era5_sea_2022-01-01_to_03.nc")
 
 
 def load_all_point_sources() -> pd.DataFrame:
@@ -46,6 +49,15 @@ def load_all_point_sources() -> pd.DataFrame:
     for fp in sorted(glob.glob(os.path.join(DATA, "openmeteo_2024", "*.json"))):
         loc = os.path.splitext(os.path.basename(fp))[0]
         frames.append(parse_openmeteo(fp, loc))
+
+    if os.path.exists(ERA5_NC):
+        locations = build_location_table()
+        stations_only = locations[locations["type"] == "station"]
+        era5_df = bilinear_interpolate_era5(ERA5_NC, stations_only)
+        if not era5_df.empty:
+            frames.append(era5_df)
+            print(f"  ERA5 (noi suy Bilinear vao {era5_df['location_id'].nunique()} tram): "
+                  f"{len(era5_df):,} dong")
 
     return pd.concat(frames, ignore_index=True)
 

@@ -7,6 +7,12 @@ của nhóm, hoặc hành động con người (họp, nộp bài, thuyết trì
 
 ---
 
+## 0. Mới phát hiện hôm nay (10/10/2026)
+
+| # | Việc | Chi tiết |
+|---|---|---|
+| 0 | **Mở Docker Desktop thủ công (lần đầu)** | Đã thử `open -a Docker` để tự khởi động nhưng daemon không lên sau vài phút chờ — có thể cần bạn tự mở app và xác nhận một số dialog lần đầu (cấp quyền, đăng nhập). Sau khi Docker Desktop chạy (biểu tượng cá voi ở thanh menu macOS chuyển sang trạng thái "running"), báo tôi để tôi chạy tiếp: `docker compose -f docker-compose.spark.yml up -d` (cụm Spark 1 master + 2 worker) và `docker compose -f docker-compose.kafka.yml up -d` (Kafka broker cho streaming) — cả 2 file đã viết sẵn, chỉ cần Docker daemon chạy là tôi tự verify được. | 🔴 Chặn 2 tác vụ TV3 |
+
 ## 1. Việc gấp — liên quan mốc đã/sắp tới hạn
 
 | # | Việc | Vì sao không tự động hoá được | Mức ưu tiên |

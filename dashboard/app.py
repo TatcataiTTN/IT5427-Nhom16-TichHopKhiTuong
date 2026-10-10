@@ -7,9 +7,13 @@ Chạy: streamlit run dashboard/app.py
 (cần chạy warehouse/build_warehouse.py trước để sinh warehouse/output/weatherobs.parquet)
 """
 import os
+import sys
 
 import pandas as pd
 import streamlit as st
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from warehouse.location import build_location_table
 
 WAREHOUSE = os.path.join(os.path.dirname(__file__), "..", "warehouse", "output", "weatherobs.parquet")
 
@@ -73,10 +77,38 @@ st.dataframe(agg, use_container_width=True)
 
 st.divider()
 
-st.subheader("3. Bản đồ phân bố trạm (cần ghép toạ độ — xem Việc còn lại)")
-st.info(
-    "Bản đồ heatmap ERA5 + toạ độ trạm (docs/03 Tuần 2, TV4 #3) **chưa làm** — cần bảng "
-    "`Location(location_id, lat, lon, ...)` join vào warehouse này trước. Toạ độ trạm đã có sẵn "
-    "trong `reference/*.csv`, phần còn thiếu là bước join + phần ERA5 grid vào Mediated Schema "
-    "(hiện ERA5 mới dừng ở subset NetCDF riêng, chưa hợp nhất vào warehouse điểm)."
+st.subheader("3. Bản đồ phân bố trạm + giá trị theo biến/thời điểm")
+
+
+@st.cache_data
+def load_location():
+    return build_location_table()
+
+
+loc = load_location()
+map_variable = st.selectbox(
+    "Biến hiển thị trên bản đồ", ["temp_c", "rh_pct", "precip_mm", "wind_speed_ms"], key="map_var",
 )
+available_dates = sorted(df["timestamp_utc"].dt.date.unique())
+# Mac dinh chon ngay co du lieu day du (GHCN gan-thoi-gian-thuc thuong tre vai thang voi TMAX/TMIN,
+# chi co PRCP truoc) -- uu tien 2024-06-15 (co du 5 nguon that) neu co, khong thi lay giua danh sach.
+import datetime as _dt
+_default_date = _dt.date(2024, 6, 15)
+default_date = _default_date if _default_date in available_dates else available_dates[len(available_dates) // 2]
+map_date = st.select_slider("Chọn ngày (time slider)", options=available_dates, value=default_date)
+
+day_df = df[df["timestamp_utc"].dt.date == map_date]
+day_agg = day_df.groupby("location_id")[map_variable].mean().reset_index()
+map_df = day_agg.merge(loc[["location_id", "lat", "lon"]], on="location_id", how="inner").dropna(
+    subset=["lat", "lon", map_variable]
+)
+
+if map_df.empty:
+    st.warning(f"Không có dữ liệu {map_variable} cho ngày {map_date}.")
+else:
+    st.caption(
+        f"{len(map_df)} vị trí có dữ liệu {map_variable} vào {map_date} "
+        f"(kéo thanh trượt phía trên để đổi ngày)."
+    )
+    st.map(map_df.rename(columns={"lat": "latitude", "lon": "longitude"}), size=20000)
+    st.dataframe(map_df.sort_values(map_variable, ascending=False).head(10), use_container_width=True)
