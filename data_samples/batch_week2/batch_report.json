@@ -5,70 +5,70 @@
       "ok": true,
       "rows": 44561,
       "size_kb": 1530.7,
-      "secs": 2.7
+      "secs": 7.84
     },
     {
       "station": "VM000048900",
       "ok": true,
       "rows": 59046,
       "size_kb": 2030.8,
-      "secs": 2.66
+      "secs": 6.2
     },
     {
       "station": "VMM00048855",
       "ok": true,
       "rows": 53895,
       "size_kb": 1848.2,
-      "secs": 2.78
+      "secs": 5.65
     },
     {
       "station": "VMM00048845",
       "ok": true,
       "rows": 51350,
       "size_kb": 1756.1,
-      "secs": 2.66
+      "secs": 5.69
     },
     {
       "station": "VMM00048887",
       "ok": true,
       "rows": 59968,
       "size_kb": 2049.4,
-      "secs": 2.72
+      "secs": 5.77
     },
     {
       "station": "VMM00048917",
       "ok": true,
       "rows": 49466,
       "size_kb": 1695.7,
-      "secs": 3.11
+      "secs": 7.33
     },
     {
       "station": "VMM00048808",
       "ok": true,
       "rows": 42338,
       "size_kb": 1444.4,
-      "secs": 2.7
+      "secs": 5.8
     },
     {
       "station": "VMM00048806",
       "ok": true,
       "rows": 33103,
       "size_kb": 1126.1,
-      "secs": 2.17
+      "secs": 5.5
     },
     {
       "station": "VMM00048826",
       "ok": true,
       "rows": 51565,
       "size_kb": 1762.6,
-      "secs": 2.43
+      "secs": 8.55
     },
     {
       "station": "VMM00048914",
       "ok": true,
       "rows": 59094,
       "size_kb": 2021.9,
-      "secs": 4.71
+      "secs": 7.72
     }
   ],
   "isd_2024": [
@@ -78,7 +78,7 @@
       "ok": true,
       "rows": 16583,
       "size_kb": 6037.4,
-      "secs": 4.52
+      "secs": 12.86
     },
     {
       "station": "48825199999",
@@ -86,13 +86,15 @@
       "ok": true,
       "rows": 16696,
       "size_kb": 6108.1,
-      "secs": 4.75
+      "secs": 11.11
     },
     {
       "station": "48855099999",
       "name": "DANANG INTL",
-      "ok": false,
-      "error": "The read operation timed out"
+      "ok": true,
+      "rows": 19498,
+      "size_kb": 7667.1,
+      "secs": 12.12
     },
     {
       "station": "48877099999",
@@ -100,7 +102,7 @@
       "ok": true,
       "rows": 2780,
       "size_kb": 1017.8,
-      "secs": 2.19
+      "secs": 5.84
     },
     {
       "station": "48820099999",
@@ -108,7 +110,7 @@
       "ok": true,
       "rows": 16705,
       "size_kb": 6116.1,
-      "secs": 4.56
+      "secs": 10.77
     },
     {
       "station": "48852099999",
@@ -116,7 +118,7 @@
       "ok": true,
       "rows": 19478,
       "size_kb": 7615.4,
-      "secs": 4.52
+      "secs": 8.39
     },
     {
       "station": "48866099999",
@@ -124,7 +126,7 @@
       "ok": true,
       "rows": 2760,
       "size_kb": 1132.1,
-      "secs": 3.45
+      "secs": 11.89
     },
     {
       "station": "48870099999",
@@ -132,7 +134,7 @@
       "ok": true,
       "rows": 2781,
       "size_kb": 1096.3,
-      "secs": 2.48
+      "secs": 5.27
     },
     {
       "station": "48900099999",
@@ -140,7 +142,7 @@
       "ok": true,
       "rows": 16742,
       "size_kb": 6129.1,
-      "secs": 5.11
+      "secs": 7.24
     },
     {
       "station": "48845099999",
@@ -148,7 +150,7 @@
       "ok": true,
       "rows": 2777,
       "size_kb": 1049.2,
-      "secs": 1.95
+      "secs": 6.06
     }
   ],
   "nasa_power_2024": [
@@ -157,42 +159,42 @@
       "ok": true,
       "days": 366,
       "size_kb": 36.5,
-      "secs": 1.58
+      "secs": 1.21
     },
     {
       "point": "hcmc",
       "ok": true,
       "days": 366,
       "size_kb": 36.7,
-      "secs": 1.55
+      "secs": 1.22
     },
     {
       "point": "jakarta",
       "ok": true,
       "days": 366,
       "size_kb": 36.8,
-      "secs": 1.55
+      "secs": 1.29
     },
     {
       "point": "bangkok",
       "ok": true,
       "days": 366,
       "size_kb": 36.7,
-      "secs": 1.46
+      "secs": 1.26
     },
     {
       "point": "manila",
       "ok": true,
       "days": 366,
       "size_kb": 36.5,
-      "secs": 0.98
+      "secs": 1.42
     },
     {
       "point": "kuala_lumpur",
       "ok": true,
       "days": 366,
       "size_kb": 36.5,
-      "secs": 1.45
+      "secs": 1.57
     }
   ],
   "openmeteo_2024": [
@@ -200,43 +202,43 @@
       "point": "hanoi",
       "ok": true,
       "hours": 8784,
-      "size_kb": 413.8,
-      "secs": 1.83
+      "size_kb": 445.6,
+      "secs": 5.26
     },
     {
       "point": "hcmc",
       "ok": true,
       "hours": 8784,
-      "size_kb": 414.7,
-      "secs": 2.66
+      "size_kb": 447.4,
+      "secs": 5.6
     },
     {
       "point": "jakarta",
       "ok": true,
       "hours": 8784,
-      "size_kb": 412.9,
-      "secs": 1.87
+      "size_kb": 445.3,
+      "secs": 5.47
     },
     {
       "point": "bangkok",
       "ok": true,
       "hours": 8784,
-      "size_kb": 414.9,
-      "secs": 2.2
+      "size_kb": 447.1,
+      "secs": 5.49
     },
     {
       "point": "manila",
       "ok": true,
       "hours": 8784,
-      "size_kb": 414.5,
-      "secs": 11.19
+      "size_kb": 446.2,
+      "secs": 5.9
     },
     {
       "point": "kuala_lumpur",
       "ok": true,
       "hours": 8784,
-      "size_kb": 411.9,
-      "secs": 1.84
+      "size_kb": 444.2,
+      "secs": 5.64
     }
   ],
   "era5_arco": {
@@ -273,217 +275,217 @@
       "ok": true,
       "rows": 45830,
       "size_kb": 1569.2,
-      "secs": 2.41
+      "secs": 7.14
     },
     {
       "station": "CBM00048991",
       "ok": true,
       "rows": 25501,
       "size_kb": 882.3,
-      "secs": 1.88
+      "secs": 6.23
     },
     {
       "station": "IDM00097230",
       "ok": true,
       "rows": 42128,
       "size_kb": 1450.8,
-      "secs": 2.54
+      "secs": 8.35
     },
     {
       "station": "IDM00096253",
       "ok": true,
       "rows": 40680,
       "size_kb": 1402.6,
-      "secs": 2.2
+      "secs": 6.89
     },
     {
       "station": "ID000096745",
       "ok": true,
       "rows": 28401,
       "size_kb": 978.3,
-      "secs": 2.09
+      "secs": 6.17
     },
     {
       "station": "IDM00096741",
       "ok": true,
       "rows": 25706,
       "size_kb": 885.9,
-      "secs": 1.97
+      "secs": 5.64
     },
     {
       "station": "IDM00096033",
       "ok": true,
       "rows": 30885,
       "size_kb": 1065.1,
-      "secs": 5.32
+      "secs": 6.23
     },
     {
       "station": "IDM00096749",
       "ok": true,
       "rows": 33502,
       "size_kb": 1155.6,
-      "secs": 2.07
+      "secs": 6.4
     },
     {
       "station": "IDM00096935",
       "ok": true,
       "rows": 38755,
       "size_kb": 1336.0,
-      "secs": 2.25
+      "secs": 5.35
     },
     {
       "station": "IDM00096937",
       "ok": true,
       "rows": 25317,
       "size_kb": 875.7,
-      "secs": 1.95
+      "secs": 5.45
     },
     {
       "station": "IDM00096933",
       "ok": true,
       "rows": 38201,
       "size_kb": 1318.1,
-      "secs": 2.41
+      "secs": 6.08
     },
     {
       "station": "LAW00041061",
       "ok": true,
       "rows": 9836,
       "size_kb": 323.5,
-      "secs": 1.49
+      "secs": 4.95
     },
     {
       "station": "LAW00041051",
       "ok": true,
       "rows": 5298,
       "size_kb": 173.4,
-      "secs": 1.21
+      "secs": 4.47
     },
     {
       "station": "MYM00096471",
       "ok": true,
       "rows": 64167,
       "size_kb": 2191.8,
-      "secs": 3.74
+      "secs": 6.06
     },
     {
       "station": "MYM00048650",
       "ok": true,
       "rows": 18754,
       "size_kb": 640.9,
-      "secs": 1.69
+      "secs": 7.79
     },
     {
       "station": "MY000096413",
       "ok": true,
       "rows": 85733,
       "size_kb": 2928.6,
-      "secs": 6.04
+      "secs": 7.36
     },
     {
       "station": "MYM00048601",
       "ok": true,
       "rows": 59300,
       "size_kb": 2025.3,
-      "secs": 2.84
+      "secs": 5.58
     },
     {
       "station": "BMM00048042",
       "ok": true,
       "rows": 36867,
       "size_kb": 1270.0,
-      "secs": 4.59
+      "secs": 5.71
     },
     {
       "station": "BMM00048097",
       "ok": true,
       "rows": 37065,
       "size_kb": 1278.4,
-      "secs": 2.19
+      "secs": 6.03
     },
     {
       "station": "RPM00098646",
       "ok": true,
       "rows": 54606,
       "size_kb": 1872.9,
-      "secs": 2.22
+      "secs": 6.54
     },
     {
       "station": "RPW00041229",
       "ok": true,
       "rows": 45926,
       "size_kb": 1573.4,
-      "secs": 2.29
+      "secs": 28.8
     },
     {
       "station": "RPW00041227",
       "ok": true,
       "rows": 643,
       "size_kb": 21.4,
-      "secs": 0.73
+      "secs": 4.96
     },
     {
       "station": "RPW00041228",
       "ok": true,
       "rows": 790,
       "size_kb": 26.5,
-      "secs": 2.03
+      "secs": 4.68
     },
     {
       "station": "TH000048455",
       "ok": true,
-      "rows": 95028,
-      "size_kb": 3242.8,
-      "secs": 2.81
+      "rows": 95035,
+      "size_kb": 3243.0,
+      "secs": 20.98
     },
     {
       "station": "TH000048327",
       "ok": true,
       "rows": 95216,
       "size_kb": 3247.3,
-      "secs": 5.33
+      "secs": 8.74
     },
     {
       "station": "TH000048456",
       "ok": true,
       "rows": 97582,
       "size_kb": 3330.4,
-      "secs": 10.56
+      "secs": 16.69
     },
     {
       "station": "THW00041001",
       "ok": true,
       "rows": 10620,
       "size_kb": 351.5,
-      "secs": 2.22
+      "secs": 5.21
     },
     {
       "station": "TH000048564",
       "ok": true,
-      "rows": 88070,
-      "size_kb": 3002.5,
-      "secs": 2.76
+      "rows": 88077,
+      "size_kb": 3002.7,
+      "secs": 6.8
     },
     {
       "station": "TH000048565",
       "ok": true,
       "rows": 86125,
       "size_kb": 2935.7,
-      "secs": 3.18
+      "secs": 6.69
     },
     {
       "station": "THW00041028",
       "ok": true,
       "rows": 3013,
       "size_kb": 99.5,
-      "secs": 1.17
+      "secs": 5.03
     },
     {
       "station": "THW00041018",
       "ok": true,
       "rows": 88737,
       "size_kb": 3033.1,
-      "secs": 2.7
+      "secs": 6.71
     }
   ],
   "isd_2024_sea_priority": [
@@ -493,7 +495,7 @@
       "ok": true,
       "rows": 22972,
       "size_kb": 8615.5,
-      "secs": 6.76
+      "secs": 8.4
     },
     {
       "station": "48456099999",
@@ -501,7 +503,7 @@
       "ok": true,
       "rows": 19543,
       "size_kb": 7623.3,
-      "secs": 9.2
+      "secs": 8.46
     },
     {
       "station": "48459099999",
@@ -509,7 +511,7 @@
       "ok": true,
       "rows": 22934,
       "size_kb": 8542.9,
-      "secs": 6.3
+      "secs": 32.05
     },
     {
       "station": "96749099999",
@@ -517,7 +519,7 @@
       "ok": true,
       "rows": 21314,
       "size_kb": 8672.8,
-      "secs": 6.06
+      "secs": 9.04
     },
     {
       "station": "96935099999",
@@ -525,7 +527,7 @@
       "ok": true,
       "rows": 4526,
       "size_kb": 2044.8,
-      "secs": 4.45
+      "secs": 13.04
     },
     {
       "station": "97230099999",
@@ -533,7 +535,7 @@
       "ok": true,
       "rows": 4004,
       "size_kb": 1903.9,
-      "secs": 3.59
+      "secs": 6.51
     },
     {
       "station": "48601099999",
@@ -541,7 +543,7 @@
       "ok": true,
       "rows": 20805,
       "size_kb": 8094.5,
-      "secs": 22.44
+      "secs": 6.8
     },
     {
       "station": "48650099999",
@@ -549,7 +551,7 @@
       "ok": true,
       "rows": 20837,
       "size_kb": 8335.6,
-      "secs": 6.37
+      "secs": 10.03
     },
     {
       "station": "98429099999",
@@ -557,7 +559,7 @@
       "ok": true,
       "rows": 11362,
       "size_kb": 4726.5,
-      "secs": 4.64
+      "secs": 7.91
     },
     {
       "station": "98646099999",
@@ -565,7 +567,7 @@
       "ok": true,
       "rows": 11310,
       "size_kb": 4754.4,
-      "secs": 4.57
+      "secs": 6.56
     },
     {
       "station": "48991099999",
@@ -573,7 +575,7 @@
       "ok": true,
       "rows": 20542,
       "size_kb": 7669.3,
-      "secs": 14.87
+      "secs": 8.06
     },
     {
       "station": "48930099999",
@@ -581,7 +583,7 @@
       "ok": true,
       "rows": 6173,
       "size_kb": 2467.8,
-      "secs": 18.62
+      "secs": 6.07
     },
     {
       "station": "48940099999",
@@ -589,7 +591,7 @@
       "ok": true,
       "rows": 13647,
       "size_kb": 5253.4,
-      "secs": 4.84
+      "secs": 7.57
     },
     {
       "station": "48097099999",
@@ -597,7 +599,7 @@
       "ok": true,
       "rows": 18265,
       "size_kb": 7078.3,
-      "secs": 8.67
+      "secs": 8.57
     },
     {
       "station": "48600199999",
@@ -605,7 +607,7 @@
       "ok": true,
       "rows": 3876,
       "size_kb": 1473.6,
-      "secs": 5.92
+      "secs": 5.66
     },
     {
       "station": "96315099999",
@@ -613,7 +615,7 @@
       "ok": true,
       "rows": 19389,
       "size_kb": 8149.3,
-      "secs": 4.13
+      "secs": 8.9
     }
   ]
 }

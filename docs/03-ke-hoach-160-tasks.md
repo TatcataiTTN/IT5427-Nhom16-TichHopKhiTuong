@@ -17,10 +17,10 @@
 - ✅ **Xong** — đã làm thật, vượt qua đúng tiêu chí Kiểm thử đã định nghĩa.
 - 🟡 **Một phần** — có kết quả thật nhưng chưa khớp 100% tiêu chí gốc (vd quy mô nhỏ hơn, công cụ khác tương đương, hoặc thiếu 1 phần việc).
 - ⬜ **Chưa làm** — chưa có kết quả, hoặc là hành động của con người (họp nhóm, nộp bài, thuyết trình, đăng ký tài khoản) ngoài khả năng hỗ trợ tự động — xem `docs/09-viec-ban-can-tu-lam.md`.
-- **Tổng Tuần 1 (40 tác vụ): 26 ✅ / 4 🟡 / 10 ⬜**
-- **Tổng Tuần 2 (40 tác vụ): 24 ✅ / 8 🟡 / 8 ⬜**
-- **Tổng 80 tác vụ đã rà soát: 50 ✅ / 12 🟡 / 18 ⬜** (so với lần rà soát trước 10/10/2026: 27 ✅ / 16 🟡 / 37 ⬜ — tăng 23 tác vụ Xong sau 1 phiên làm việc tập trung vào ETL/warehouse/PINN)
-- **10 tác vụ ⬜ còn lại chủ yếu là hành động con người** (họp nhóm, nộp bài, thuyết trình, thu thập tiến độ từ Quang/Lương) — xem `docs/09`. Phần kỹ thuật tự động hoá được gần như đã làm hết trong khả năng của môi trường hiện tại (bị chặn bởi Docker Desktop chưa khởi động cho 2 tác vụ Kafka/Spark-cluster).
+- **Tổng Tuần 1 (40 tác vụ): 30 ✅ / 4 🟡 / 6 ⬜**
+- **Tổng Tuần 2 (40 tác vụ): 26 ✅ / 6 🟡 / 8 ⬜**
+- **Tổng 80 tác vụ đã rà soát: 56 ✅ / 10 🟡 / 14 ⬜** (cập nhật 12/10/2026: +4 nộp đề cương đã xác nhận, +1 Kafka producer test với broker thật, +1 cụm Spark Docker chạy thật; so với lần rà soát trước 10/10/2026: 27 ✅ / 16 🟡 / 37 ⬜ — tăng 23 tác vụ Xong sau 1 phiên làm việc tập trung vào ETL/warehouse/PINN)
+- **10 tác vụ ⬜ còn lại chủ yếu là hành động con người** (họp nhóm, nộp bài, thuyết trình, thu thập tiến độ từ Quang/Lương) — xem `docs/09`. Phần kỹ thuật tự động hoá được gần như đã làm hết trong khả năng của môi trường hiện tại (Kafka broker + cụm Spark Docker đã chạy thật trên máy Linux của TV1 ngày 12/10/2026).
 
 ---
 
@@ -40,7 +40,7 @@
 | 7 | Script gọi NASA POWER lấy dữ liệu mẫu JSON cho 1 toạ độ | 2/10 | JSON parse được thành DataFrame pandas | `pd.json_normalize()` không lỗi, có đủ các biến khí tượng yêu cầu | ✅ Xong — `ingestion/parsers.py::parse_nasa_power`, có unit test |
 | 8 | Bảng đối chiếu 3 nguồn: field, đơn vị, tần suất, độ phân giải | 3/10 | Bảng Markdown/Excel liệt kê đủ field trùng khớp giữa nguồn | TV2 review và xác nhận đủ dữ liệu để map sang schema trung gian | ✅ Xong, vượt yêu cầu — `docs/06` mục 1 có đủ 5 nguồn |
 | 9 | Soạn mục "Data Sources & Volume" cho đề cương | 4/10 | Đoạn văn mô tả nguồn + bảng ước lượng dung lượng (~1.5–2 TB) | TV4 review nội dung khớp định dạng đề cương | ✅ Xong — `report/main.tex` Chương 4, số liệu thật ~35GB |
-| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Đề cương hoàn chỉnh, đúng template, xuất PDF | Nộp thành công trên hệ thống của học phần trước 23:59 5/10 | ⬜ PDF đã sẵn sàng (`report/main.pdf`), chưa xác nhận đã nộp |
+| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Đề cương hoàn chỉnh, đúng template, xuất PDF | Nộp thành công trên hệ thống của học phần trước 23:59 5/10 | ✅ Đã nộp (nhóm xác nhận 12/10/2026) — `report/main.pdf` |
 
 ### TV2 — Schema Lead
 
@@ -55,7 +55,7 @@
 | 7 | So sánh Kriging vs Bilinear Interpolation, chọn thư viện | 2/10 | Bảng so sánh ưu/nhược, quyết định dùng `pykrige`/`scipy` | Cài thử thư viện, chạy ví dụ nội suy trên tập toy data thành công | ✅ Xong, vượt yêu cầu — `warehouse/interpolation.py`, chạy thật trên 113 trạm x 4 biến ERA5 (không chỉ toy data) |
 | 8 | Viết tài liệu "Data Model Design v0" (ERD + giải thích) | 3/10 | File `.md` mô tả đầy đủ schema, đính kèm ERD | TV3, TV4 review và không có câu hỏi mở về cấu trúc bảng | ✅ Xong — `docs/11-data-model-design.md`, có ERD Mermaid đính kèm |
 | 9 | Đóng góp mục "System Architecture" cho đề cương | 4/10 | Sơ đồ kiến trúc tổng thể pipeline (ingest → warehouse → model → dashboard) | TV4 review nội dung khớp định dạng đề cương | ✅ Xong — `report/main.tex` Chương 3, sơ đồ TikZ |
-| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Phần schema/kiến trúc trong đề cương chính xác, nhất quán | Nộp thành công cùng nhóm trước 23:59 5/10 | ⬜ Nội dung sẵn sàng, chưa xác nhận đã nộp |
+| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Phần schema/kiến trúc trong đề cương chính xác, nhất quán | Nộp thành công cùng nhóm trước 23:59 5/10 | ✅ Đã nộp (nhóm xác nhận 12/10/2026) |
 
 ### TV3 — Spark/PINN Lead
 
@@ -70,7 +70,7 @@
 | 7 | Ước lượng VRAM/RAM cần cho huấn luyện PINN theo kích thước dữ liệu dự kiến | 2/10 | Bảng ước lượng theo batch size, số điểm lưới | Con số hợp lý so với phần cứng thực tế của nhóm (không âm/vô lý) | ⬜ Chưa làm |
 | 8 | Thiết kế sơ bộ kiến trúc Replay Streaming (Kafka producer) | 3/10 | Sơ đồ luồng: file lịch sử → producer → topic → consumer | TV1 xác nhận khớp với dữ liệu sẽ sinh ra từ pipeline ingest | ⬜ Đã cài `kafka-python`, chưa thiết kế/code |
 | 9 | Đóng góp mục "Computing Infrastructure & Big Data Techniques" cho đề cương | 4/10 | Đoạn mô tả Spark, Kafka, PINN trong đề cương | TV4 review nội dung khớp định dạng đề cương | ✅ Xong — `report/main.tex` Mục 3.5 |
-| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Phần hạ tầng tính toán chính xác, khả thi | Nộp thành công cùng nhóm trước 23:59 5/10 | ⬜ Nội dung sẵn sàng, chưa xác nhận đã nộp |
+| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Phần hạ tầng tính toán chính xác, khả thi | Nộp thành công cùng nhóm trước 23:59 5/10 | ✅ Đã nộp (nhóm xác nhận 12/10/2026) |
 
 ### TV4 — Dashboard/PM Lead
 
@@ -85,7 +85,7 @@
 | 7 | Vẽ bounding box khu vực nghiên cứu trên bản đồ | 2/10 | Toạ độ bounding box (lat/lon min-max) xác định rõ | TV1/TV3 dùng bounding box này tải dữ liệu thử không lỗi | ✅ Xong — lat -11→23, lon 92→141, dùng nhất quán trong code+docs |
 | 8 | Soạn checklist tiêu chí 5V đính kèm đề cương | 3/10 | Bảng 5V với số liệu ước lượng cụ thể (như bản nháp đã có) | TV1–3 xác nhận số liệu khớp với dữ liệu thực tế dự kiến | ✅ Xong — `report/main.tex` Mục 4.4 |
 | 9 | Rà soát, format đề cương theo yêu cầu nộp, xuất PDF | 4/10 | File PDF đúng font/margin theo quy định học phần | Mở file PDF không lỗi định dạng, đủ số trang quy định | ✅ Xong — đã verify từng trang bằng pdftoppm |
-| 10 | Nộp đề cương đúng hạn và thông báo cả nhóm | 5/10 | Biên nhận nộp bài (email/hệ thống) | Có xác nhận nộp thành công trước 23:59 5/10 | ⬜ Hành động của người dùng, chưa xác nhận |
+| 10 | Nộp đề cương đúng hạn và thông báo cả nhóm | 5/10 | Biên nhận nộp bài (email/hệ thống) | Có xác nhận nộp thành công trước 23:59 5/10 | ✅ Đã nộp (nhóm xác nhận 12/10/2026) |
 
 ---
 
@@ -104,7 +104,7 @@
 | 6 | Module parser CSV/Fixed-width NOAA ISD, xử lý mã lỗi -9999/NaN | 13/10 | Hàm `parse_isd()` loại bỏ/đánh dấu giá trị lỗi | Unit test: input chứa `-9999` → output là NaN, không crash | ✅ Xong — `ingestion/parsers.py::parse_isd`, có unit test tiêm mã lỗi thật |
 | 7 | Chuẩn hoá thời gian: mọi timestamp về UTC ISO8601 | 15/10 | Toàn bộ 3 nguồn có cột `timestamp_utc` thống nhất | Kiểm tra ngẫu nhiên 10 bản ghi mỗi nguồn, timezone đúng UTC | ✅ Xong, vượt yêu cầu — cả 4 nguồn điểm, có unit test tự động (không chỉ kiểm tra ngẫu nhiên) |
 | 8 | Chuẩn hoá đơn vị: T→K, P→Pa, gió→m/s | 16/10 | Giá trị sau chuẩn hoá nằm trong khoảng vật lý hợp lý | So sánh trước/sau: T ~ 250–320K, P ~ 90.000–105.000 Pa | 🟡 Đã chuẩn hoá nhất quán + test khoảng vật lý hợp lý, nhưng dùng °C/hPa (quyết định thiết kế ở docs/06) thay vì K/Pa |
-| 9 | Kafka producer đọc dữ liệu lịch sử, publish theo topic riêng | 18/10 | Producer chạy được, publish message vào đúng topic | `kafka-console-consumer` nhận được message đúng định dạng JSON | 🟡 Code xong (`ingestion/kafka_producer.py`) + `docker-compose.kafka.yml` sẵn sàng, nhưng CHƯA test với broker thật (máy chưa bật Docker Desktop — xem `docs/09` mục 0) |
+| 9 | Kafka producer đọc dữ liệu lịch sử, publish theo topic riêng | 18/10 | Producer chạy được, publish message vào đúng topic | `kafka-console-consumer` nhận được message đúng định dạng JSON | ✅ Xong (12/10/2026) — broker thật `apache/kafka:3.7.0` (Bitnami đã gỡ image cũ), publish 500 message vào `weatherobs.open_meteo`/`weatherobs.nasa_power`, `kafka-console-consumer` đọc lại đủ 500/500, JSON hợp lệ chuẩn (NaN → null) |
 | 10 | Viết phần Ingestion cho báo cáo tiến độ | 19/10 | Slide/đoạn báo cáo: khối lượng đã tải, vướng mắc, số liệu | TV4 review nội dung sẵn sàng đưa vào slide chung | ✅ Xong — `docs/10-ket-qua-ky-thuat-tuan-2.md` mục 1 |
 
 ### TV2 — Schema Lead
@@ -126,7 +126,7 @@
 
 | # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
 |---|---|---|---|---|---|
-| 1 | Dựng cụm Spark giả lập nhiều node bằng Docker Compose (driver + 2–3 worker) | 7/10 | Cluster khởi động đủ số node, UI Spark truy cập được | Spark Master UI hiển thị đủ số worker đã cấu hình | 🟡 `docker-compose.spark.yml` viết xong (1 master + 2 worker), `docker compose config` chạy sạch, nhưng CHƯA khởi động được vì Docker Desktop chưa chạy trên máy — xem `docs/09` mục 0 |
+| 1 | Dựng cụm Spark giả lập nhiều node bằng Docker Compose (driver + 2–3 worker) | 7/10 | Cluster khởi động đủ số node, UI Spark truy cập được | Spark Master UI hiển thị đủ số worker đã cấu hình | ✅ Xong (12/10/2026) — đổi sang image chính thức `apache/spark:4.2.0` (Bitnami đã gỡ `bitnami/spark`), Master UI báo ALIVE, 2/2 worker × 2 core; job thử gửi từ host chạy xong trên cụm |
 | 2 | Kết nối Spark Streaming với Kafka topic từ TV1, xử lý windowing cơ bản | 8/10 | Job Streaming chạy, tính được aggregate theo cửa sổ thời gian | Console output hiển thị kết quả window đúng chu kỳ đã set | ⬜ Chưa làm — phụ thuộc Kafka broker thật (chặn bởi Docker, xem #1) |
 | 3 | Spark transformation tính ma trận tương quan giữa các biến khí tượng | 9/10 | Ma trận correlation xuất ra đúng kích thước n×n | Giá trị đường chéo = 1.0, ma trận đối xứng | ✅ Xong — `warehouse/spark_analytics.py`, ma trận 5×5 thật trên 1.076.473 dòng, đường chéo=1.0, đối xứng đúng |
 | 4 | Pipeline tiền xử lý dữ liệu đầu vào cho PINN (chuẩn hoá, tensor hoá) | 10/10 | Hàm trả tensor đúng shape (batch, features) | Unit test: input DataFrame mẫu → output tensor đúng dtype/shape | ✅ Xong — `model/pinn_rh_from_dewpoint.py` (DataFrame ISD thật → tensor `(batch,2)`) |

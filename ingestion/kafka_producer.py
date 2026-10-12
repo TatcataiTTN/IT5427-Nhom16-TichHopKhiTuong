@@ -28,7 +28,10 @@ def main():
 
     import pandas as pd
     from kafka import KafkaProducer
-    from kafka.errors import NoBrokersAvailable
+    try:
+        from kafka.errors import NoBrokersAvailable  # kafka-python 2.x
+    except ImportError:
+        from kafka.errors import KafkaError as NoBrokersAvailable  # 3.x da bo NoBrokersAvailable
 
     df = pd.read_parquet(WAREHOUSE).sort_values("timestamp_utc").head(args.limit)
     print(f"Doc {len(df)} ban ghi tu warehouse (gioi han --limit {args.limit}) de replay")
@@ -36,7 +39,7 @@ def main():
     try:
         producer = KafkaProducer(
             bootstrap_servers=args.bootstrap,
-            value_serializer=lambda v: json.dumps(v, default=str).encode("utf-8"),
+            value_serializer=lambda v: json.dumps(v, default=str, allow_nan=False).encode("utf-8"),
         )
     except NoBrokersAvailable:
         print(f"LOI: khong ket noi duoc Kafka broker tai {args.bootstrap}.")
@@ -46,7 +49,8 @@ def main():
     sent = 0
     for _, row in df.iterrows():
         topic = f"weatherobs.{row['source'].lower()}"
-        message = row.to_dict()
+        # NaN khong phai JSON hop le (consumer Spark/Java se loi) -> doi thanh null
+        message = {k: (None if pd.isna(v) else v) for k, v in row.items()}
         producer.send(topic, value=message)
         sent += 1
         if args.speed > 0:

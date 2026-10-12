@@ -112,24 +112,39 @@ Danh sách trạm quan trắc dùng thẳng trong code: `reference/*.csv` (xem `
     └── test_model_pinn.py         — 3 test tích hợp, chạy thật cả 3 script PINN (đánh dấu `slow`)
 ```
 
-**Chạy thử toàn bộ pipeline** (đã verify thật, 1.076.473 bản ghi, 119 vị trí, 5 nguồn gồm cả ERA5):
+**Chạy thử toàn bộ pipeline** (đã verify thật, 5 nguồn gồm cả ERA5):
 ```bash
-python3 -m pytest tests/ -v                                    # 25/25 test pass
-JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home \
-  python3 warehouse/build_warehouse.py                         # sinh warehouse/output/weatherobs.parquet
-JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home \
-  python3 warehouse/spark_analytics.py                         # correlation, data skew, benchmark
-python3 model/train_demo.py && python3 model/navier_stokes_autograd_check.py \
-  && python3 model/pinn_rh_from_dewpoint.py                    # 3 ví dụ PINN, đều chạy thật
-streamlit run dashboard/app.py                                 # xem dữ liệu thật trên trình duyệt
+# 0) Đặt JAVA_HOME trỏ tới JDK 17/21 (PySpark 4.x không chạy với Java 11):
+export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home   # macOS + Homebrew
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64                             # Ubuntu (apt install openjdk-17-jdk)
+export MKL_THREADING_LAYER=GNU    # chỉ cần nếu dùng Anaconda + torch cài từ pip (tránh lỗi MKL/libgomp)
 
-# Cần Docker Desktop đang chạy:
-docker compose -f docker-compose.spark.yml up -d                # cụm Spark nhiều node
-docker compose -f docker-compose.kafka.yml up -d                # Kafka broker
-python3 ingestion/kafka_producer.py --limit 100                 # replay dữ liệu vào Kafka
+python3 scripts/batch_download_week2.py full           # tải dữ liệu thô (data_samples/ bị gitignore)
+python3 scripts/batch_download_week2.py sea-priority   # mở rộng GHCN/ISD ra 8 nước ĐNA còn lại
+python3 -m pytest tests/ -v                            # 25/25 test pass
+python3 warehouse/build_warehouse.py                   # sinh warehouse/output/weatherobs.parquet
+python3 warehouse/spark_analytics.py                   # correlation, data skew, benchmark
+python3 model/train_demo.py && python3 model/navier_stokes_autograd_check.py \
+  && python3 model/pinn_rh_from_dewpoint.py            # 3 ví dụ PINN, đều chạy thật
+streamlit run dashboard/app.py                         # xem dữ liệu thật trên trình duyệt
+
+# Cần Docker daemon đang chạy (Docker Engine trên Linux hoặc Docker Desktop trên macOS).
+# Cả 2 file dùng image chính thức apache/* (Bitnami đã gỡ bitnami/kafka, bitnami/spark khỏi Docker Hub).
+docker compose -f docker-compose.kafka.yml up -d       # Kafka broker (KRaft) tại localhost:9092
+python3 ingestion/kafka_producer.py --limit 100        # replay dữ liệu vào topic weatherobs.<source>
+docker compose -f docker-compose.spark.yml up -d       # Spark 4.2.0: 1 master + 2 worker, UI http://localhost:8080
 ```
 
-Chi tiết số liệu/phát hiện kỹ thuật: `docs/10-ket-qua-ky-thuat-tuan-2.md`. Việc cần bạn tự làm (đăng ký, quyết định, Docker Desktop): `docs/09-viec-ban-can-tu-lam.md`.
+Gửi job từ máy host vào cụm Spark Docker — worker phải gọi ngược được về driver, nên cần đặt
+`spark.driver.host` là gateway của mạng `spark-net` (đã test thật, job chạy trên 2 worker × 2 core):
+```python
+# GW=$(docker network inspect it5427-nhom16-tichhopkhituong_spark-net -f '{{(index .IPAM.Config 0).Gateway}}')
+SparkSession.builder.master("spark://localhost:7077") \
+    .config("spark.driver.host", GW).config("spark.driver.bindAddress", "0.0.0.0")
+```
+Lưu ý: phiên bản `pyspark` trên host phải trùng image (4.2.0). Thư mục `warehouse/output` được mount vào worker tại `/data/warehouse`.
+
+Chi tiết số liệu/phát hiện kỹ thuật: `docs/10-ket-qua-ky-thuat-tuan-2.md`. Việc cần bạn tự làm (đăng ký, quyết định): `docs/09-viec-ban-can-tu-lam.md`.
 
 ## 5. Nguồn dữ liệu lõi
 
@@ -158,7 +173,7 @@ Mỗi thành viên nên tự kiểm tra máy mình theo danh sách dưới (lệ
   # macOS + Homebrew — ĐÃ TEST THẬT, dùng lệnh này (không dùng java_home -v 17,
   # lệnh đó có thể âm thầm trả về Java 11 nếu openjdk@17 chưa symlink hệ thống):
   export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home
-  # Linux: export JAVA_HOME tới thư mục cài JDK 17/21 (vd update-alternatives --config java)
+  # Ubuntu — ĐÃ TEST THẬT (12/10/2026): export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
   ```
   Kiểm tra nhanh: `JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home python3 scripts/check_spark_env.py` — đã test thật, in ra "Môi trường Spark sẵn sàng."
 - Git ≥ 2.x

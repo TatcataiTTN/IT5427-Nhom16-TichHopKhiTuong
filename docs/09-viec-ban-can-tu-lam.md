@@ -11,13 +11,13 @@ của nhóm, hoặc hành động con người (họp, nộp bài, thuyết trì
 
 | # | Việc | Chi tiết |
 |---|---|---|
-| 0 | **Mở Docker Desktop thủ công (lần đầu)** | Đã thử `open -a Docker` để tự khởi động nhưng daemon không lên sau vài phút chờ — có thể cần bạn tự mở app và xác nhận một số dialog lần đầu (cấp quyền, đăng nhập). Sau khi Docker Desktop chạy (biểu tượng cá voi ở thanh menu macOS chuyển sang trạng thái "running"), báo tôi để tôi chạy tiếp: `docker compose -f docker-compose.spark.yml up -d` (cụm Spark 1 master + 2 worker) và `docker compose -f docker-compose.kafka.yml up -d` (Kafka broker cho streaming) — cả 2 file đã viết sẵn, chỉ cần Docker daemon chạy là tôi tự verify được. | 🔴 Chặn 2 tác vụ TV3 |
+| 0 | ~~Mở Docker Desktop thủ công~~ ✅ **Xong 12/10/2026** | Kafka + cụm Spark đã chạy thật trên máy Linux của TV1 (Docker Engine 29.8, không cần Docker Desktop). Cả 2 compose đã đổi sang image chính thức `apache/kafka:3.7.0`, `apache/spark:4.2.0` vì Bitnami đã gỡ `bitnami/kafka`, `bitnami/spark` khỏi Docker Hub (pull báo `manifest unknown`). | ✅ Xong |
 
 ## 1. Việc gấp — liên quan mốc đã/sắp tới hạn
 
 | # | Việc | Vì sao không tự động hoá được | Mức ưu tiên |
 |---|---|---|---|
-| 1 | **Xác nhận đã nộp đề cương đề tài (hạn 5/10) chưa** | Đây là hành động nộp bài trên hệ thống học phần — tôi không có quyền truy cập hệ thống đó. **Lưu ý: hôm nay đã là 10/10, quá hạn 5 ngày** — nếu nhóm chưa nộp, cần liên hệ giảng viên TS. Vũ Tuyết Trinh ngay để biết có bị trừ điểm/gia hạn không. File PDF đã sẵn sàng tại `report/main.pdf`. | 🔴 Khẩn cấp |
+| 1 | ~~Xác nhận đã nộp đề cương~~ ✅ **Đã nộp** (TV1 xác nhận 12/10/2026) | — | ✅ Xong |
 | 2 | **Họp nhóm xác nhận lại vai trò, kênh liên lạc** với Ngô Văn Quang (TV1) và Nguyễn Cao Lương (TV2) | Cần sự đồng ý/xác nhận thật của 2 thành viên còn lại — tôi không thể đại diện họ. | 🔴 Khẩn cấp |
 | 3 | **Thu thập tiến độ thật từ Quang & Lương** cho phần việc TV1 (Ingestion) và TV2 (Schema) — xem họ đã làm được gì trong 10 tác vụ/tuần của mình | Tôi chỉ hỗ trợ được phần TV3+TV4 (vai trò của bạn, Trương Tuấn Nghĩa). Phần TV1/TV2 trong `docs/03` tôi đánh dấu trạng thái dựa trên **code tôi tự làm thay**, không phản ánh việc Quang/Lương đã tự làm riêng phần của họ chưa — cần hỏi lại 2 bạn trực tiếp. | 🔴 Khẩn cấp |
 
