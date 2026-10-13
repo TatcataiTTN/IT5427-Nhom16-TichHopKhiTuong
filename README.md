@@ -62,6 +62,7 @@ Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (*
     ├── 09-viec-ban-can-tu-lam.md       — việc CHỈ người dùng mới làm được (đăng ký, quyết định, nộp bài,
     │                                     Docker Desktop) — lọc ra từ 160 tác vụ, phần còn lại đã tự động hoá
     ├── 10-ket-qua-ky-thuat-tuan-2.md   — số liệu thật từ ETL/warehouse/Spark analytics, dùng cho báo cáo tiến độ
+    ├── 12-phat-hien-di-thuong-khi-hau.md — phương pháp + kiểm chứng phát hiện dị thường (nắng nóng 4/2024, bão Yagi, hạn Mekong)
     └── 11-data-model-design.md         — ERD (Mermaid), naming convention, so sánh Kriging/Bilinear,
                                           so sánh Streamlit/Grafana/Superset
 ```
@@ -124,10 +125,11 @@ python3 scripts/batch_download_week2.py sea-priority   # mở rộng GHCN/ISD ra
 python3 scripts/download_full_points.py                # ISD 10 năm + Open-Meteo/NASA POWER 5 năm (~1,4 GB, vài giờ)
 python3 scripts/download_era5_full.py                  # ERA5 9 biến × 5 năm (22 GB lưu, ~1 TB tải về, ~24 giờ;
                                                        #   chạy lại được sau khi ngắt — tháng đã có sẽ bỏ qua)
-python3 -m pytest tests/ -v                            # 26/26 test pass
+python3 -m pytest tests/ -v                            # 35/35 test pass
 python3 warehouse/build_warehouse.py                   # 9.348.470 bản ghi -> warehouse/output/weatherobs.parquet
                                                        #   (--dataset week2 để build bộ mẫu nhỏ nếu chưa tải đủ)
 python3 warehouse/spark_analytics.py                   # correlation, data skew, benchmark
+python3 warehouse/anomaly_detection.py                 # dị thường khí hậu: z-score, đợt nóng, SPI, xác nhận chéo ERA5 (docs/12)
 python3 model/train_demo.py && python3 model/navier_stokes_autograd_check.py \
   && python3 model/pinn_rh_from_dewpoint.py            # 3 ví dụ PINN, đều chạy thật
 streamlit run dashboard/app.py                         # xem dữ liệu thật trên trình duyệt
