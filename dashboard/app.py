@@ -28,7 +28,26 @@ def load_warehouse():
     if not os.path.exists(WAREHOUSE):
         return None
     df = pd.read_parquet(WAREHOUSE)
+    df["location_id"] = df["location_id"].astype("category")  # loc theo tram nhanh hon tren ~10 trieu dong
     return df
+
+
+@st.cache_data
+def daily_means(_df):
+    """Trung binh theo (vi tri, ngay) — tinh 1 lan, dung cho ban do + time slider (khong quet lai ca warehouse moi lan keo)."""
+    cols = ["temp_c", "rh_pct", "precip_mm", "wind_speed_ms"]
+    d = _df[["location_id", "timestamp_utc"] + cols].copy()
+    d["date"] = d["timestamp_utc"].dt.date
+    return d.groupby(["location_id", "date"], observed=True)[cols].mean().reset_index()
+
+
+@st.cache_data
+def source_summary(_df):
+    return _df.groupby("source").agg(
+        so_ban_ghi=("location_id", "count"),
+        so_tram=("location_id", "nunique"),
+        temp_tb=("temp_c", "mean"),
+    ).round(2)
 
 
 df = load_warehouse()
@@ -36,8 +55,7 @@ df = load_warehouse()
 if df is None:
     st.error(
         "Chưa tìm thấy warehouse. Chạy trước:\n\n"
-        "`JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home "
-        "python3 warehouse/build_warehouse.py`"
+        "`python3 warehouse/build_warehouse.py` (JAVA_HOME trỏ tới JDK 17/21, xem README)"
     )
     st.stop()
 
@@ -54,6 +72,10 @@ st.divider()
 st.subheader("1. Chọn trạm/điểm để xem chuỗi thời gian")
 station = st.selectbox("Trạm/điểm", sorted(df["location_id"].unique()))
 station_df = df[df["location_id"] == station].sort_values("timestamp_utc")
+if station_df["source"].nunique() > 1:
+    # 1 vi tri co the co nhieu nguon (vd tram ISD + ERA5 noi suy) -> cho chon nguon de khong ve chong len nhau
+    src = st.selectbox("Nguồn", sorted(station_df["source"].unique()))
+    station_df = station_df[station_df["source"] == src]
 
 variable = st.selectbox(
     "Biến khí tượng",
@@ -68,12 +90,7 @@ else:
 st.divider()
 
 st.subheader("2. Tổng hợp theo nguồn")
-agg = df.groupby("source").agg(
-    so_ban_ghi=("location_id", "count"),
-    so_tram=("location_id", "nunique"),
-    temp_tb=("temp_c", "mean"),
-).round(2)
-st.dataframe(agg, use_container_width=True)
+st.dataframe(source_summary(df), width="stretch")
 
 st.divider()
 
@@ -89,7 +106,8 @@ loc = load_location()
 map_variable = st.selectbox(
     "Biến hiển thị trên bản đồ", ["temp_c", "rh_pct", "precip_mm", "wind_speed_ms"], key="map_var",
 )
-available_dates = sorted(df["timestamp_utc"].dt.date.unique())
+daily = daily_means(df)
+available_dates = sorted(daily["date"].unique())
 # Mac dinh chon ngay co du lieu day du (GHCN gan-thoi-gian-thuc thuong tre vai thang voi TMAX/TMIN,
 # chi co PRCP truoc) -- uu tien 2024-06-15 (co du 5 nguon that) neu co, khong thi lay giua danh sach.
 import datetime as _dt
@@ -97,8 +115,8 @@ _default_date = _dt.date(2024, 6, 15)
 default_date = _default_date if _default_date in available_dates else available_dates[len(available_dates) // 2]
 map_date = st.select_slider("Chọn ngày (time slider)", options=available_dates, value=default_date)
 
-day_df = df[df["timestamp_utc"].dt.date == map_date]
-day_agg = day_df.groupby("location_id")[map_variable].mean().reset_index()
+day_agg = daily.loc[daily["date"] == map_date, ["location_id", map_variable]].copy()
+day_agg["location_id"] = day_agg["location_id"].astype(str)
 map_df = day_agg.merge(loc[["location_id", "lat", "lon"]], on="location_id", how="inner").dropna(
     subset=["lat", "lon", map_variable]
 )
@@ -111,4 +129,4 @@ else:
         f"(kéo thanh trượt phía trên để đổi ngày)."
     )
     st.map(map_df.rename(columns={"lat": "latitude", "lon": "longitude"}), size=20000)
-    st.dataframe(map_df.sort_values(map_variable, ascending=False).head(10), use_container_width=True)
+    st.dataframe(map_df.sort_values(map_variable, ascending=False).head(10), width="stretch")

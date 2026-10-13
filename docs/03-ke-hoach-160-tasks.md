@@ -18,8 +18,8 @@
 - 🟡 **Một phần** — có kết quả thật nhưng chưa khớp 100% tiêu chí gốc (vd quy mô nhỏ hơn, công cụ khác tương đương, hoặc thiếu 1 phần việc).
 - ⬜ **Chưa làm** — chưa có kết quả, hoặc là hành động của con người (họp nhóm, nộp bài, thuyết trình, đăng ký tài khoản) ngoài khả năng hỗ trợ tự động — xem `docs/09-viec-ban-can-tu-lam.md`.
 - **Tổng Tuần 1 (40 tác vụ): 30 ✅ / 4 🟡 / 6 ⬜**
-- **Tổng Tuần 2 (40 tác vụ): 26 ✅ / 6 🟡 / 8 ⬜**
-- **Tổng 80 tác vụ đã rà soát: 56 ✅ / 10 🟡 / 14 ⬜** (cập nhật 12/10/2026: +4 nộp đề cương đã xác nhận, +1 Kafka producer test với broker thật, +1 cụm Spark Docker chạy thật; so với lần rà soát trước 10/10/2026: 27 ✅ / 16 🟡 / 37 ⬜ — tăng 23 tác vụ Xong sau 1 phiên làm việc tập trung vào ETL/warehouse/PINN)
+- **Tổng Tuần 2 (40 tác vụ): 29 ✅ / 5 🟡 / 6 ⬜**
+- **Tổng 80 tác vụ đã rà soát: 59 ✅ / 9 🟡 / 12 ⬜** (cập nhật 13/10/2026: +3 tải đủ dữ liệu theo đề cương — ERA5 5 năm, ISD 10 năm, Open-Meteo khớp ERA5; 12/10/2026: +4 nộp đề cương đã xác nhận, +1 Kafka producer test với broker thật, +1 cụm Spark Docker chạy thật; so với lần rà soát trước 10/10/2026: 27 ✅ / 16 🟡 / 37 ⬜ — tăng 23 tác vụ Xong sau 1 phiên làm việc tập trung vào ETL/warehouse/PINN)
 - **10 tác vụ ⬜ còn lại chủ yếu là hành động con người** (họp nhóm, nộp bài, thuyết trình, thu thập tiến độ từ Quang/Lương) — xem `docs/09`. Phần kỹ thuật tự động hoá được gần như đã làm hết trong khả năng của môi trường hiện tại (Kafka broker + cụm Spark Docker đã chạy thật trên máy Linux của TV1 ngày 12/10/2026).
 
 ---
@@ -96,10 +96,10 @@
 
 | # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
 |---|---|---|---|---|---|
-| 1 | Script batch tải ERA5 đầy đủ (bounding box, 5 năm, 6 biến) | 7/10 | Toàn bộ dữ liệu ERA5 theo phạm vi đã chốt tải về đủ | So khớp số file/số ngày với lịch 5 năm, không thiếu tháng nào | ⬜ Mới có subset 3 ngày × 4 biến (chứng minh pipeline chạy được), chưa tải full 5 năm |
-| 2 | Script tải toàn bộ NOAA ISD cho danh sách trạm mục tiêu | 8/10 | CSV đủ cho toàn bộ trạm trong danh sách, 10 năm | Đếm số trạm tải được / tổng số trạm mục tiêu ≥ 95% | 🟡 100% trạm mục tiêu (26/26) nhưng mới 1 năm (2024), chưa đủ 10 năm |
-| 3 | Script tải NASA POWER cho lưới điểm tương ứng khu vực | 9/10 | Dữ liệu POWER phủ đủ bounding box đã chọn | So sánh phạm vi toạ độ tải về với bounding box gốc | 🟡 Mới 6 điểm đại diện, chưa phủ dạng lưới đầy đủ bounding box |
-| 4 | Script tải Open-Meteo Historical làm nguồn đối chiếu chéo | 10/10 | Dữ liệu Open-Meteo cùng khoảng thời gian với ERA5 | Số ngày dữ liệu Open-Meteo = số ngày ERA5 tương ứng | ⬜ Open-Meteo có cả năm 2024, nhưng ERA5 mới có 3 ngày — chưa khớp khoảng thời gian |
+| 1 | Script batch tải ERA5 đầy đủ (bounding box, 5 năm, 6 biến) | 7/10 | Toàn bộ dữ liệu ERA5 theo phạm vi đã chốt tải về đủ | So khớp số file/số ngày với lịch 5 năm, không thiếu tháng nào | ✅ Xong (13/10/2026) — `scripts/download_era5_full.py`: 9 biến × 60 tháng (2020–2024) = 540/540 file, mỗi biến đủ 43.848/43.848 giờ, 0% NaN, 22 GB (ARCO-ERA5, chạy lại được sau khi ngắt) |
+| 2 | Script tải toàn bộ NOAA ISD cho danh sách trạm mục tiêu | 8/10 | CSV đủ cho toàn bộ trạm trong danh sách, 10 năm | Đếm số trạm tải được / tổng số trạm mục tiêu ≥ 95% | ✅ Xong (13/10/2026) — `scripts/download_full_points.py`: 26/26 trạm × 10 năm (2015–2024), 258/260 file = 99,2% (≥ 95%); 2 file thiếu là trạm Cát Bi 2015–2016 không có trên NOAA (404) |
+| 3 | Script tải NASA POWER cho lưới điểm tương ứng khu vực | 9/10 | Dữ liệu POWER phủ đủ bounding box đã chọn | So sánh phạm vi toạ độ tải về với bounding box gốc | 🟡 Mở rộng lên 5 năm (2020–2024) cho 6 điểm đại diện, nhưng vẫn là điểm, chưa phủ dạng lưới bounding box (vùng lưới đã được ERA5 phủ đầy đủ) |
+| 4 | Script tải Open-Meteo Historical làm nguồn đối chiếu chéo | 10/10 | Dữ liệu Open-Meteo cùng khoảng thời gian với ERA5 | Số ngày dữ liệu Open-Meteo = số ngày ERA5 tương ứng | ✅ Xong (13/10/2026) — Open-Meteo 6 điểm × 2020–2024 = 1.827 ngày, khớp đúng 1.827 ngày ERA5 |
 | 5 | Module parser NetCDF4/GRIB2 bằng `xarray` → DataFrame chuẩn | 12/10 | Hàm `parse_era5()` trả DataFrame đúng cột đã định nghĩa | Unit test: input file mẫu → output đúng shape & tên cột | ✅ Xong — `warehouse/interpolation.py::bilinear_interpolate_era5()` (đọc NetCDF bằng xarray + nội suy vào trạm), trả đúng schema WeatherObs, đã chạy thật 8.136 dòng |
 | 6 | Module parser CSV/Fixed-width NOAA ISD, xử lý mã lỗi -9999/NaN | 13/10 | Hàm `parse_isd()` loại bỏ/đánh dấu giá trị lỗi | Unit test: input chứa `-9999` → output là NaN, không crash | ✅ Xong — `ingestion/parsers.py::parse_isd`, có unit test tiêm mã lỗi thật |
 | 7 | Chuẩn hoá thời gian: mọi timestamp về UTC ISO8601 | 15/10 | Toàn bộ 3 nguồn có cột `timestamp_utc` thống nhất | Kiểm tra ngẫu nhiên 10 bản ghi mỗi nguồn, timezone đúng UTC | ✅ Xong, vượt yêu cầu — cả 4 nguồn điểm, có unit test tự động (không chỉ kiểm tra ngẫu nhiên) |

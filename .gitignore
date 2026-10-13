@@ -44,3 +44,7 @@ data/
 *.ipynb_checkpoints/
 spark-warehouse/
 metastore_db/
+
+# Dữ liệu đầy đủ (tải bằng scripts/download_*.py, ~23 GB) — không đẩy lên repo
+data_samples/full/
+data_samples/era5_full/

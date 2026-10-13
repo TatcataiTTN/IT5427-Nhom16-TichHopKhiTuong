@@ -96,7 +96,10 @@ WeatherObs(loc,t,'ISD',temp,dew,ws,wd,pmsl,vis,...) ⊇
 WeatherObs(loc,t,'ERA5',temp,NULL,NULL,precip,ws=f(u,v),wd=g(u,v),ps,pmsl,rad,cc,NULL,NULL) ⊇
     ERA5(lat,lon,t,'2m_temperature','total_precipitation',
          '10m_u_component_of_wind','10m_v_component_of_wind',
-         surface_pressure,mean_sea_level_pressure,toa_incident_solar_radiation,total_cloud_cover)
+         surface_pressure,mean_sea_level_pressure,surface_solar_radiation_downwards,total_cloud_cover)
+    -- (13/10/2026) rad dung surface_solar_radiation_downwards (buc xa TAI BE MAT, cung dai luong voi
+    --  POWER ALLSKY_SFC_SW_DWN va Open-Meteo shortwave_radiation), KHONG dung toa_incident_solar_radiation
+    --  (buc xa o DINH khi quyen). Don vi: J/m2 tich luy 1 gio -> chia 3600 ra W/m2
     -- can chuyen doi vector (u,v) -> (speed,direction): ws=sqrt(u²+v²), wd=atan2(-u,-v)
 ```
 

@@ -68,6 +68,59 @@ def bilinear_interpolate_era5(nc_path: str, stations: pd.DataFrame) -> pd.DataFr
     return pd.concat(rows, ignore_index=True)
 
 
+def interpolate_era5_month(era5_dir: str, month: str, stations: pd.DataFrame) -> pd.DataFrame:
+    """
+    Ban day du cho data_samples/era5_full/<bien>/<YYYY-MM>.nc (scripts/download_era5_full.py):
+    noi suy Bilinear 1 thang, TAT CA tram trong 1 lan goi (vectorized, khong lap tung tram),
+    du 9 bien -> WeatherObs. Doi don vi theo docs/06:
+      K -> °C, m -> mm, Pa -> hPa, J/m² tich luy 1 gio -> W/m² (/3600), cloud 0-1 -> %,
+      (u, v) -> (speed, direction).
+    solar_rad_wm2 lay tu surface_solar_radiation_downwards (buc xa TAI BE MAT, cung dai luong
+    voi NASA POWER ALLSKY_SFC_SW_DWN va Open-Meteo shortwave_radiation); toa_incident_solar_radiation
+    (dinh khi quyen) chi giu o Raw Zone, khong dua vao WeatherObs.
+    """
+    def load(var):
+        return xr.open_dataset(f"{era5_dir}/{var}/{month}.nc")[var]
+
+    t2m = load("2m_temperature")
+    lat_min, lat_max = float(t2m.latitude.min()), float(t2m.latitude.max())
+    lon_min, lon_max = float(t2m.longitude.min()), float(t2m.longitude.max())
+    st = stations.dropna(subset=["lat", "lon"])
+    st = st[st["lat"].between(lat_min, lat_max) & st["lon"].between(lon_min, lon_max)]
+    if st.empty:
+        return pd.DataFrame()
+
+    lat = xr.DataArray(st["lat"].values, dims="station")
+    lon = xr.DataArray(st["lon"].values, dims="station")
+
+    def at_stations(var):
+        da = t2m if var == "2m_temperature" else load(var)
+        # (time, station) -> mang 1 chieu theo thu tu station-major khop voi khung ben duoi
+        return da.interp(latitude=lat, longitude=lon, method="linear").transpose("station", "time").values.ravel()
+
+    u = at_stations("10m_u_component_of_wind")
+    v = at_stations("10m_v_component_of_wind")
+    n_time = t2m.sizes["time"]
+    out = pd.DataFrame({
+        "location_id": np.repeat(st["location_id"].values, n_time),
+        "timestamp_utc": np.tile(pd.to_datetime(t2m.time.values, utc=True), len(st)),
+        "source": "ERA5",
+        "temp_c": at_stations("2m_temperature") - 273.15,
+        "rh_pct": np.nan,
+        "dewpoint_c": np.nan,
+        "precip_mm": np.clip(at_stations("total_precipitation") * 1000.0, 0, None),
+        "wind_speed_ms": np.sqrt(u**2 + v**2),
+        "wind_dir_deg": np.degrees(np.arctan2(-u, -v)) % 360,
+        "pressure_surface_hpa": at_stations("surface_pressure") / 100.0,
+        "pressure_msl_hpa": at_stations("mean_sea_level_pressure") / 100.0,
+        "solar_rad_wm2": np.clip(at_stations("surface_solar_radiation_downwards") / 3600.0, 0, None),
+        "cloud_cover_pct": at_stations("total_cloud_cover") * 100.0,
+        "soil_temp_c": np.nan,
+        "soil_moist_m3m3": np.nan,
+    })
+    return out
+
+
 if __name__ == "__main__":
     import os
     import sys

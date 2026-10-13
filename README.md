@@ -112,17 +112,21 @@ Danh sách trạm quan trắc dùng thẳng trong code: `reference/*.csv` (xem `
     └── test_model_pinn.py         — 3 test tích hợp, chạy thật cả 3 script PINN (đánh dấu `slow`)
 ```
 
-**Chạy thử toàn bộ pipeline** (đã verify thật, 5 nguồn gồm cả ERA5):
+**Chạy thử toàn bộ pipeline** (đã verify thật 13/10/2026 trên bộ dữ liệu đầy đủ: 9.348.470 bản ghi, 119 vị trí, 5 nguồn):
 ```bash
 # 0) Đặt JAVA_HOME trỏ tới JDK 17/21 (PySpark 4.x không chạy với Java 11):
 export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home   # macOS + Homebrew
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64                             # Ubuntu (apt install openjdk-17-jdk)
 export MKL_THREADING_LAYER=GNU    # chỉ cần nếu dùng Anaconda + torch cài từ pip (tránh lỗi MKL/libgomp)
 
-python3 scripts/batch_download_week2.py full           # tải dữ liệu thô (data_samples/ bị gitignore)
+python3 scripts/batch_download_week2.py full           # bộ mẫu Tuần 2 + GHCN toàn lịch sử (data_samples/ bị gitignore)
 python3 scripts/batch_download_week2.py sea-priority   # mở rộng GHCN/ISD ra 8 nước ĐNA còn lại
-python3 -m pytest tests/ -v                            # 25/25 test pass
-python3 warehouse/build_warehouse.py                   # sinh warehouse/output/weatherobs.parquet
+python3 scripts/download_full_points.py                # ISD 10 năm + Open-Meteo/NASA POWER 5 năm (~1,4 GB, vài giờ)
+python3 scripts/download_era5_full.py                  # ERA5 9 biến × 5 năm (22 GB lưu, ~1 TB tải về, ~24 giờ;
+                                                       #   chạy lại được sau khi ngắt — tháng đã có sẽ bỏ qua)
+python3 -m pytest tests/ -v                            # 26/26 test pass
+python3 warehouse/build_warehouse.py                   # 9.348.470 bản ghi -> warehouse/output/weatherobs.parquet
+                                                       #   (--dataset week2 để build bộ mẫu nhỏ nếu chưa tải đủ)
 python3 warehouse/spark_analytics.py                   # correlation, data skew, benchmark
 python3 model/train_demo.py && python3 model/navier_stokes_autograd_check.py \
   && python3 model/pinn_rh_from_dewpoint.py            # 3 ví dụ PINN, đều chạy thật

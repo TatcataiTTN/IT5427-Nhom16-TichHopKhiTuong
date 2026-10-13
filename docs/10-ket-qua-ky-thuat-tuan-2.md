@@ -3,79 +3,140 @@
 Tài liệu này gộp số liệu thật từ pipeline đã chạy (`ingestion/`, `warehouse/`), dùng làm nguồn cho
 3 mục "Viết phần ... cho báo cáo tiến độ" (TV1 #10, TV2 #10, TV3 #10 trong `docs/03`). Toàn bộ số
 liệu lấy trực tiếp từ lần chạy `warehouse/build_warehouse.py` + `warehouse/spark_analytics.py`
-ngày 10/10/2026 — không ước lượng.
+trên **bộ dữ liệu đầy đủ** ngày 13/10/2026 — không ước lượng.
+
+> Lịch sử: bản 10/10/2026 chạy trên bộ mẫu nhỏ (1.076.473 bản ghi, ERA5 3 ngày). Bản này thay thế
+> hoàn toàn sau khi tải đủ dữ liệu theo phạm vi đề cương (ERA5 5 năm, ISD 10 năm). Bộ mẫu nhỏ vẫn
+> build lại được bằng `python3 warehouse/build_warehouse.py --dataset week2`.
 
 ---
 
 ## 1. Ingestion (phần TV1)
 
-| Nguồn | Số bản ghi thật | Phạm vi |
-|---|---|---|
-| GHCN-Daily | 655.164 | 41 trạm (10 VN + 31 ĐNA ưu tiên), toàn lịch sử tới 2025 |
-| NOAA ISD/Global Hourly | 358.273 | 26 trạm (10 VN + 16 ĐNA ưu tiên), năm 2024 |
-| Open-Meteo Historical | 52.704 | 6 điểm đại diện, năm 2024, tần suất giờ |
-| ERA5 (ARCO, nội suy Bilinear) | 8.136 | 113 trạm, 3 ngày (15-17/6/2021), 4 biến |
-| NASA POWER | 2.196 | 6 điểm đại diện, năm 2024, tần suất ngày |
-| **Tổng** | **1.076.473** | |
+| Nguồn | Số bản ghi trong warehouse | Phạm vi | Dữ liệu thô |
+|---|---|---|---|
+| ERA5 (ARCO, nội suy Bilinear vào trạm) | 4.954.824 | 113 trạm × 43.848 giờ (2020–2024), 9 biến | 22 GB (540 file NetCDF, lưới 137×197 ô vùng ĐNA) |
+| NOAA ISD/Global Hourly | 3.464.430 | 26 trạm (10 VN + 16 ĐNA ưu tiên), 10 năm 2015–2024 | 1,3 GB CSV (258/260 file) |
+| GHCN-Daily | 655.166 | 41 trạm (10 VN + 31 ĐNA ưu tiên), toàn lịch sử 1943–2026 | 63 MB CSV |
+| Open-Meteo Historical | 263.088 | 6 điểm đại diện, 5 năm 2020–2024, tần suất giờ | 13 MB JSON |
+| NASA POWER | 10.962 | 6 điểm đại diện, 5 năm 2020–2024, tần suất ngày | 1 MB JSON |
+| **Tổng** | **9.348.470** | 119 vị trí, 5 nguồn | **~23,4 GB** |
+
+**Kiểm chứng đầy đủ ERA5 (tiêu chí TV1 #1 "không thiếu tháng nào"):** 540/540 file (9 biến × 60
+tháng), mỗi biến đủ 43.848/43.848 giờ (kể cả 2 năm nhuận 2020, 2024), 0% NaN. Khoảng giá trị hợp lý
+vật lý: nhiệt độ −0,4 → 46°C; áp suất mực nước biển thấp nhất 932 hPa và gió ~40 m/s (tâm bão);
+mưa giờ lớn nhất 77 mm.
 
 **Vướng mắc đã gặp và đã xử lý:**
-- Phát hiện lỗi tải Open-Meteo sai trường (`surface_pressure` thay vì `pressure_msl` theo đúng mapping GAV) — đã sửa và tải lại.
-- Phát hiện khác biệt hệ mã trạm: GHCN và ISD dùng 2 ID namespace khác nhau cho cùng vị trí vật lý (GHCN dùng mã dạng `VMM00048820`, ISD dùng `USAF+WBAN` dạng số) — nghĩa là **chưa thể tự động coi 2 trạm có cùng toạ độ là "cùng 1 thực thể"** nếu chỉ so khớp ID. Đây là bài toán Entity Resolution thật cần xử lý thêm (so khớp theo khoảng cách toạ độ, không phải so khớp ID) — ghi nhận làm việc cần làm ở Tuần 3.
-- Dữ liệu ERA5 mới dừng ở subset 3 ngày (không phải 5 năm đầy đủ) — quyết định phạm vi do giới hạn thời gian/băng thông, xem `docs/09-viec-ban-can-tu-lam.md` mục 5.
+- **Băng thông là nút thắt của ERA5, không phải số luồng.** Mỗi chunk ARCO-ERA5 là 1 giờ *toàn cầu*
+  (721×1440), nên để lấy vùng ĐNA vẫn phải tải cả chunk: ~1,8 GB tải về cho mỗi tháng-biến dù chỉ giữ
+  ~40 MB → tổng ~1 TB lưu lượng mạng, ~24 giờ ở ~10 MB/s. Tăng từ 32 lên 128 luồng không nhanh hơn.
+  Phương án thay thế (CDS cắt bbox phía server, chỉ ~25 GB) cần tài khoản + xếp hàng — nhóm chọn ARCO.
+  Script `scripts/download_era5_full.py` tải theo tháng, ghi qua file tạm, chạy lại được sau khi ngắt
+  (đã thực tế bị khởi động lại máy 1 lần giữa chừng, chạy lại không mất dữ liệu).
+- **Lỗi đơn vị gió Open-Meteo (đã sửa):** API trả `wind_speed_10m` theo **km/h** (`hourly_units`),
+  parser cũ ghi thẳng vào cột `wind_speed_ms` → gió Open-Meteo bị **phóng đại 3,6 lần** trong warehouse
+  cũ. Parser giờ đọc `hourly_units` và quy đổi, có unit test riêng.
+- **Bức xạ ERA5 — chọn đúng đại lượng vật lý:** GAV mapping ban đầu (docs/06) dùng
+  `toa_incident_solar_radiation` = bức xạ ở **đỉnh khí quyển**, trong khi NASA POWER
+  (`ALLSKY_SFC_SW_DWN`) và Open-Meteo (`shortwave_radiation`) là bức xạ **tại bề mặt**. Đã tải thêm
+  `surface_solar_radiation_downwards` và dùng nó cho cột `solar_rad_wm2` (J/m² tích luỹ giờ ÷ 3600 → W/m²).
+- **Khoảng trống dữ liệu thật trong nguồn:** ISD trạm Cát Bi (Hải Phòng) không có dữ liệu 2015–2016
+  trên NOAA (HTTP 404) — đây là đặc điểm nguồn, không phải lỗi tải.
+- Phát hiện lỗi tải Open-Meteo sai trường (`surface_pressure` thay vì `pressure_msl`) — đã sửa từ trước.
+- GHCN và ISD dùng 2 ID namespace khác nhau cho cùng vị trí vật lý (`VMM00048820` vs `USAF+WBAN`) —
+  **chưa thể coi 2 trạm cùng toạ độ là "cùng 1 thực thể"** nếu chỉ so khớp ID. Bài toán Entity
+  Resolution theo khoảng cách toạ độ — việc Tuần 3.
 
 ## 2. Schema & Warehousing (phần TV2)
 
 **Kiến trúc đã triển khai thật:**
 - Mediated Schema `WeatherObs` (15 cột) — `ingestion/parsers.py`
-- Dimension `Location` (119 vị trí: 113 trạm + 6 điểm) — `warehouse/location.py`, referential integrity đã test: **100% khớp** (0 location_id mồ côi)
-- ETL end-to-end qua Spark, partition theo `year/source` — `warehouse/build_warehouse.py`, **88 partition thật**, đếm vào=ra khớp 100% (1.076.473 = 1.076.473)
-- Survivorship (ISD/GHCN > ERA5 > Open-Meteo > NASA_POWER) — `warehouse/survivorship.py`, đã test với dữ liệu overlap thật (GHCN vs ERA5, 15-17/6/2021): GHCN thắng đúng ở hầu hết trường hợp, fallback đúng về ERA5 khi GHCN thiếu dữ liệu
+- Dimension `Location` (119 vị trí: 113 trạm + 6 điểm) — `warehouse/location.py`, referential integrity đã test: **100% khớp**
+- Nội suy ERA5 lưới → trạm (`warehouse/interpolation.py::interpolate_era5_month`): vector hoá, nội suy
+  cả 113 trạm trong 1 lần gọi/tháng (~2,5 s/tháng), kết quả khớp tuyệt đối với cách nội suy từng trạm cũ
+- ETL end-to-end qua Spark, partition theo `year/source` — `warehouse/build_warehouse.py`:
+  **109 partition**, đếm vào = ra khớp 100% (9.348.470 = 9.348.470), chạy hết **2 phút 26 giây**, RAM
+  đỉnh ~0,5 GB (parse từng nguồn → Parquet tạm → Spark đọc và ghi partition, không dồn ~10 triệu dòng
+  qua `createDataFrame` trên driver)
+- Survivorship (ISD/GHCN > ERA5 > Open-Meteo > NASA_POWER) — `warehouse/survivorship.py`
 
 **Dung lượng thực tế vs ước lượng ban đầu:**
 
-| | Ước lượng ban đầu (đề cương) | Thực tế đã lưu (10/10/2026) | Giải thích chênh lệch |
+| | Ước lượng (đề cương) | Thực tế (13/10/2026) | Giải thích |
 |---|---|---|---|
-| Tổng dung lượng | ~35 GB (chủ yếu ERA5 full 5 năm) | 29 MB (warehouse Parquet, partition) | Chưa tải ERA5 full 5 năm — mới có subset 3 ngày để chứng minh pipeline. Khi tải đủ 5 năm, dự kiến tiệm cận ước lượng gốc (xem mục 3) |
-| GHCN+ISD+POWER+Open-Meteo (phần đã tải đủ) | ~70 MB (ước lượng đề cương) | ~64 MB thô (CSV/JSON gốc), 29MB sau nén Parquet | Khớp hợp lý, Parquet nén tốt hơn CSV/JSON thô |
+| ERA5 | ~34,8 GB (8 biến, 5 năm) | 22 GB (9 biến, 5 năm, NetCDF nén zlib) | Khớp bậc độ lớn; nén zlib giảm ~40% so với float32 thô |
+| Các nguồn điểm | < 100 MB | 1,4 GB | ISD mở rộng từ 1 năm lên 10 năm, 26 trạm |
+| Warehouse Parquet | — | 303 MB | Warehouse chỉ giữ ERA5 **tại 113 vị trí trạm** (sau nội suy), không giữ cả lưới — lưới đầy đủ nằm ở Raw Zone |
 
-**Phát hiện benchmark quan trọng (trung thực, không che giấu kết quả không như kỳ vọng):**
-Benchmark đọc `year=2024, source=ISD` (358.273 dòng) — **partition KHÔNG nhanh hơn ở quy mô dữ liệu hiện tại**:
-- Có partition: 0.381s | Không partition: 0.173s → **partition chậm hơn ~2.2x**
-- Dung lượng: có partition 29MB (88 thư mục nhỏ) vs không partition 8.5MB (1 file) — **partition tốn thêm dung lượng ~3.4x**
+**Benchmark partition (đo lại công bằng trên dữ liệu đầy đủ):** trung vị 5 lần chạy sau 1 lần làm
+nóng JVM, so với bản sao không partition ghi từ **chính** warehouse hiện tại:
 
-Nguyên nhân: ở quy mô ~1 triệu dòng, dữ liệu đủ nhỏ để Spark quét toàn bộ cực nhanh; overhead liệt kê 88 thư mục partition + nhiều file nhỏ (small-file problem) vượt quá lợi ích "partition pruning". **Lợi ích partition chỉ rõ rệt khi dữ liệu đủ lớn** (dự kiến sau khi tải ERA5 full 5 năm, ~35GB) — cần benchmark lại ở quy mô đó trước khi kết luận partition key year/source có tối ưu hay không.
+| Truy vấn | Có partition | Không partition | Kết quả |
+|---|---|---|---|
+| Đếm ISD năm 2024 | 0,173 s | 0,080 s | partition chậm hơn 2,2× |
+| Trung bình nhiệt độ ISD 2024 | 0,222 s | 0,093 s | chậm hơn 2,4× |
+| Trung bình theo tháng/trạm ERA5 2024 | 0,299 s | 0,202 s | chậm hơn 1,5× |
+| Tổng mưa theo năm/trạm GHCN 1991–2000 | 0,185 s | 0,106 s | chậm hơn 1,7× |
+
+**Kết luận trung thực: ở quy mô 9,3 triệu dòng / 303 MB, partition `year/source` vẫn KHÔNG nhanh
+hơn.** Nguyên nhân: bản không partition vẫn được Parquet lọc hiệu quả nhờ **thống kê min/max theo
+row-group** (dữ liệu được ghi theo cụm nguồn/năm nên Spark bỏ qua được hầu hết row-group không liên
+quan), trong khi 109 thư mục partition phát sinh chi phí liệt kê file. Lợi ích partition pruning chỉ
+rõ ở quy mô lớn hơn nhiều hoặc khi lưu trên object storage (S3/GCS) nơi mỗi lần liệt kê/đọc file tốn
+độ trễ mạng. *Lưu ý: bản 10/10 có lỗi benchmark — bản sao không partition chỉ được ghi một lần nên về
+sau so warehouse mới với bản sao cũ; script đã sửa để ghi lại mỗi lần chạy.*
 
 ## 3. Distributed Computing (phần TV3)
 
-**Môi trường Spark:** PySpark 4.2.0, local mode (`local[*]`, 14 core). Phát hiện & khắc phục: PySpark 4.x yêu cầu Java 17+, máy có Java 11 mặc định gây lỗi `UnsupportedClassVersionError` — đã ghi quy trình khắc phục vào README.
+**Môi trường Spark:** PySpark 4.2.0. Chạy được cả `local[*]` và **cụm Docker thật** (`apache/spark:4.2.0`,
+1 master + 2 worker × 2 core, đã gửi job từ host chạy xong trên cụm). Kafka broker (`apache/kafka:3.7.0`)
+chạy thật, producer replay 500/500 message JSON hợp lệ.
 
-**Ma trận tương quan giữa các biến khí tượng** (tính thật trên 1.076.473 dòng, `warehouse/spark_analytics.py`):
+**Ma trận tương quan Pearson** (tính thật trên warehouse đầy đủ, **từng cặp biến, chỉ trên dòng có
+đủ cả 2 biến** — từ 274.050 đến 8.662.032 dòng tuỳ cặp):
 
 | | temp_c | rh_pct | precip_mm | wind_speed_ms | pressure_msl_hpa |
 |---|---|---|---|---|---|
-| temp_c | +1.00 | +0.11 | -0.07 | +0.16 | +0.06 |
-| rh_pct | +0.11 | +1.00 | -0.16 | +0.57 | +0.43 |
-| precip_mm | -0.07 | -0.16 | +1.00 | -0.10 | -0.07 |
-| wind_speed_ms | +0.16 | +0.57 | -0.10 | +1.00 | +0.51 |
-| pressure_msl_hpa | +0.06 | +0.43 | -0.07 | +0.51 | +1.00 |
+| temp_c | +1.00 | −0.60 | −0.01 | +0.12 | −0.61 |
+| rh_pct | −0.60 | +1.00 | +0.10 | −0.30 | +0.04 |
+| precip_mm | −0.01 | +0.10 | +1.00 | +0.08 | −0.11 |
+| wind_speed_ms | +0.12 | −0.30 | +0.08 | +1.00 | +0.05 |
+| pressure_msl_hpa | −0.61 | +0.04 | −0.11 | +0.05 | +1.00 |
 
-Kiểm thử đạt: đường chéo = 1.0, ma trận đối xứng. Tương quan gió-áp suất (+0.51) và gió-độ ẩm (+0.57) hợp lý về mặt khí tượng (gió mạnh thường đi kèm hệ thống áp thấp/mưa).
+Hai tương quan mạnh đều đúng vật lý: **nhiệt độ – độ ẩm tương đối −0,60** (chu kỳ ngày: trời nóng thì
+RH giảm vì áp suất hơi bão hoà tăng theo Clausius-Clapeyron) và **nhiệt độ – áp suất −0,61** (mùa
+nóng ứng với áp thấp nóng lục địa, mùa lạnh ứng với áp cao lạnh). Mưa tương quan yếu với mọi biến —
+khớp nhận định Veracity thấp của mưa đối lưu ở docs/06.
 
-**Kiểm tra data skew:** 88 partition, partition lớn nhất (`year=2024, source=ISD`) chiếm 33.28% tổng dữ liệu — **dưới ngưỡng 50%, đạt yêu cầu**. Nguyên nhân: ISD năm 2024 có tần suất 30 phút/lần trong khi GHCN là tần suất ngày, trải trên nhiều năm — mất cân bằng tự nhiên theo tần suất nguồn, không phải lỗi thiết kế partition.
+*Đính chính bản 10/10:* ma trận cũ (gió–độ ẩm +0,57, gió–áp suất +0,51) là **tương quan giả** do
+script thay NaN bằng 0 trước khi tính — mỗi nguồn thiếu biến khác nhau (ERA5 không có RH, ISD không có
+mưa, NASA POWER không có áp suất MSL) nên các cột "cùng bị thiếu" bị coi là cùng bằng 0. Đã sửa sang
+tương quan từng cặp (pairwise deletion).
 
-**Chưa làm (ghi nhận trung thực):** Docker Compose Spark cluster nhiều node, Kafka Streaming, PINN training loop (Clausius-Clapeyron mới ở dạng công thức trực tiếp, chưa phải physics loss trong vòng lặp huấn luyện) — xem trạng thái đầy đủ tại `docs/03-ke-hoach-160-tasks.md`.
+**Kiểm tra data skew:** 109 partition, partition lớn nhất (`year=2020, source=ERA5`) chiếm **10,62%**
+tổng dữ liệu — dưới ngưỡng 50%, đạt yêu cầu. ERA5 phân bố đều theo năm (~990 nghìn dòng/năm) nên 5
+partition lớn nhất đều là ERA5 với tỷ lệ gần như bằng nhau.
+
+**Dashboard với dữ liệu đầy đủ:** nạp 9,3 triệu bản ghi lần đầu ~3,7 s; đã thêm cache bảng trung bình
+theo ngày → đổi ngày/trạm còn ~0,6 s (trước đó ~4 s mỗi lần kéo thanh trượt).
+
+**Chưa làm (ghi nhận trung thực):** Spark Structured Streaming consumer cho Kafka, PINN training
+loop, **phát hiện dị thường khí hậu** và các panel hỗ trợ quyết định (UAV/nông nghiệp/năng lượng) —
+xem trạng thái đầy đủ tại `docs/03-ke-hoach-160-tasks.md`.
 
 ## 4. Rà soát rủi ro — cập nhật sau Tuần 2 (phần TV4)
 
-Bổ sung các rủi ro MỚI phát hiện khi chạy pipeline thật, cộng thêm bảng rủi ro gốc ở `report/main.tex` Chương 7:
-
-| Rủi ro mới | Mức ảnh hưởng | Phương án dự phòng |
+| Rủi ro | Mức ảnh hưởng | Trạng thái / phương án |
 |---|---|---|
-| Docker Desktop không khởi động được tự động trên máy TV3+TV4, chặn Spark cluster nhiều node + Kafka | Trung bình | Đã viết sẵn + validate cú pháp `docker-compose.spark.yml` và `docker-compose.kafka.yml` — chỉ cần Docker Desktop chạy là triển khai được ngay. Trong lúc chờ, toàn bộ pipeline vẫn chạy tốt ở `local[*]` (đã verify 1.076.473 dòng) |
-| GHCN và ISD dùng 2 hệ mã trạm độc lập cho cùng vị trí vật lý — chưa thể so sánh trực tiếp 2 nguồn trạm với nhau qua `location_id` | Trung bình-Cao | Cần thêm bước Entity Resolution dựa trên khoảng cách toạ độ (không phải so khớp ID) ở Tuần 3 — đã ghi nhận rõ trong `docs/11` mục 1 |
-| Partition theo `year/source` làm CHẬM truy vấn và TỐN dung lượng hơn ở quy mô dữ liệu hiện tại (~1 triệu dòng) | Thấp (hiện tại), có thể tăng nếu không xử lý trước khi mở rộng ERA5 full 5 năm | Giữ nguyên partition key, benchmark lại khi dữ liệu đạt quy mô ~35GB (ERA5 full) — khả năng cao lợi ích sẽ rõ ràng hơn ở quy mô đó, đúng bản chất kỹ thuật của partition pruning |
-| Khối lượng công việc TV3+TV4 (PINN, Spark, Dashboard, Kafka) vẫn là phần nặng nhất còn lại dù đã tự động hoá nhiều | Cao (đã nêu từ đầu `docs/03`) | Đã ưu tiên đúng thứ tự khuyến nghị: Spark batch + Dashboard (lõi bắt buộc) đã xong trước; PINN/Kafka làm sau — khớp đúng chiến lược giảm tải đã thống nhất |
+| Docker không chạy được, chặn Spark cluster + Kafka | — | **Đã giải quyết 13/10**: chạy thật trên Docker Engine (Linux). Image Bitnami đã bị gỡ khỏi Docker Hub → đổi sang image chính thức `apache/*` |
+| GHCN và ISD dùng 2 hệ mã trạm độc lập cho cùng vị trí vật lý | Trung bình-Cao | Entity Resolution theo khoảng cách toạ độ ở Tuần 3 (`docs/11` mục 1) |
+| Partition `year/source` chậm hơn ở quy mô hiện tại (đã đo lại trên 9,3 triệu dòng) | Thấp | Giữ partition (đúng thiết kế cho quy mô lớn hơn/object storage), trình bày kết quả đo thật trong báo cáo |
+| Tải lại ERA5 tốn ~1 TB lưu lượng, ~24 giờ | Trung bình | Dữ liệu thô không nằm trong git — chia sẻ thư mục `data_samples/` (hoặc chỉ `warehouse/output/`, 303 MB) cho thành viên khác thay vì tải lại |
+| Khối lượng TV3+TV4 (PINN, Streaming, Dashboard, dị thường) vẫn là phần nặng nhất | Cao | Phần phát hiện dị thường có thể chuyển một phần sang TV1 (gần với outlier detection Tuần 3) |
 
 ---
 
-*Nguồn số liệu: chạy thật `warehouse/build_warehouse.py` và `warehouse/spark_analytics.py` lúc 10/10/2026. Tái lập bằng cách chạy lại 2 script này (xem README mục 6b).*
+*Nguồn số liệu: chạy thật `warehouse/build_warehouse.py` và `warehouse/spark_analytics.py` lúc 13/10/2026 trên máy
+Linux của TV1 (12 core, Ubuntu 24.04). Tái lập: tải dữ liệu bằng `scripts/download_era5_full.py` +
+`scripts/download_full_points.py`, rồi chạy lại 2 script trên (xem README).*

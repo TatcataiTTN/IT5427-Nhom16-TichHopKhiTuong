@@ -180,7 +180,10 @@ def parse_openmeteo(filepath: str, location_id: str) -> pd.DataFrame:
     out["temp_c"] = col("temperature_2m")
     out["rh_pct"] = col("relative_humidity_2m")
     out["precip_mm"] = col("precipitation")
-    out["wind_speed_ms"] = col("wind_speed_10m")
+    # Open-Meteo mặc định trả gió theo km/h (hourly_units) -> phải đổi sang m/s
+    wind_unit = d.get("hourly_units", {}).get("wind_speed_10m", "km/h")
+    wind_factor = {"km/h": 1 / 3.6, "m/s": 1.0, "mp/h": 0.44704, "kn": 0.514444}[wind_unit]
+    out["wind_speed_ms"] = col("wind_speed_10m") * wind_factor
     out["wind_dir_deg"] = col("wind_direction_10m")
     out["pressure_msl_hpa"] = col("pressure_msl")
     out["solar_rad_wm2"] = col("shortwave_radiation")
