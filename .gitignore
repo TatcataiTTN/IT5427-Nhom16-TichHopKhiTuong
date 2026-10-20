@@ -17,6 +17,18 @@ data/
 !slides/images/**/*.png
 !report/figures/**/*.png
 
+# Raw boundary/raster data (CHIRPS GeoTIFF, Natural Earth shapefile) - qua batch_download_week2.py
+*.tif
+*.tif.gz
+*.zip
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+data_samples/batch_week2/boundaries/
+data_samples/batch_week2/chirps/
+
 # LaTeX build artifacts (giữ lại .tex nguồn và .pdf đã build, bỏ file tạm)
 *.aux
 *.log

@@ -2,10 +2,13 @@
 # Chay: docker compose -f docker-compose.spark.yml up -d
 # Spark Master UI: http://localhost:8080  |  Submit job: spark://localhost:7077
 # Dung: docker compose -f docker-compose.spark.yml down
+# Luu y (phat hien 20/10/2026): Bitnami rut tag "bitnami/spark:3.5" khoi Docker Hub (chinh sach
+# moi, cac tag thuong chuyen sang anh tra phi). Dang dung "bitnamilegacy/spark:4.0.0" (anh dong
+# bang cuoi cung con mien phi) thay the.
 
 services:
   spark-master:
-    image: bitnami/spark:3.5
+    image: bitnamilegacy/spark:4.0.0
     container_name: nhom16-spark-master
     environment:
       - SPARK_MODE=master
@@ -16,7 +19,7 @@ services:
       - spark-net
 
   spark-worker-1:
-    image: bitnami/spark:3.5
+    image: bitnamilegacy/spark:4.0.0
     container_name: nhom16-spark-worker-1
     environment:
       - SPARK_MODE=worker
@@ -29,7 +32,7 @@ services:
       - spark-net
 
   spark-worker-2:
-    image: bitnami/spark:3.5
+    image: bitnamilegacy/spark:4.0.0
     container_name: nhom16-spark-worker-2
     environment:
       - SPARK_MODE=worker

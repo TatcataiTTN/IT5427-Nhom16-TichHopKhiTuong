@@ -2,10 +2,12 @@
 # (docs/03 Tuan 1 TV3 #8, Tuan 2 TV1 #9 + TV3 #2).
 # Chay: docker compose -f docker-compose.kafka.yml up -d
 # Dung: docker compose -f docker-compose.kafka.yml down
+# Luu y (phat hien 20/10/2026): tag "bitnami/kafka:3.7" bi rut khoi Docker Hub, dung
+# "bitnamilegacy/kafka:4.0.0-debian-12-r10" (anh dong bang con mien phi) thay the.
 
 services:
   kafka:
-    image: bitnami/kafka:3.7
+    image: bitnamilegacy/kafka:4.0.0-debian-12-r10
     container_name: nhom16-kafka
     ports:
       - "9092:9092"
