@@ -28,7 +28,10 @@ def main():
 
     import pandas as pd
     from kafka import KafkaProducer
-    from kafka.errors import NoBrokersAvailable
+    try:
+        from kafka.errors import NoBrokersAvailable
+    except ImportError:  # kafka-python >= 3.0 doi ten exception
+        from kafka.errors import KafkaConnectionError as NoBrokersAvailable
 
     df = pd.read_parquet(WAREHOUSE).sort_values("timestamp_utc").head(args.limit)
     print(f"Doc {len(df)} ban ghi tu warehouse (gioi han --limit {args.limit}) de replay")
@@ -46,7 +49,7 @@ def main():
     sent = 0
     for _, row in df.iterrows():
         topic = f"weatherobs.{row['source'].lower()}"
-        message = row.to_dict()
+        message = {k: (None if pd.isna(v) else v) for k, v in row.to_dict().items()}
         producer.send(topic, value=message)
         sent += 1
         if args.speed > 0:

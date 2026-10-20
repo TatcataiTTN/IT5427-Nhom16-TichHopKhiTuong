@@ -1,17 +1,25 @@
 # Việc chỉ bạn (hoặc nhóm) mới làm được — không tự động hoá được
 
-Cập nhật: 10/10/2026. Đây là danh sách lọc ra từ toàn bộ kế hoạch 160 tác vụ (`03-ke-hoach-160-tasks.md`)
+Cập nhật: 20/10/2026. Đây là danh sách lọc ra từ toàn bộ kế hoạch 160 tác vụ (`03-ke-hoach-160-tasks.md`)
 — mọi việc có thể tự động hoá (code, test, tải dữ liệu, viết tài liệu kỹ thuật) đã được làm hoặc đang
 được làm trực tiếp trong repo. Danh sách dưới đây là phần còn lại: cần tài khoản cá nhân, quyết định
 của nhóm, hoặc hành động con người (họp, nộp bài, thuyết trình) mà không ai làm thay được.
 
 ---
 
-## 0. Mới phát hiện hôm nay (10/10/2026)
+## 0. ĐÃ XONG (20/10/2026) — Docker Desktop đã lên, cụm Spark + Kafka đã chạy thật
 
-| # | Việc | Chi tiết |
-|---|---|---|
-| 0 | **Mở Docker Desktop thủ công (lần đầu)** | Đã thử `open -a Docker` để tự khởi động nhưng daemon không lên sau vài phút chờ — có thể cần bạn tự mở app và xác nhận một số dialog lần đầu (cấp quyền, đăng nhập). Sau khi Docker Desktop chạy (biểu tượng cá voi ở thanh menu macOS chuyển sang trạng thái "running"), báo tôi để tôi chạy tiếp: `docker compose -f docker-compose.spark.yml up -d` (cụm Spark 1 master + 2 worker) và `docker compose -f docker-compose.kafka.yml up -d` (Kafka broker cho streaming) — cả 2 file đã viết sẵn, chỉ cần Docker daemon chạy là tôi tự verify được. | 🔴 Chặn 2 tác vụ TV3 |
+~~Mở Docker Desktop thủ công~~ — Docker daemon đã chạy. Đã tự verify thật ngay sau đó:
+- Pull lại image: tag cũ `bitnami/spark:3.5`/`bitnami/kafka:3.7` đã bị **Bitnami rút khỏi Docker Hub**
+  (chính sách mới 2025) — đã đổi `docker-compose.spark.yml`/`docker-compose.kafka.yml` sang
+  `bitnamilegacy/spark:4.0.0` / `bitnamilegacy/kafka:4.0.0-debian-12-r10` (ảnh đông băng còn miễn phí).
+- Spark cluster: `curl localhost:8080/json/` báo `aliveworkers: 2`, đã `spark-submit` 1 job thật
+  (tổng 0..999999) chạy phân tán trên worker, kết quả đúng.
+- Kafka: producer publish 70 message JSON thật vào topic `weatherobs.ghcn`, `kafka-console-consumer`
+  đọc lại đúng. Phát hiện + sửa 1 bug thật: producer xuất `NaN` (không hợp JSON chuẩn) cho giá trị
+  thiếu, đã sửa thành `null`.
+
+**Không còn việc gì cần bạn làm cho mục này.**
 
 ## 1. Việc gấp — liên quan mốc đã/sắp tới hạn
 
@@ -45,7 +53,14 @@ Không bắt buộc cho lõi đề tài (4 nguồn chính đều không cần đ
 | # | Việc | Ngày |
 |---|---|---|
 | 11 | Diễn tập thuyết trình báo cáo tiến độ trong nhóm | 18/10 |
-| 12 | Trình bày báo cáo tiến độ trước lớp/giảng viên | 20/10 |
+| 12 | **Trình bày báo cáo tiến độ trước lớp/giảng viên — HÔM NAY** | 20/10 |
+
+**Đã chuẩn bị sẵn cho mục 12**: `slides/progress-report.tex` — bộ slide 21 trang (build sạch bằng
+XeLaTeX, `slides/progress-report.pdf`) tổng hợp số liệu thật từ `docs/10` (1.076.473 bản ghi,
+ma trận tương quan, 3 kỹ thuật PINN hội tụ, phát hiện partition chậm hơn, Kafka+Spark cluster chạy
+thật ngay hôm nay) + tiến độ 52/80 tác vụ Tuần 1-2. **Bạn cần tự xem lại nội dung trước khi trình
+bày** — đây là nháp tự động, chưa qua mắt người, có thể cần chỉnh câu chữ/thời lượng cho khớp
+giới hạn báo cáo thật của lớp.
 
 ---
 

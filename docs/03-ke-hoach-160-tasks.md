@@ -17,9 +17,9 @@
 - ✅ **Xong** — đã làm thật, vượt qua đúng tiêu chí Kiểm thử đã định nghĩa.
 - 🟡 **Một phần** — có kết quả thật nhưng chưa khớp 100% tiêu chí gốc (vd quy mô nhỏ hơn, công cụ khác tương đương, hoặc thiếu 1 phần việc).
 - ⬜ **Chưa làm** — chưa có kết quả, hoặc là hành động của con người (họp nhóm, nộp bài, thuyết trình, đăng ký tài khoản) ngoài khả năng hỗ trợ tự động — xem `docs/09-viec-ban-can-tu-lam.md`.
-- **Tổng Tuần 1 (40 tác vụ): 26 ✅ / 4 🟡 / 10 ⬜**
-- **Tổng Tuần 2 (40 tác vụ): 24 ✅ / 8 🟡 / 8 ⬜**
-- **Tổng 80 tác vụ đã rà soát: 50 ✅ / 12 🟡 / 18 ⬜** (so với lần rà soát trước 10/10/2026: 27 ✅ / 16 🟡 / 37 ⬜ — tăng 23 tác vụ Xong sau 1 phiên làm việc tập trung vào ETL/warehouse/PINN)
+- **Tổng Tuần 1 (40 tác vụ): 27 ✅ / 3 🟡 / 10 ⬜**
+- **Tổng Tuần 2 (40 tác vụ): 25 ✅ / 7 🟡 / 8 ⬜**
+- **Tổng 80 tác vụ đã rà soát: 52 ✅ / 10 🟡 / 18 ⬜** (so với lần rà soát trước 10/10/2026: 27 ✅ / 16 🟡 / 37 ⬜ — tăng 25 tác vụ Xong sau khi Docker Desktop lên được 20/10: Spark cluster 3 node + Kafka broker đã chạy và test thật, không còn là kế hoạch trên giấy)
 - **10 tác vụ ⬜ còn lại chủ yếu là hành động con người** (họp nhóm, nộp bài, thuyết trình, thu thập tiến độ từ Quang/Lương) — xem `docs/09`. Phần kỹ thuật tự động hoá được gần như đã làm hết trong khả năng của môi trường hiện tại (bị chặn bởi Docker Desktop chưa khởi động cho 2 tác vụ Kafka/Spark-cluster).
 
 ---
@@ -104,7 +104,7 @@
 | 6 | Module parser CSV/Fixed-width NOAA ISD, xử lý mã lỗi -9999/NaN | 13/10 | Hàm `parse_isd()` loại bỏ/đánh dấu giá trị lỗi | Unit test: input chứa `-9999` → output là NaN, không crash | ✅ Xong — `ingestion/parsers.py::parse_isd`, có unit test tiêm mã lỗi thật |
 | 7 | Chuẩn hoá thời gian: mọi timestamp về UTC ISO8601 | 15/10 | Toàn bộ 3 nguồn có cột `timestamp_utc` thống nhất | Kiểm tra ngẫu nhiên 10 bản ghi mỗi nguồn, timezone đúng UTC | ✅ Xong, vượt yêu cầu — cả 4 nguồn điểm, có unit test tự động (không chỉ kiểm tra ngẫu nhiên) |
 | 8 | Chuẩn hoá đơn vị: T→K, P→Pa, gió→m/s | 16/10 | Giá trị sau chuẩn hoá nằm trong khoảng vật lý hợp lý | So sánh trước/sau: T ~ 250–320K, P ~ 90.000–105.000 Pa | 🟡 Đã chuẩn hoá nhất quán + test khoảng vật lý hợp lý, nhưng dùng °C/hPa (quyết định thiết kế ở docs/06) thay vì K/Pa |
-| 9 | Kafka producer đọc dữ liệu lịch sử, publish theo topic riêng | 18/10 | Producer chạy được, publish message vào đúng topic | `kafka-console-consumer` nhận được message đúng định dạng JSON | 🟡 Code xong (`ingestion/kafka_producer.py`) + `docker-compose.kafka.yml` sẵn sàng, nhưng CHƯA test với broker thật (máy chưa bật Docker Desktop — xem `docs/09` mục 0) |
+| 9 | Kafka producer đọc dữ liệu lịch sử, publish theo topic riêng | 18/10 | Producer chạy được, publish message vào đúng topic | `kafka-console-consumer` nhận được message đúng định dạng JSON | ✅ Xong — test thật với broker thật 20/10 (Docker Desktop đã lên): `docker-compose.kafka.yml` (image `bitnamilegacy/kafka:4.0.0`, tag `bitnami/kafka:3.7` cũ đã bị rút khỏi Docker Hub), producer publish 70 message vào topic `weatherobs.ghcn`, `kafka-console-consumer` đọc lại đúng JSON. Phát hiện + sửa 1 bug thật: producer ban đầu xuất `NaN` (không phải JSON hợp lệ) cho giá trị thiếu, đã sửa thành `null` |
 | 10 | Viết phần Ingestion cho báo cáo tiến độ | 19/10 | Slide/đoạn báo cáo: khối lượng đã tải, vướng mắc, số liệu | TV4 review nội dung sẵn sàng đưa vào slide chung | ✅ Xong — `docs/10-ket-qua-ky-thuat-tuan-2.md` mục 1 |
 
 ### TV2 — Schema Lead
@@ -126,8 +126,8 @@
 
 | # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
 |---|---|---|---|---|---|
-| 1 | Dựng cụm Spark giả lập nhiều node bằng Docker Compose (driver + 2–3 worker) | 7/10 | Cluster khởi động đủ số node, UI Spark truy cập được | Spark Master UI hiển thị đủ số worker đã cấu hình | 🟡 `docker-compose.spark.yml` viết xong (1 master + 2 worker), `docker compose config` chạy sạch, nhưng CHƯA khởi động được vì Docker Desktop chưa chạy trên máy — xem `docs/09` mục 0 |
-| 2 | Kết nối Spark Streaming với Kafka topic từ TV1, xử lý windowing cơ bản | 8/10 | Job Streaming chạy, tính được aggregate theo cửa sổ thời gian | Console output hiển thị kết quả window đúng chu kỳ đã set | ⬜ Chưa làm — phụ thuộc Kafka broker thật (chặn bởi Docker, xem #1) |
+| 1 | Dựng cụm Spark giả lập nhiều node bằng Docker Compose (driver + 2–3 worker) | 7/10 | Cluster khởi động đủ số node, UI Spark truy cập được | Spark Master UI hiển thị đủ số worker đã cấu hình | ✅ Xong — test thật 20/10 sau khi Docker Desktop lên: Master API (`/json/`) báo `aliveworkers: 2`, đã `spark-submit` 1 job thật (tổng 0..999999) chạy phân tán trên worker `172.23.0.3`, kết quả đúng `499999500000`. Image `bitnami/spark:3.5` cũ bị Bitnami rút, đã đổi `bitnamilegacy/spark:4.0.0` |
+| 2 | Kết nối Spark Streaming với Kafka topic từ TV1, xử lý windowing cơ bản | 8/10 | Job Streaming chạy, tính được aggregate theo cửa sổ thời gian | Console output hiển thị kết quả window đúng chu kỳ đã set | ⬜ Hạ tầng (Spark cluster + Kafka broker) đã sẵn sàng thật từ 20/10 (#1, TV1 #9) — còn thiếu code Structured Streaming windowing, chuyển sang Tuần 3 |
 | 3 | Spark transformation tính ma trận tương quan giữa các biến khí tượng | 9/10 | Ma trận correlation xuất ra đúng kích thước n×n | Giá trị đường chéo = 1.0, ma trận đối xứng | ✅ Xong — `warehouse/spark_analytics.py`, ma trận 5×5 thật trên 1.076.473 dòng, đường chéo=1.0, đối xứng đúng |
 | 4 | Pipeline tiền xử lý dữ liệu đầu vào cho PINN (chuẩn hoá, tensor hoá) | 10/10 | Hàm trả tensor đúng shape (batch, features) | Unit test: input DataFrame mẫu → output tensor đúng dtype/shape | ✅ Xong — `model/pinn_rh_from_dewpoint.py` (DataFrame ISD thật → tensor `(batch,2)`) |
 | 5 | Cài framework huấn luyện (PyTorch + DeepXDE/custom loss) | 12/10 | Môi trường train chạy được ví dụ tối thiểu | Script `train_demo.py` chạy hết 1 epoch không lỗi | ✅ Xong, vượt yêu cầu — `model/train_demo.py` chạy 100 epoch, hội tụ đúng nghiệm giải tích |
