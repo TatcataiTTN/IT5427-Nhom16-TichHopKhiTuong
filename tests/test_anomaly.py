@@ -16,7 +16,10 @@ from warehouse.anomaly_detection import (
     classify_cross_source,
     doy365,
     heatwave_events,
+    precip_annual_indices,
+    precip_extreme_flag,
     spi_from_totals,
+    wet_day_percentiles,
 )
 
 
@@ -94,3 +97,40 @@ def test_classify_cross_source():
         "chua_xac_dinh",      # trạm bất thường vừa, ERA5 lệch nhẹ
         "khong_co_era5",
     ]
+
+
+# ---------------------------- Mưa cực đoan (ETCCDI) ----------------------------
+def _rain(values, start="2020-01-01", loc="A", source="ERA5"):
+    dates = pd.date_range(start, periods=len(values), freq="D")
+    return pd.DataFrame({"location_id": loc, "source": source, "date": dates.date, "precip_sum": values})
+
+
+def test_wet_day_percentiles_ignore_dry_days():
+    # 300 ngày khô (0 mm) + 200 ngày ướt 1..200 mm: p95 phải tính trên ngày ướt, không bị ngày khô kéo xuống
+    vals = np.concatenate([np.zeros(300), np.arange(1, 201, dtype=float)])
+    p = wet_day_percentiles(_rain(vals), {"ERA5": (2020, 2024)})
+    assert len(p) == 1
+    assert abs(p.loc[0, "p95"] - np.quantile(np.arange(1, 201), 0.95)) < 1e-9
+    assert p.loc[0, "n_wet"] == 200
+
+
+def test_wet_day_percentiles_require_enough_wet_days():
+    assert wet_day_percentiles(_rain(np.full(50, 5.0)), {"ERA5": (2020, 2024)}).empty
+
+
+def test_precip_extreme_flag():
+    f = precip_extreme_flag(pd.Series([10.0, 60.0, 120.0]), pd.Series([50.0] * 3), pd.Series([100.0] * 3))
+    assert list(f) == ["binh_thuong", "mua_lon", "mua_cuc_doan"]
+
+
+def test_precip_annual_indices_values_and_coverage():
+    vals = np.zeros(366)                  # 2020 là năm nhuận, đủ ngày
+    vals[[10, 20, 30]] = [5.0, 80.0, 150.0]
+    d = _rain(vals)
+    pct = pd.DataFrame({"location_id": ["A"], "source": ["ERA5"], "p95": [50.0], "p99": [100.0], "n_wet": [999]})
+    idx = precip_annual_indices(d, pct)
+    row = idx.iloc[0]
+    assert row["Rx1day"] == 150.0 and row["PRCPTOT"] == 235.0
+    assert row["R95p"] == 230.0 and row["R99p"] == 150.0
+    # Năm thiếu > 10% ngày số liệu thì bị bỏ
+    assert precip_annual_indices(d.head(200), pct).empty

@@ -106,6 +106,50 @@ def spi_from_totals(totals: pd.Series, baseline: pd.Series) -> pd.Series:
     return pd.Series(stats.norm.ppf(np.clip(h, 1e-6, 1 - 1e-6)), index=totals.index).where(totals.notna())
 
 
+WET_DAY_MM = 1.0        # ETCCDI: ngày ướt khi lượng mưa ≥ 1 mm
+MIN_WET_DAYS = 100      # số ngày ướt tối thiểu trong nền để ước lượng p95/p99 tin cậy
+MIN_YEAR_COVERAGE = 0.9 # chỉ số năm chỉ tính khi ≥ 90% số ngày có số liệu mưa
+
+
+def wet_day_percentiles(daily: pd.DataFrame, baselines: dict = None) -> pd.DataFrame:
+    """Ngưỡng mưa lớn theo ETCCDI: bách phân vị 95/99 của các NGÀY ƯỚT (≥ 1 mm) trong giai đoạn nền,
+    theo (vị trí, nguồn). Không theo mùa — đúng định nghĩa R95p/R99p của ETCCDI."""
+    baselines = baselines or BASELINES
+    d = daily.dropna(subset=["precip_sum"])
+    year = pd.to_datetime(d["date"]).dt.year
+    in_base = pd.Series(False, index=d.index)
+    for src, (y0, y1) in baselines.items():
+        in_base |= (d["source"] == src) & year.between(y0, y1)
+    wet = d[in_base & (d["precip_sum"] >= WET_DAY_MM)]
+    p = wet.groupby(["location_id", "source"])["precip_sum"].agg(
+        p95=lambda s: s.quantile(0.95), p99=lambda s: s.quantile(0.99), n_wet="size").reset_index()
+    return p[p["n_wet"] >= MIN_WET_DAYS]
+
+
+def precip_extreme_flag(precip: pd.Series, p95: pd.Series, p99: pd.Series) -> pd.Series:
+    return pd.Series(np.select([precip > p99, precip > p95], ["mua_cuc_doan", "mua_lon"], "binh_thuong"),
+                     index=precip.index)
+
+
+def precip_annual_indices(daily: pd.DataFrame, pct: pd.DataFrame) -> pd.DataFrame:
+    """Chỉ số ETCCDI theo năm: PRCPTOT (tổng mưa ngày ướt), Rx1day (mưa ngày lớn nhất),
+    R95p/R99p (tổng mưa của các ngày vượt p95/p99), R95pTOT (% đóng góp của mưa lớn).
+    Năm thiếu > 10% số ngày có số liệu mưa bị bỏ (Rx1day/R95p sẽ bị đánh giá thấp)."""
+    d = daily.dropna(subset=["precip_sum"]).merge(pct, on=["location_id", "source"], how="inner")
+    d["year"] = pd.to_datetime(d["date"]).dt.year
+    wet = d["precip_sum"] >= WET_DAY_MM
+    d["wet_precip"] = d["precip_sum"].where(wet, 0.0)
+    d["r95"] = d["precip_sum"].where(wet & (d["precip_sum"] > d["p95"]), 0.0)
+    d["r99"] = d["precip_sum"].where(wet & (d["precip_sum"] > d["p99"]), 0.0)
+    out = d.groupby(["location_id", "source", "year"]).agg(
+        n_days=("precip_sum", "size"), PRCPTOT=("wet_precip", "sum"), Rx1day=("precip_sum", "max"),
+        R95p=("r95", "sum"), R99p=("r99", "sum")).reset_index()
+    days_in_year = np.where(pd.to_datetime(out["year"].astype(str) + "-12-31").dt.is_leap_year, 366, 365)
+    out = out[out["n_days"] >= MIN_YEAR_COVERAGE * days_in_year].copy()
+    out["R95pTOT_pct"] = (100 * out["R95p"] / out["PRCPTOT"].where(out["PRCPTOT"] > 0)).round(1)
+    return out
+
+
 def classify_cross_source(z_station: pd.Series, z_era5: pd.Series) -> pd.Series:
     """Phân loại dị thường tại trạm theo ERA5 cùng vị trí/ngày:
       khong_co_era5     — ERA5 không có ngày đó (ERA5 chỉ có 2020–2024)
@@ -176,7 +220,8 @@ def build_climatology(spark, daily, var):
 # ----------------------------------------------------------------------------------------------
 # Kiểm chứng với sự kiện thật
 # ----------------------------------------------------------------------------------------------
-def validate_events(anom: pd.DataFrame, events: pd.DataFrame, spi: pd.DataFrame, loc: pd.DataFrame) -> dict:
+def validate_events(anom: pd.DataFrame, events: pd.DataFrame, spi: pd.DataFrame, loc: pd.DataFrame,
+                    precip_ext: pd.DataFrame = None) -> dict:
     names = loc.set_index("location_id")["name"].to_dict() if "name" in loc else {}
     country = loc.set_index("location_id")["country"].to_dict()
     out = {}
@@ -229,6 +274,19 @@ def validate_events(anom: pd.DataFrame, events: pd.DataFrame, spi: pd.DataFrame,
         "ty_le_thang_han_spi3_le_-1": round(float((dry["spi3"] <= -1).mean()), 3) if len(dry) else None,
         "ty_le_thang_han_toan_chuoi": round(float((clim["spi3"] <= -1).mean()), 3) if len(clim) else None,
     }
+
+    # 4) Mưa cực đoan do bão Yagi 6–11/9/2024 tại miền Bắc Việt Nam (so với ngưỡng p99 ngày ướt của chính trạm)
+    if precip_ext is not None and len(precip_ext):
+        r = precip_ext.copy()
+        r["date"] = pd.to_datetime(r["date"])
+        yr = r[r["location_id"].isin(north_vn) & r["date"].between("2024-09-06", "2024-09-11")]
+        top = yr.sort_values("ratio_p99", ascending=False).drop_duplicates(["location_id", "source"])
+        out["mua_bao_yagi_9_2024"] = {
+            "so_cap_tram_nguon_vuot_p99": int((top["precip_sum"] > top["p99"]).sum()),
+            "so_cap_tram_nguon": int(len(top)),
+            "lon_nhat": top.head(6)[["location_id", "source", "date", "precip_sum", "p99", "ratio_p99", "rank_in_record"]]
+                .assign(date=lambda x: x["date"].dt.date).round(1).astype(str).to_dict("records"),
+        }
     return out
 
 
@@ -243,12 +301,12 @@ def main():
              .config("spark.sql.session.timeZone", "UTC").config("spark.driver.memory", "4g").getOrCreate())
     spark.sparkContext.setLogLevel("ERROR")
 
-    print("== 1/5: Tong hop theo ngay (Spark) ==")
+    print("== 1/6: Tong hop theo ngay (Spark) ==")
     daily = build_daily(spark).cache()
     daily.write.mode("overwrite").parquet(os.path.join(OUT, "weather_daily.parquet"))
     print(f"  {daily.count():,} ngay-vi-tri-nguon")
 
-    print("== 2/5: Khi hau nen ±15 ngay + di thuong chuan hoa (Spark) ==")
+    print("== 2/6: Khi hau nen ±15 ngay + di thuong chuan hoa (Spark) ==")
     doy_col = F.when(F.expr("month(date) = 2 AND day(date) = 29"), 59).otherwise(
         F.dayofyear("date") - F.when(F.expr("month(date) > 2 AND (year(date) % 4 = 0)"), 1).otherwise(0))
     parts = []
@@ -266,7 +324,7 @@ def main():
     print(f"  {len(anom):,} gia tri co khi hau nen | bat thuong: {(anom.flag == 'bat_thuong').sum():,} "
           f"| cuc doan: {(anom.flag == 'cuc_doan').sum():,}")
 
-    print("== 3/5: Xac nhan cheo tram vs ERA5 cung vi tri/ngay ==")
+    print("== 3/6: Xac nhan cheo tram vs ERA5 cung vi tri/ngay ==")
     era5 = anom[anom["source"] == "ERA5"][["location_id", "date", "var", "z"]].rename(columns={"z": "z_era5"})
     anom = anom.merge(era5, on=["location_id", "date", "var"], how="left")
     anom.loc[anom["source"] == "ERA5", "z_era5"] = np.nan
@@ -276,13 +334,13 @@ def main():
     print("  " + anom.loc[station, "xac_nhan"].value_counts().to_string().replace("\n", "\n  "))
     anom.to_parquet(os.path.join(OUT, "anomaly_daily.parquet"), index=False)
 
-    print("== 4/5: Dot nong (>= 3 ngay lien tiep > bach phan vi 90) ==")
+    print("== 4/6: Dot nong (>= 3 ngay lien tiep > bach phan vi 90) ==")
     t = anom[anom["var"] == "temp_mean"].rename(columns={"value": "temp_mean"})
     events = heatwave_events(t)
     events.to_parquet(os.path.join(OUT, "heatwave_events.parquet"), index=False)
     print(f"  {len(events):,} dot nong | {events['location_id'].nunique()} vi tri")
 
-    print("== 5/5: SPI-1 / SPI-3 (tram GHCN, nen 1991-2020) ==")
+    print("== 5/6: SPI-1 / SPI-3 (tram GHCN, nen 1991-2020) ==")
     g = daily.filter((F.col("source") == "GHCN")).groupBy("location_id", "year", "month").agg(
         F.sum("precip_sum").alias("precip"), F.count("precip_sum").alias("n_days")).toPandas()
     g["days_in_month"] = pd.to_datetime(dict(year=g.year, month=g.month, day=1)).dt.days_in_month
@@ -307,8 +365,23 @@ def main():
     spi.to_parquet(os.path.join(OUT, "spi_monthly.parquet"), index=False)
     print(f"  {spi['location_id'].nunique()} tram co SPI | {len(spi):,} thang")
 
+    print("== 6/6: Mua cuc doan ETCCDI (p95/p99 ngay uot, Rx1day, R95p) ==")
+    dp = daily.select("location_id", "source", "date", "precip_sum").filter(F.col("precip_sum").isNotNull()).toPandas()
+    pct = wet_day_percentiles(dp)
+    ext = dp.merge(pct, on=["location_id", "source"], how="inner")
+    # Hạng của ngày trong toàn bộ chuỗi của trạm (1 = ngày mưa lớn nhất từng ghi nhận ở nguồn đó)
+    ext["rank_in_record"] = ext.groupby(["location_id", "source"])["precip_sum"].rank(ascending=False, method="min").astype(int)
+    ext["flag"] = precip_extreme_flag(ext["precip_sum"], ext["p95"], ext["p99"])
+    ext["ratio_p99"] = ext["precip_sum"] / ext["p99"]
+    precip_ext = ext[ext["flag"] != "binh_thuong"].reset_index(drop=True)
+    precip_ext.to_parquet(os.path.join(OUT, "precip_extremes_daily.parquet"), index=False)
+    indices = precip_annual_indices(dp, pct)
+    indices.to_parquet(os.path.join(OUT, "precip_indices_annual.parquet"), index=False)
+    print(f"  {len(pct)} vi tri-nguon co nguong | mua lon: {(precip_ext.flag == 'mua_lon').sum():,} ngay "
+          f"| mua cuc doan: {(precip_ext.flag == 'mua_cuc_doan').sum():,} ngay | {len(indices):,} nam-vi-tri co chi so")
+
     print("\n== Kiem chung voi su kien that ==")
-    summary = validate_events(anom, events, spi, build_location_table())
+    summary = validate_events(anom, events, spi, build_location_table(), precip_ext)
     summary["tong_quan"] = {
         "ngay_vi_tri_nguon": int(daily.count()),
         "gia_tri_co_nen": int(len(anom)),
@@ -316,6 +389,7 @@ def main():
         "cuc_doan": int((anom.flag == "cuc_doan").sum()),
         "xac_nhan_cheo": anom.loc[station, "xac_nhan"].value_counts().to_dict(),
         "dot_nong": int(len(events)),
+        "ngay_mua_cuc_doan_vuot_p99": int((precip_ext.flag == "mua_cuc_doan").sum()),
     }
     with open(os.path.join(OUT, "anomaly_summary.json"), "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2, default=str)
