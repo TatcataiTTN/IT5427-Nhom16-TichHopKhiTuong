@@ -14,8 +14,10 @@ import streamlit as st
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from warehouse.location import build_location_table
+from ingestion.veracity import detect_outliers_iqr
 
 WAREHOUSE = os.path.join(os.path.dirname(__file__), "..", "warehouse", "output", "weatherobs.parquet")
+PINN_OUTPUT = os.path.join(os.path.dirname(__file__), "..", "warehouse", "output", "pinn_wind_field_output.parquet")
 
 st.set_page_config(page_title="Nhóm 16 — Dashboard Khí tượng ĐNA", layout="wide")
 st.title("Dashboard Khí tượng Đông Nam Á — Nhóm 16, IT5427")
@@ -112,3 +114,83 @@ else:
     )
     st.map(map_df.rename(columns={"lat": "latitude", "lon": "longitude"}), size=20000)
     st.dataframe(map_df.sort_values(map_variable, ascending=False).head(10), use_container_width=True)
+
+st.divider()
+
+st.subheader("4. So sánh giá trị khí tượng giữa các nguồn (cùng điểm, cùng thời gian)")
+st.caption(
+    "NASA POWER và Open-Meteo cùng phủ 6 điểm đại diện, cả năm 2024 — đủ overlap thật để so sánh "
+    "trực tiếp (ERA5 hiện chỉ có 3 ngày 2021, GHCN/ISD khác điểm nên không đưa vào panel này)."
+)
+compare_sources = ["NASA_POWER", "OPEN_METEO"]
+compare_df = df[df["source"].isin(compare_sources)]
+compare_points = sorted(compare_df["location_id"].unique())
+if compare_points:
+    cmp_point = st.selectbox("Điểm so sánh", compare_points, key="cmp_point")
+    cmp_var = st.selectbox("Biến so sánh", ["temp_c", "precip_mm"], key="cmp_var")
+    cmp_pivot = (
+        compare_df[compare_df["location_id"] == cmp_point]
+        .pivot_table(index=compare_df["timestamp_utc"].dt.date, columns="source", values=cmp_var, aggfunc="mean")
+    )
+    cmp_pivot = cmp_pivot.reindex(columns=[c for c in compare_sources if c in cmp_pivot.columns])
+    if cmp_pivot.dropna(how="all").empty:
+        st.warning(f"Không có dữ liệu {cmp_var} để so sánh tại {cmp_point}.")
+    else:
+        st.line_chart(cmp_pivot)
+        diff = (cmp_pivot[compare_sources[0]] - cmp_pivot[compare_sources[1]]).dropna()
+        if len(diff) > 0:
+            rmse = (diff ** 2).mean() ** 0.5
+            st.metric(f"RMSE giữa {compare_sources[0]} và {compare_sources[1]} ({cmp_var})", f"{rmse:.3f}")
+else:
+    st.info("Chưa có dữ liệu NASA_POWER/OPEN_METEO trong warehouse.")
+
+st.divider()
+
+st.subheader("5. Panel cảnh báo bất thường khí tượng (IQR, gắn cờ tự động)")
+st.caption(
+    "Dùng IQR (bền vững hơn Z-score với outlier cực đoan — xem ingestion/veracity.py) để gắn cờ "
+    "giá trị bất thường thật trong warehouse, không phải dữ liệu giả lập."
+)
+alert_var = st.selectbox("Biến kiểm tra bất thường", ["temp_c", "precip_mm", "wind_speed_ms"], key="alert_var")
+alert_source = st.selectbox("Nguồn", sorted(df["source"].unique()), key="alert_source")
+alert_df = df[df["source"] == alert_source][["location_id", "timestamp_utc", alert_var]].dropna()
+if len(alert_df) >= 4:
+    flags = detect_outliers_iqr(alert_df[alert_var])
+    alert_df = alert_df.assign(is_outlier=flags)
+    n_alerts = int(flags.sum())
+    pct = n_alerts / len(alert_df) * 100
+    if pct > 10:
+        st.error(f"🔴 {n_alerts} bản ghi bất thường ({pct:.1f}%) — tỷ lệ CAO, cần rà soát nguồn")
+    elif pct > 2:
+        st.warning(f"🟡 {n_alerts} bản ghi bất thường ({pct:.1f}%) — mức trung bình")
+    else:
+        st.success(f"🟢 {n_alerts} bản ghi bất thường ({pct:.1f}%) — mức thấp, bình thường")
+    if n_alerts > 0:
+        st.dataframe(
+            alert_df[alert_df["is_outlier"]].sort_values(alert_var, ascending=False).head(20),
+            use_container_width=True,
+        )
+else:
+    st.info("Không đủ dữ liệu để kiểm tra bất thường cho lựa chọn này.")
+
+st.divider()
+
+st.subheader("6. Output PINN — trường gió (u,v) dự đoán vs quan trắc thật")
+if os.path.exists(PINN_OUTPUT):
+    pinn_df = pd.read_parquet(PINN_OUTPUT)
+    st.caption(
+        f"Từ `model/pinn_wind_field_v2.py` (λ={pinn_df['lambda_used'].iloc[0]}), {len(pinn_df)} trạm, "
+        f"residual |pred-obs| trung bình {pinn_df['residual_ms'].mean():.3f} m/s."
+    )
+    pinn_map = pinn_df.rename(columns={"lat": "latitude", "lon": "longitude"})[
+        ["latitude", "longitude", "residual_ms"]
+    ]
+    st.map(pinn_map, size="residual_ms")
+    st.dataframe(
+        pinn_df[["location_id", "u_obs_ms", "v_obs_ms", "u_pred_ms", "v_pred_ms", "residual_ms"]]
+        .sort_values("residual_ms", ascending=False)
+        .head(10),
+        use_container_width=True,
+    )
+else:
+    st.info("Chưa có output PINN — chạy `python3 model/pinn_wind_field_v2.py` trước.")

@@ -171,6 +171,26 @@ def main():
               f"continuity co the chua du manh de vuot troi MSE thuan tren tap test nho. Physics loss "
               f"van co gia tri o tinh hop ly vat ly (bao toan khoi luong) ma baseline khong co.")
 
+    # --- TV3 Tuan 3 #9: xuat output cho Dashboard (TV4) doc duoc, dinh dang Parquet ---
+    final_model, _ = train_one(xy_train, uv_train, lambda_physics=best_pinn["lambda"], epochs=300)
+    with torch.no_grad():
+        pred_all_n = final_model(torch.tensor(xy_n)).numpy()
+    pred_all = pred_all_n * uv_std + uv_mean  # de-normalize ve don vi m/s that
+
+    export_df = agg.copy()
+    export_df["u_pred_ms"] = pred_all[:, 0]
+    export_df["v_pred_ms"] = pred_all[:, 1]
+    export_df["u_obs_ms"] = uv_raw[:, 0]
+    export_df["v_obs_ms"] = uv_raw[:, 1]
+    export_df["residual_ms"] = np.sqrt((pred_all[:, 0] - uv_raw[:, 0]) ** 2 + (pred_all[:, 1] - uv_raw[:, 1]) ** 2)
+    export_df["lambda_used"] = best_pinn["lambda"]
+
+    out_path = os.path.join(ROOT, "warehouse", "output", "pinn_wind_field_output.parquet")
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+    export_df.to_parquet(out_path, index=False)
+    print(f"\nDa xuat output cho Dashboard: {out_path} ({len(export_df)} tram, "
+          f"residual trung binh {export_df['residual_ms'].mean():.3f} m/s)")
+
     print(f"\nPASS n_lambda_tested={len(lambdas)} best_lambda={best['lambda']}")
 
 
