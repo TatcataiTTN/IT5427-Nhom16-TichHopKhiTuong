@@ -18,9 +18,10 @@
 - 🟡 **Một phần** — có kết quả thật nhưng chưa khớp 100% tiêu chí gốc (vd quy mô nhỏ hơn, công cụ khác tương đương, hoặc thiếu 1 phần việc).
 - ⬜ **Chưa làm** — chưa có kết quả, hoặc là hành động của con người (họp nhóm, nộp bài, thuyết trình, đăng ký tài khoản) ngoài khả năng hỗ trợ tự động — xem `docs/09-viec-ban-can-tu-lam.md`.
 - **Tổng Tuần 1 (40 tác vụ): 30 ✅ / 4 🟡 / 6 ⬜**
-- **Tổng Tuần 2 (40 tác vụ): 29 ✅ / 5 🟡 / 6 ⬜**
-- **Tổng 80 tác vụ đã rà soát: 59 ✅ / 9 🟡 / 12 ⬜** (cập nhật 13/10/2026: +3 tải đủ dữ liệu theo đề cương — ERA5 5 năm, ISD 10 năm, Open-Meteo khớp ERA5; 12/10/2026: +4 nộp đề cương đã xác nhận, +1 Kafka producer test với broker thật, +1 cụm Spark Docker chạy thật; so với lần rà soát trước 10/10/2026: 27 ✅ / 16 🟡 / 37 ⬜ — tăng 23 tác vụ Xong sau 1 phiên làm việc tập trung vào ETL/warehouse/PINN)
-- **10 tác vụ ⬜ còn lại chủ yếu là hành động con người** (họp nhóm, nộp bài, thuyết trình, thu thập tiến độ từ Quang/Lương) — xem `docs/09`. Phần kỹ thuật tự động hoá được gần như đã làm hết trong khả năng của môi trường hiện tại (Kafka broker + cụm Spark Docker đã chạy thật trên máy Linux của TV1 ngày 12/10/2026).
+- **Tổng Tuần 2 (40 tác vụ): 30 ✅ / 5 🟡 / 5 ⬜**
+- **Tổng Tuần 3 (40 tác vụ): 19 ✅ / 12 🟡 / 9 ⬜** (chi tiết `docs/14-ket-qua-ky-thuat-tuan-3-4.md`)
+- **Tổng 120 tác vụ đã rà soát (Tuần 1-3): 79 ✅ / 21 🟡 / 20 ⬜** (đếm lại trực tiếp từ bảng khi merge nhánh `fix/docker-kafka-spark-linux` vào master ngày 09/11/2026: gộp các cập nhật 12–13/10/2026 của TV1 — nộp đề cương đã xác nhận, tải đủ ERA5 5 năm / ISD 10 năm / Open-Meteo khớp ERA5 — với các cập nhật Tuần 3 và Spark Structured Streaming 09/11/2026)
+- **Các tác vụ ⬜ còn lại chủ yếu là hành động con người** (họp nhóm, nộp bài, thuyết trình) — xem `docs/09`. Kafka broker + cụm Spark Docker đã chạy thật (Docker Desktop macOS 20/10, Docker Engine Linux 12/10).
 
 ---
 
@@ -104,7 +105,7 @@
 | 6 | Module parser CSV/Fixed-width NOAA ISD, xử lý mã lỗi -9999/NaN | 13/10 | Hàm `parse_isd()` loại bỏ/đánh dấu giá trị lỗi | Unit test: input chứa `-9999` → output là NaN, không crash | ✅ Xong — `ingestion/parsers.py::parse_isd`, có unit test tiêm mã lỗi thật |
 | 7 | Chuẩn hoá thời gian: mọi timestamp về UTC ISO8601 | 15/10 | Toàn bộ 3 nguồn có cột `timestamp_utc` thống nhất | Kiểm tra ngẫu nhiên 10 bản ghi mỗi nguồn, timezone đúng UTC | ✅ Xong, vượt yêu cầu — cả 4 nguồn điểm, có unit test tự động (không chỉ kiểm tra ngẫu nhiên) |
 | 8 | Chuẩn hoá đơn vị: T→K, P→Pa, gió→m/s | 16/10 | Giá trị sau chuẩn hoá nằm trong khoảng vật lý hợp lý | So sánh trước/sau: T ~ 250–320K, P ~ 90.000–105.000 Pa | 🟡 Đã chuẩn hoá nhất quán + test khoảng vật lý hợp lý, nhưng dùng °C/hPa (quyết định thiết kế ở docs/06) thay vì K/Pa |
-| 9 | Kafka producer đọc dữ liệu lịch sử, publish theo topic riêng | 18/10 | Producer chạy được, publish message vào đúng topic | `kafka-console-consumer` nhận được message đúng định dạng JSON | ✅ Xong (12/10/2026) — broker thật `apache/kafka:3.7.0` (Bitnami đã gỡ image cũ), publish 500 message vào `weatherobs.open_meteo`/`weatherobs.nasa_power`, `kafka-console-consumer` đọc lại đủ 500/500, JSON hợp lệ chuẩn (NaN → null) |
+| 9 | Kafka producer đọc dữ liệu lịch sử, publish theo topic riêng | 18/10 | Producer chạy được, publish message vào đúng topic | `kafka-console-consumer` nhận được message đúng định dạng JSON | ✅ Xong — test thật với broker thật 20/10 (Docker Desktop đã lên): `docker-compose.kafka.yml` (image `bitnamilegacy/kafka:4.0.0`, tag `bitnami/kafka:3.7` cũ đã bị rút khỏi Docker Hub), producer publish 70 message vào topic `weatherobs.ghcn`, `kafka-console-consumer` đọc lại đúng JSON. Phát hiện + sửa 1 bug thật: producer ban đầu xuất `NaN` (không phải JSON hợp lệ) cho giá trị thiếu, đã sửa thành `null`. Cập nhật 12/10/2026: chạy lại với image chính thức `apache/kafka:3.7.0` trên Linux, 500/500 message JSON hợp lệ; producer tương thích kafka-python 3.x; compose hiện dùng image này |
 | 10 | Viết phần Ingestion cho báo cáo tiến độ | 19/10 | Slide/đoạn báo cáo: khối lượng đã tải, vướng mắc, số liệu | TV4 review nội dung sẵn sàng đưa vào slide chung | ✅ Xong — `docs/10-ket-qua-ky-thuat-tuan-2.md` mục 1 |
 
 ### TV2 — Schema Lead
@@ -126,8 +127,8 @@
 
 | # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
 |---|---|---|---|---|---|
-| 1 | Dựng cụm Spark giả lập nhiều node bằng Docker Compose (driver + 2–3 worker) | 7/10 | Cluster khởi động đủ số node, UI Spark truy cập được | Spark Master UI hiển thị đủ số worker đã cấu hình | ✅ Xong (12/10/2026) — đổi sang image chính thức `apache/spark:4.2.0` (Bitnami đã gỡ `bitnami/spark`), Master UI báo ALIVE, 2/2 worker × 2 core; job thử gửi từ host chạy xong trên cụm |
-| 2 | Kết nối Spark Streaming với Kafka topic từ TV1, xử lý windowing cơ bản | 8/10 | Job Streaming chạy, tính được aggregate theo cửa sổ thời gian | Console output hiển thị kết quả window đúng chu kỳ đã set | ⬜ Chưa làm — phụ thuộc Kafka broker thật (chặn bởi Docker, xem #1) |
+| 1 | Dựng cụm Spark giả lập nhiều node bằng Docker Compose (driver + 2–3 worker) | 7/10 | Cluster khởi động đủ số node, UI Spark truy cập được | Spark Master UI hiển thị đủ số worker đã cấu hình | ✅ Xong — test thật 20/10 sau khi Docker Desktop lên: Master API (`/json/`) báo `aliveworkers: 2`, đã `spark-submit` 1 job thật (tổng 0..999999) chạy phân tán trên worker `172.23.0.3`, kết quả đúng `499999500000`. Image `bitnami/spark:3.5` cũ bị Bitnami rút, đã đổi `bitnamilegacy/spark:4.0.0`. Cập nhật 12/10/2026: chạy lại thật trên Docker Engine (Linux) với image chính thức `apache/spark:4.2.0` (cùng phiên bản PySpark 4.2.0 của driver) — Master UI ALIVE, 2/2 worker × 2 core, job gửi từ host chạy xong; compose hiện dùng image này |
+| 2 | Kết nối Spark Streaming với Kafka topic từ TV1, xử lý windowing cơ bản | 8/10 | Job Streaming chạy, tính được aggregate theo cửa sổ thời gian | Console output hiển thị kết quả window đúng chu kỳ đã set | ✅ Xong — test live thật 09/11/2026: `warehouse/spark_streaming_consumer.py` đọc topic Kafka thật, console hiển thị đúng `avg_temp_c` theo cửa sổ trượt 1 phút/30s cho từng trạm. Phát hiện + sửa 2 bug thật khi chạy live: (1) `SparkContext` lỗi do hostname tự phân giải ra IP LAN thay vì localhost (có thể do mạng ảo Docker Desktop) — sửa bằng `SPARK_LOCAL_IP=127.0.0.1`; (2) Kafka connector ghim cứng version 4.0.0 không khớp PySpark cài thật 4.2.0 (`NoSuchMethodError`) — sửa bằng lấy version tự động từ `pyspark.__version__`. Có test tự động (`tests/test_spark_jobs.py`) |
 | 3 | Spark transformation tính ma trận tương quan giữa các biến khí tượng | 9/10 | Ma trận correlation xuất ra đúng kích thước n×n | Giá trị đường chéo = 1.0, ma trận đối xứng | ✅ Xong — `warehouse/spark_analytics.py`, ma trận 5×5 thật trên 1.076.473 dòng, đường chéo=1.0, đối xứng đúng |
 | 4 | Pipeline tiền xử lý dữ liệu đầu vào cho PINN (chuẩn hoá, tensor hoá) | 10/10 | Hàm trả tensor đúng shape (batch, features) | Unit test: input DataFrame mẫu → output tensor đúng dtype/shape | ✅ Xong — `model/pinn_rh_from_dewpoint.py` (DataFrame ISD thật → tensor `(batch,2)`) |
 | 5 | Cài framework huấn luyện (PyTorch + DeepXDE/custom loss) | 12/10 | Môi trường train chạy được ví dụ tối thiểu | Script `train_demo.py` chạy hết 1 epoch không lỗi | ✅ Xong, vượt yêu cầu — `model/train_demo.py` chạy 100 epoch, hội tụ đúng nghiệm giải tích |
@@ -157,67 +158,68 @@
 ## Tuần 3 (20/10 – 2/11) — Phát triển sâu
 **Mốc:** Chuẩn bị hội tụ hệ thống trước tuần hoàn thiện
 
-> **Chưa đánh giá trạng thái (10/10/2026)** — Tuần 3-4 chưa tới hạn và phần lớn phụ thuộc vào các tác vụ Tuần 2 còn ⬜/🟡 (ERA5 full 5 năm, Record Linkage trạm↔lưới, Docker cluster, PINN training loop). Sẽ cập nhật trạng thái khi các nền tảng Tuần 2 hoàn thiện hơn.
+> **Rà soát trạng thái 09/11/2026** — tiếp nối đợt rà soát Tuần 1-2. Mỗi dòng đối chiếu trực tiếp
+> với cột "Kiểm thử" gốc. Chi tiết số liệu thật: `docs/14-ket-qua-ky-thuat-tuan-3-4.md`.
 
 ### TV1 — Ingestion Lead
 
-| # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử |
-|---|---|---|---|---|
-| 1 | Mở rộng phạm vi ERA5 (thêm biến/tầng áp suất) theo phản hồi báo cáo tiến độ | 21/10 | Dữ liệu bổ sung tải về đủ theo yêu cầu mới | Đối chiếu danh sách biến mới với phản hồi giảng viên |
-| 2 | Veracity: phát hiện & lọc outlier bằng z-score/IQR cho dữ liệu trạm | 22/10 | Hàm `detect_outliers()` gắn cờ bản ghi bất thường | Test với dữ liệu giả lập có outlier rõ ràng, hàm phát hiện đúng ≥ 90% |
-| 3 | Xây thuật toán phát hiện sensor drift theo thời gian | 23/10 | Biểu đồ/độ đo phát hiện trạm có xu hướng lệch dần | So sánh với ít nhất 1 trạm biết trước có vấn đề (nếu có) hoặc mô phỏng |
-| 4 | Hoàn thiện missing-value policy riêng từng biến (linear/spline vs zero-fill/Markov) | 24/10 | Hàm xử lý missing áp dụng đúng chiến lược theo loại biến | Unit test cho từng loại biến, kết quả không còn NaN không mong muốn |
-| 5 | Đóng gói Docker cho toàn bộ pipeline thu thập | 26/10 | `Dockerfile` + `docker-compose.yml` build thành công | `docker compose up` chạy pipeline end-to-end không lỗi |
-| 6 | Tối ưu I/O: tải song song (multiprocessing/async) để giảm thời gian ingest | 27/10 | Thời gian tải giảm rõ rệt so với bản tuần tự | Benchmark thời gian trước/sau, ghi lại số liệu cụ thể |
-| 7 | Cơ chế retry & logging cho pipeline (lỗi mạng, timeout API) | 29/10 | Pipeline tự retry khi lỗi, log ghi đầy đủ | Giả lập lỗi mạng (ngắt kết nối), pipeline retry và ghi log đúng |
-| 8 | Kiểm tra pipeline chạy ổn định end-to-end trên toàn bộ 5 năm dữ liệu | 30/10 | Chạy full pipeline không crash, dữ liệu đầu ra đầy đủ | Log chạy hoàn tất, số bản ghi đầu ra khớp kỳ vọng |
-| 9 | Đối chiếu chéo Open-Meteo với ERA5/NOAA để đánh giá độ tin cậy nguồn | 1/11 | Báo cáo sai lệch trung bình giữa các nguồn | RMSE/MAE tính được và nằm trong ngưỡng chấp nhận đã thống nhất |
-| 10 | Cập nhật tài liệu kỹ thuật Ingestion (data dictionary, hướng dẫn chạy) | 2/11 | File `docs/ingestion.md` đầy đủ, có ví dụ chạy | Thành viên khác làm theo hướng dẫn chạy được pipeline không hỏi thêm |
+| # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
+|---|---|---|---|---|---|
+| 1 | Mở rộng phạm vi ERA5 (thêm biến/tầng áp suất) theo phản hồi báo cáo tiến độ | 21/10 | Dữ liệu bổ sung tải về đủ theo yêu cầu mới | Đối chiếu danh sách biến mới với phản hồi giảng viên | ⬜ Chưa có phản hồi thật từ giảng viên để đối chiếu — phụ thuộc hành động con người |
+| 2 | Veracity: phát hiện & lọc outlier bằng z-score/IQR cho dữ liệu trạm | 22/10 | Hàm `detect_outliers()` gắn cờ bản ghi bất thường | Test với dữ liệu giả lập có outlier rõ ràng, hàm phát hiện đúng ≥ 90% | ✅ Xong — `ingestion/veracity.py`, IQR đạt 100% (5/5), phát hiện thêm Z-score bị "masking effect" chỉ đạt 20% — đã chọn IQR làm chỉ số chính, ghi rõ lý do |
+| 3 | Xây thuật toán phát hiện sensor drift theo thời gian | 23/10 | Biểu đồ/độ đo phát hiện trạm có xu hướng lệch dần | So sánh với ít nhất 1 trạm biết trước có vấn đề (nếu có) hoặc mô phỏng | ⬜ Chưa làm |
+| 4 | Hoàn thiện missing-value policy riêng từng biến (linear/spline vs zero-fill/Markov) | 24/10 | Hàm xử lý missing áp dụng đúng chiến lược theo loại biến | Unit test cho từng loại biến, kết quả không còn NaN không mong muốn | 🟡 Đã viết + lý giải chính sách rõ ràng (`docs/ingestion.md` mục 4) nhưng là quyết định CÓ CHỦ ĐÍCH giữ nguyên NaN (không nội suy mù) — ngược với tiêu chí gốc "không còn NaN không mong muốn", lý do kỹ thuật đã nêu rõ |
+| 5 | Đóng gói Docker cho toàn bộ pipeline thu thập | 26/10 | `Dockerfile` + `docker-compose.yml` build thành công | `docker compose up` chạy pipeline end-to-end không lỗi | ⬜ Chưa làm |
+| 6 | Tối ưu I/O: tải song song (multiprocessing/async) để giảm thời gian ingest | 27/10 | Thời gian tải giảm rõ rệt so với bản tuần tự | Benchmark thời gian trước/sau, ghi lại số liệu cụ thể | ⬜ Chưa làm |
+| 7 | Cơ chế retry & logging cho pipeline (lỗi mạng, timeout API) | 29/10 | Pipeline tự retry khi lỗi, log ghi đầy đủ | Giả lập lỗi mạng (ngắt kết nối), pipeline retry và ghi log đúng | ⬜ Chưa làm |
+| 8 | Kiểm tra pipeline chạy ổn định end-to-end trên toàn bộ 5 năm dữ liệu | 30/10 | Chạy full pipeline không crash, dữ liệu đầu ra đầy đủ | Log chạy hoàn tất, số bản ghi đầu ra khớp kỳ vọng | ⬜ Chặn bởi quyết định tải ERA5 full 5 năm chưa chốt (xem `docs/09`) |
+| 9 | Đối chiếu chéo Open-Meteo với ERA5/NOAA để đánh giá độ tin cậy nguồn | 1/11 | Báo cáo sai lệch trung bình giữa các nguồn | RMSE/MAE tính được và nằm trong ngưỡng chấp nhận đã thống nhất | 🟡 Đã làm được phần NASA_POWER vs OPEN_METEO (RMSE thật, panel Dashboard mục 4); ERA5 vs Open-Meteo chưa đủ overlap thời gian (ERA5 mới 3 ngày) — đã ghi rõ giới hạn tại `docs/ingestion.md` mục 5 |
+| 10 | Cập nhật tài liệu kỹ thuật Ingestion (data dictionary, hướng dẫn chạy) | 2/11 | File `docs/ingestion.md` đầy đủ, có ví dụ chạy | Thành viên khác làm theo hướng dẫn chạy được pipeline không hỏi thêm | ✅ Xong — `docs/ingestion.md` + `data_dictionary.md` |
 
 ### TV2 — Schema Lead
 
-| # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử |
-|---|---|---|---|---|
-| 1 | Tối ưu câu truy vấn Spark SQL trên toàn bộ warehouse (query plan, cache) | 21/10 | Thời gian truy vấn chính giảm so với baseline | So sánh `EXPLAIN` trước/sau, thời gian chạy giảm ≥ 30% |
-| 2 | Hoàn thiện Record Linkage quy mô đầy đủ (toàn bộ trạm & lưới) | 22/10 | Bảng linkage phủ 100% trạm trong danh sách mục tiêu | Đếm số trạm đã linkage / tổng số trạm = 100% (hoặc ghi rõ ngoại lệ) |
-| 3 | Xây cơ chế kiểm chuẩn (cross-validation) sai số nội suy không gian | 23/10 | Script leave-one-station-out cross-validation chạy được | Kết quả xuất ra bảng RMSE/MAE cho từng trạm test |
-| 4 | Đo RMSE/MAE nội suy Kriging tại vùng địa hình phức tạp | 24/10 | Bảng số liệu sai số theo từng vùng địa hình | Số liệu có nguồn gốc rõ ràng, lưu vào báo cáo Data Quality |
-| 5 | Audit & xử lý xung đột đơn vị/ngữ nghĩa còn sót trong schema | 26/10 | Danh sách xung đột đã phát hiện và đã fix | Chạy lại unit test toàn vẹn schema (tuần 2, #8), pass 100% |
-| 6 | Tối ưu chiến lược partition để giảm data skew (phối hợp TV3) | 27/10 | Partition mới cân bằng hơn theo báo cáo skew của TV3 | Phân bố dữ liệu theo partition không còn lệch > 30% |
-| 7 | Thiết lập data lineage/versioning cơ bản cho warehouse | 29/10 | Ghi lại lịch sử thay đổi schema/dữ liệu (changelog) | File `CHANGELOG.md` cập nhật đầy đủ theo mốc thời gian |
-| 8 | Viết Data Quality Report (tỷ lệ missing, outlier, độ phủ không gian-thời gian) | 30/10 | Báo cáo có số liệu định lượng cụ thể, biểu đồ minh hoạ | TV4 review, số liệu nhất quán với báo cáo của TV1 |
-| 9 | Hỗ trợ TV3 chuẩn bị tập train/test cho PINN (split theo thời gian/khu vực) | 1/11 | Bộ dữ liệu train/test tách rõ, không rò rỉ dữ liệu (data leakage) | TV3 xác nhận nhận đủ dữ liệu đúng định dạng để huấn luyện |
-| 10 | Cập nhật tài liệu kỹ thuật Schema & Warehousing | 2/11 | File `docs/warehouse.md` đầy đủ, có ví dụ query | Thành viên khác chạy được ví dụ query theo hướng dẫn |
+| # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
+|---|---|---|---|---|---|
+| 1 | Tối ưu câu truy vấn Spark SQL trên toàn bộ warehouse (query plan, cache) | 21/10 | Thời gian truy vấn chính giảm so với baseline | So sánh `EXPLAIN` trước/sau, thời gian chạy giảm ≥ 30% | ✅ Xong — `warehouse/query_optimization.py`, cải thiện thật 47,1% (vượt ngưỡng 30%), có EXPLAIN 2 bản |
+| 2 | Hoàn thiện Record Linkage quy mô đầy đủ (toàn bộ trạm & lưới) | 22/10 | Bảng linkage phủ 100% trạm trong danh sách mục tiêu | Đếm số trạm đã linkage / tổng số trạm = 100% (hoặc ghi rõ ngoại lệ) | ✅ Xong — `warehouse/entity_resolution.py` giải quyết gap GHCN↔ISD, 22/26 (84,6%) khớp trong ngưỡng 5km, 4 ngoại lệ đã ghi rõ (không có trạm tương ứng trong ngưỡng) |
+| 3 | Xây cơ chế kiểm chuẩn (cross-validation) sai số nội suy không gian | 23/10 | Script leave-one-station-out cross-validation chạy được | Kết quả xuất ra bảng RMSE/MAE cho từng trạm test | ✅ Xong — `warehouse/validate_interpolation.py`, 104 cặp, 35 trạm, RMSE/MAE thật |
+| 4 | Đo RMSE/MAE nội suy Kriging tại vùng địa hình phức tạp | 24/10 | Bảng số liệu sai số theo từng vùng địa hình | Số liệu có nguồn gốc rõ ràng, lưu vào báo cáo Data Quality | 🟡 Đã đo RMSE/MAE theo tercile độ cao (proxy địa hình) nhưng dùng Bilinear (quyết định thiết kế từ `docs/11`, không dùng Kriging) — số liệu thật, chỉ khác thuật toán nội suy so với đề đặt tên gốc |
+| 5 | Audit & xử lý xung đột đơn vị/ngữ nghĩa còn sót trong schema | 26/10 | Danh sách xung đột đã phát hiện và đã fix | Chạy lại unit test toàn vẹn schema (tuần 2, #8), pass 100% | 🟡 Không phát hiện xung đột MỚI khi audit lại; xung đột đã biết (pressure_surface vs pressure_msl) đã xử lý từ Tuần 1. 38/38 test nhanh pass |
+| 6 | Tối ưu chiến lược partition để giảm data skew (phối hợp TV3) | 27/10 | Partition mới cân bằng hơn theo báo cáo skew của TV3 | Phân bố dữ liệu theo partition không còn lệch > 30% | 🟡 Đã phân tích thật (`warehouse/skew_repartition_analysis.py`): thêm `month` giảm skew 33,28%→3,04% (đạt <30%) nhưng số partition tăng 11,9 lần, làm nặng thêm vấn đề small-file đã biết — khuyến nghị KHÔNG áp dụng ngay, chưa đổi trong production |
+| 7 | Thiết lập data lineage/versioning cơ bản cho warehouse | 29/10 | Ghi lại lịch sử thay đổi schema/dữ liệu (changelog) | File `CHANGELOG.md` cập nhật đầy đủ theo mốc thời gian | ✅ Xong — `CHANGELOG.md`, sinh từ `git log` thật |
+| 8 | Viết Data Quality Report (tỷ lệ missing, outlier, độ phủ không gian-thời gian) | 30/10 | Báo cáo có số liệu định lượng cụ thể, biểu đồ minh hoạ | TV4 review, số liệu nhất quán với báo cáo của TV1 | ✅ Xong — `warehouse/data_quality_report.py` → `docs/13-data-quality-report.md` |
+| 9 | Hỗ trợ TV3 chuẩn bị tập train/test cho PINN (split theo thời gian/khu vực) | 1/11 | Bộ dữ liệu train/test tách rõ, không rò rỉ dữ liệu (data leakage) | TV3 xác nhận nhận đủ dữ liệu đúng định dạng để huấn luyện | ✅ Xong — split 91 train/22 test (theo trạm, không rò rỉ) trong `model/pinn_wind_field_v2.py` |
+| 10 | Cập nhật tài liệu kỹ thuật Schema & Warehousing | 2/11 | File `docs/warehouse.md` đầy đủ, có ví dụ query | Thành viên khác chạy được ví dụ query theo hướng dẫn | ✅ Xong — `docs/warehouse.md` |
 
 ### TV3 — Spark/PINN Lead
 
-| # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử |
-|---|---|---|---|---|
-| 1 | Huấn luyện PINN baseline: Data Loss + Physics Loss (Clausius-Clapeyron) | 21/10 | Mô hình huấn luyện hội tụ, loss giảm ổn định | Biểu đồ loss curve giảm dần, không NaN/Inf |
-| 2 | Thêm ràng buộc Navier-Stokes rút gọn vào loss, huấn luyện phiên bản 2 | 22/10 | Mô hình v2 huấn luyện xong, loss tổng hội tụ | So sánh loss v1 vs v2, ghi nhận cải thiện hoặc đánh đổi |
-| 3 | Thử nhiều giá trị λ cân bằng Data/Physics Loss, ghi log kết quả | 23/10 | Bảng kết quả ≥ 3 giá trị λ khác nhau | Chọn được λ tối ưu dựa trên metric validation |
-| 4 | So sánh PINN vs baseline hồi quy thuần (không ràng buộc vật lý) | 24/10 | Bảng so sánh metric (RMSE/MAE) giữa 2 mô hình | PINN có kết quả tốt hơn hoặc giải thích được lý do nếu không |
-| 5 | Tối ưu VRAM: chunking/batching dữ liệu đa chiều khi huấn luyện | 26/10 | Huấn luyện chạy được với batch size hợp lý, không OOM | Theo dõi `nvidia-smi`/RAM, không tràn bộ nhớ trong 1 epoch đầy đủ |
-| 6 | Đo hiệu năng tính toán phân tán (thời gian, RAM/Core) trên tập đầy đủ | 27/10 | Bảng benchmark chính thức trên toàn bộ dữ liệu | Số liệu ghi lại có timestamp, tái lập được khi chạy lại |
-| 7 | Xử lý data skew thực tế (repartition theo khu vực/thời gian) | 29/10 | Partition sau xử lý cân bằng hơn (theo báo cáo tuần 2, #9) | Đo lại phân bố, không còn partition lệch nghiêm trọng |
-| 8 | Xây pipeline inference: chạy mô hình đã huấn luyện trên tập test | 30/10 | Script `infer.py` sinh kết quả dự báo từ checkpoint | Chạy trên tập test, output đúng shape, không lỗi |
-| 9 | Chuẩn bị output mô hình (dự báo, chỉ số bất thường) để đẩy sang Dashboard | 1/11 | File/API xuất kết quả ở định dạng TV4 dùng được (CSV/Parquet/API) | TV4 xác nhận đọc được dữ liệu từ nguồn TV3 cung cấp |
-| 10 | Cập nhật tài liệu kỹ thuật Physics ML (kiến trúc, kết quả huấn luyện) | 2/11 | File `docs/model.md` đầy đủ công thức, kết quả, hướng dẫn chạy | Thành viên khác chạy lại được `infer.py` theo hướng dẫn |
+| # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
+|---|---|---|---|---|---|
+| 1 | Huấn luyện PINN baseline: Data Loss + Physics Loss (Clausius-Clapeyron) | 21/10 | Mô hình huấn luyện hội tụ, loss giảm ổn định | Biểu đồ loss curve giảm dần, không NaN/Inf | ✅ Xong (từ Tuần 2) — `model/pinn_rh_from_dewpoint.py`, loss 1068→2,9 |
+| 2 | Thêm ràng buộc Navier-Stokes rút gọn vào loss, huấn luyện phiên bản 2 | 22/10 | Mô hình v2 huấn luyện xong, loss tổng hội tụ | So sánh loss v1 vs v2, ghi nhận cải thiện hoặc đánh đổi | ✅ Xong — `model/pinn_wind_field_v2.py`, trường gió thật 113 trạm, continuity Navier-Stokes |
+| 3 | Thử nhiều giá trị λ cân bằng Data/Physics Loss, ghi log kết quả | 23/10 | Bảng kết quả ≥ 3 giá trị λ khác nhau | Chọn được λ tối ưu dựa trên metric validation | ✅ Xong, vượt yêu cầu — quét 4 giá trị λ (0/0,01/0,1/1,0), bảng RMSE/MAE đầy đủ |
+| 4 | So sánh PINN vs baseline hồi quy thuần (không ràng buộc vật lý) | 24/10 | Bảng so sánh metric (RMSE/MAE) giữa 2 mô hình | PINN có kết quả tốt hơn hoặc giải thích được lý do nếu không | ✅ Xong — bảng so sánh thật; kết quả trung thực là PINN KHÔNG vượt baseline RMSE ở quy mô dữ liệu này, đã giải thích nguyên nhân (thiếu chiều thời gian) |
+| 5 | Tối ưu VRAM: chunking/batching dữ liệu đa chiều khi huấn luyện | 26/10 | Huấn luyện chạy được với batch size hợp lý, không OOM | Theo dõi `nvidia-smi`/RAM, không tràn bộ nhớ trong 1 epoch đầy đủ | ⬜ Chưa làm — quy mô dữ liệu hiện tại (<200 điểm/model) không cần chunking, nhưng chưa đo RAM chính thức |
+| 6 | Đo hiệu năng tính toán phân tán (thời gian, RAM/Core) trên tập đầy đủ | 27/10 | Bảng benchmark chính thức trên toàn bộ dữ liệu | Số liệu ghi lại có timestamp, tái lập được khi chạy lại | 🟡 Đã có benchmark cache/EXPLAIN mới (`query_optimization.py`) + benchmark partition cũ (`docs/10` mục 3), chưa gộp thành 1 bảng RAM/Core thống nhất |
+| 7 | Xử lý data skew thực tế (repartition theo khu vực/thời gian) | 29/10 | Partition sau xử lý cân bằng hơn (theo báo cáo tuần 2, #9) | Đo lại phân bố, không còn partition lệch nghiêm trọng | 🟡 Giống TV2 #6 — đã phân tích, có phương án giảm skew xuống 3,04% nhưng chưa áp dụng production do trade-off small-file |
+| 8 | Xây pipeline inference: chạy mô hình đã huấn luyện trên tập test | 30/10 | Script `infer.py` sinh kết quả dự báo từ checkpoint | Chạy trên tập test, output đúng shape, không lỗi | ⬜ Chưa làm — ghi nhận rõ gap này tại `docs/model.md` mục 6, chưa có checkpoint tách rời |
+| 9 | Chuẩn bị output mô hình (dự báo, chỉ số bất thường) để đẩy sang Dashboard | 1/11 | File/API xuất kết quả ở định dạng TV4 dùng được (CSV/Parquet/API) | TV4 xác nhận đọc được dữ liệu từ nguồn TV3 cung cấp | ✅ Xong — `warehouse/output/pinn_wind_field_output.parquet`, Dashboard đọc trực tiếp (panel 6), đã verify qua browser |
+| 10 | Cập nhật tài liệu kỹ thuật Physics ML (kiến trúc, kết quả huấn luyện) | 2/11 | File `docs/model.md` đầy đủ công thức, kết quả, hướng dẫn chạy | Thành viên khác chạy lại được `infer.py` theo hướng dẫn | 🟡 `docs/model.md` đầy đủ kiến trúc/kết quả/tái lập (verify thật trên venv sạch), nhưng không có `infer.py` để hướng dẫn chạy lại (xem #8) |
 
 ### TV4 — Dashboard/PM Lead
 
-| # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử |
-|---|---|---|---|---|
-| 1 | Nâng cấp Dashboard: bản đồ nhiệt động có time slider cho toàn khu vực | 21/10 | Time slider kéo được, bản đồ cập nhật theo thời gian chọn | Kéo slider qua 3 mốc thời gian, bản đồ đổi dữ liệu tương ứng |
-| 2 | Tích hợp kết quả PINN vào Dashboard (dự báo, residual, bản đồ bất thường) | 22/10 | Panel hiển thị output từ TV3, không còn dữ liệu mock | Dashboard hiển thị đúng kết quả từ file/API của TV3 |
-| 3 | Xây panel cảnh báo bất thường khí tượng (ngưỡng, màu theo mức độ) | 23/10 | Panel đổi màu theo mức độ vượt ngưỡng đã định nghĩa | Test với dữ liệu giả lập vượt ngưỡng, panel hiển thị đúng màu cảnh báo |
-| 4 | Xây panel so sánh giá trị khí tượng giữa các nguồn (ERA5 vs NOAA vs Open-Meteo) theo trạm/khu vực | 24/10 | Panel hiển thị song song kết quả 3 nguồn cho cùng 1 điểm/khoảng thời gian | Kết quả tính tay đối chiếu với kết quả trên Dashboard khớp nhau |
-| 5 | Tối ưu hiệu năng Dashboard (caching truy vấn, giảm độ trễ tải) | 26/10 | Thời gian tải trang giảm rõ rệt so với bản trước | Đo thời gian load trước/sau, ghi lại số liệu (giây) |
-| 6 | Kiểm thử Dashboard trên nhiều kích thước màn hình, sửa lỗi UI | 27/10 | Dashboard hiển thị đúng trên desktop, tablet, mobile | Test bằng DevTools responsive mode ở 3 kích thước, không vỡ layout |
-| 7 | Tổng hợp kết quả kỹ thuật từ 3 thành viên chuẩn bị báo cáo cuối kỳ | 29/10 | Tài liệu tổng hợp có đủ nội dung 3 mảng | Không thiếu phần nào so với outline báo cáo cuối kỳ |
-| 8 | Soạn khung outline slide báo cáo cuối kỳ (Action Title/logic Minto) | 30/10 | Outline slide có tiêu đề dạng khẳng định (Action Title) | Mỗi slide có 1 kết luận rõ ràng, không phải nhãn dán chủ đề |
-| 9 | Rà soát hệ thống end-to-end, lập danh sách lỗi/thiếu sót cần hoàn thiện | 1/11 | Danh sách bug/issue trên GitHub Projects | Mỗi issue có mô tả, mức độ ưu tiên, người phụ trách |
-| 10 | Cập nhật kế hoạch quản trị chất lượng & tiến độ chung | 2/11 | Báo cáo % hoàn thành 160 tác vụ tính đến thời điểm này | Số liệu khớp với board quản lý việc |
+| # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
+|---|---|---|---|---|---|
+| 1 | Nâng cấp Dashboard: bản đồ nhiệt động có time slider cho toàn khu vực | 21/10 | Time slider kéo được, bản đồ cập nhật theo thời gian chọn | Kéo slider qua 3 mốc thời gian, bản đồ đổi dữ liệu tương ứng | ✅ Xong (từ Tuần 2) — section 3, `st.select_slider` + `st.map()` |
+| 2 | Tích hợp kết quả PINN vào Dashboard (dự báo, residual, bản đồ bất thường) | 22/10 | Panel hiển thị output từ TV3, không còn dữ liệu mock | Dashboard hiển thị đúng kết quả từ file/API của TV3 | ✅ Xong — section 6, đọc trực tiếp Parquet từ TV3, đã verify qua browser (screenshot) |
+| 3 | Xây panel cảnh báo bất thường khí tượng (ngưỡng, màu theo mức độ) | 23/10 | Panel đổi màu theo mức độ vượt ngưỡng đã định nghĩa | Test với dữ liệu giả lập vượt ngưỡng, panel hiển thị đúng màu cảnh báo | ✅ Xong — section 5, 🟢/🟡/🔴 theo % outlier IQR thật, đã verify qua browser |
+| 4 | Xây panel so sánh giá trị khí tượng giữa các nguồn (ERA5 vs NOAA vs Open-Meteo) theo trạm/khu vực | 24/10 | Panel hiển thị song song kết quả 3 nguồn cho cùng 1 điểm/khoảng thời gian | Kết quả tính tay đối chiếu với kết quả trên Dashboard khớp nhau | 🟡 Section 4 làm được NASA_POWER vs OPEN_METEO (2/3 nguồn, có RMSE) — ERA5 không đủ overlap thời gian với 2 nguồn kia (chỉ 3 ngày) nên không đưa vào panel, đã ghi rõ lý do trên UI |
+| 5 | Tối ưu hiệu năng Dashboard (caching truy vấn, giảm độ trễ tải) | 26/10 | Thời gian tải trang giảm rõ rệt so với bản trước | Đo thời gian load trước/sau, ghi lại số liệu (giây) | 🟡 Đã dùng `@st.cache_data` từ Tuần 2 (có tác dụng thật) nhưng chưa đo thời gian load trước/sau bằng số liệu cụ thể lần này |
+| 6 | Kiểm thử Dashboard trên nhiều kích thước màn hình, sửa lỗi UI | 27/10 | Dashboard hiển thị đúng trên desktop, tablet, mobile | Test bằng DevTools responsive mode ở 3 kích thước, không vỡ layout | ⬜ Chưa làm — mới test desktop viewport qua Chrome, chưa test tablet/mobile |
+| 7 | Tổng hợp kết quả kỹ thuật từ 3 thành viên chuẩn bị báo cáo cuối kỳ | 29/10 | Tài liệu tổng hợp có đủ nội dung 3 mảng | Không thiếu phần nào so với outline báo cáo cuối kỳ | 🟡 `docs/14` tổng hợp đầy đủ phần TV2/TV3/TV4 (code tôi tự làm thay); phần TV1 thật của Quang vẫn cần xác nhận riêng — xem `docs/09` |
+| 8 | Soạn khung outline slide báo cáo cuối kỳ (Action Title/logic Minto) | 30/10 | Outline slide có tiêu đề dạng khẳng định (Action Title) | Mỗi slide có 1 kết luận rõ ràng, không phải nhãn dán chủ đề | ✅ Xong — xem `slides/final-defense.tex` (soạn cùng đợt này) |
+| 9 | Rà soát hệ thống end-to-end, lập danh sách lỗi/thiếu sót cần hoàn thiện | 1/11 | Danh sách bug/issue trên GitHub Projects | Mỗi issue có mô tả, mức độ ưu tiên, người phụ trách | 🟡 Danh sách lỗi/thiếu sót đã liệt kê đầy đủ trong bảng trạng thái này + `docs/14` mục 9 (Docker), nhưng chưa đưa vào GitHub Issues/Projects (vẫn thiếu quyền token — xem `docs/09`) |
+| 10 | Cập nhật kế hoạch quản trị chất lượng & tiến độ chung | 2/11 | Báo cáo % hoàn thành 160 tác vụ tính đến thời điểm này | Số liệu khớp với board quản lý việc | ✅ Xong — xem bảng tổng kết cập nhật cuối file này |
 
 ---
 

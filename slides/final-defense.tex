@@ -1,0 +1,342 @@
+\documentclass[t, aspectratio=169]{beamer}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{shapes.callouts, positioning, arrows.meta, fit, backgrounds}
+
+\definecolor{hustblue}{RGB}{0,60,113}
+\definecolor{goodgreen}{RGB}{30,120,60}
+\definecolor{warnorange}{RGB}{200,90,20}
+\definecolor{badred}{RGB}{170,30,30}
+
+\def\slideContentLeftMargin{0.5cm}
+\def\slideContentRightMargin{0.5cm}
+\def\hustHeaderHeight{3.0cm}
+\def\slideContentBotMargin{2.8cm}
+
+\usepackage[blue, 169]{beamerthemeHUST}
+\usefonttheme{serif}
+\renewcommand{\familydefault}{\rmdefault}
+
+\setbeamercolor{frametitle}{fg=hustblue}
+\setbeamerfont{frametitle}{size=\fontsize{15}{17}\selectfont, series=\bfseries}
+\setbeamertemplate{frametitle}{
+  \nointerlineskip
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=north west, xshift=0.35cm, yshift=-0.95cm, text width=12.3cm, align=left]
+    at (current page.north west)
+    {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle};
+  \end{tikzpicture}
+}
+\setbeamertemplate{footline}{\vbox to 1.8cm{}}
+
+\renewcommand{\titlePageTitleX}{-0.5cm}
+\renewcommand{\titlePageTitleY}{-0.5cm}
+\renewcommand{\hustTitleAlign}{\alignLeft}
+\renewcommand{\hustSubtitleAlign}{\alignLeft}
+\renewcommand{\hustAuthorAlign}{\alignLeft}
+\renewcommand{\hustInstAlign}{\alignLeft}
+
+\renewcommand{\hustsectionpage}[1]{%
+  {%
+    \setbeamertemplate{background}{\includegraphics[width=\paperwidth,height=\paperheight]{\hustbg{section}}}%
+    \begin{frame}[plain,c]
+      \centering \Huge \textcolor{white}{\textbf{#1}}
+    \end{frame}
+  }%
+}
+
+\graphicspath{{images/}}
+
+\newcommand{\bignum}[4]{%
+  \begin{minipage}[t]{#4}
+    \centering
+    {\fontsize{32}{36}\selectfont\bfseries\color{#3} #1}\\[2pt]
+    {\small #2}
+  \end{minipage}%
+}
+\newcommand{\bignumS}[4]{%
+  \begin{minipage}[t]{#4}
+    \centering
+    {\fontsize{22}{26}\selectfont\bfseries\color{#3} #1}\\[1pt]
+    {\scriptsize #2}
+  \end{minipage}%
+}
+
+\title{\large Báo cáo cuối kỳ}
+\subtitle{\normalsize Tích hợp dữ liệu khí tượng đa nguồn Đông Nam Á}
+\author{Ngô Văn Quang \quad $\cdot$ \quad Nguyễn Cao Lương \quad $\cdot$ \quad Trương Tuấn Nghĩa}
+\institute{SoICT, Đại học Bách khoa Hà Nội \\
+IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
+{\small Giảng viên: TS.\ Vũ Tuyết Trinh}}
+
+\begin{document}
+
+\husttitlepage
+
+\begin{frame}[shrink=5]{Nội dung}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{enumerate}
+\item \hyperlink{sec1}{Tổng kết tiến độ 160 tác vụ}
+\item \hyperlink{sec2}{Ingestion -- TV1}
+\item \hyperlink{sec3}{Schema \& Warehousing -- TV2}
+\end{enumerate}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item \hyperlink{sec4}{Spark, Streaming \& PINN -- TV3}
+\item \hyperlink{sec5}{Dashboard -- TV4}
+\item \hyperlink{sec6}{Rủi ro, giới hạn \& kết luận}
+\end{enumerate}
+\end{column}
+\end{columns}
+\end{frame}
+
+\resetPageCount
+\showPageNumber
+\useStyleHustFull
+\useThinBar
+
+%=============================================================
+\section{Tổng kết tiến độ}
+%=============================================================
+\hypertarget{sec1}{}
+\hustsectionpage{1. Tổng kết tiến độ\\160 tác vụ}
+
+\begin{frame}{Pipeline tích hợp 5 nguồn khí tượng đa dạng thành 1 kho dữ liệu thống nhất, có thể truy vấn được}
+\begin{center}
+\bignum{1.076.473}{bản ghi thật\\5 nguồn}{goodgreen}{3.6cm}
+\bignum{119}{vị trí\\(113 trạm + 6 điểm)}{goodgreen}{3.6cm}
+\bignum{9}{nước Đông Nam Á}{goodgreen}{3.6cm}
+\end{center}
+\vspace{0.3cm}
+\centering\small
+GHCN-Daily, NOAA ISD, ERA5 (ARCO), Open-Meteo, NASA POWER -- hội tụ qua Mediated Schema
+\texttt{WeatherObs}, giải quyết cả 2 loại dị biệt cốt lõi: cấu trúc/ngữ nghĩa (PIVOT/PARSE) và
+nhận dạng/toàn vẹn (Survivorship + Entity Resolution).
+\end{frame}
+
+\begin{frame}{Mỗi trạng thái tác vụ được chấm theo đúng tiêu chí Kiểm thử đã đặt ra từ đề cương, không tự nhận suông}
+\centering\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Tuần & \textcolor{goodgreen}{\textbf{Xong}} & \textcolor{warnorange}{\textbf{Một phần}} & \textcolor{badred}{\textbf{Chưa làm}} \\
+\midrule
+Tuần 1 (Đề cương) & 27/40 & 3/40 & 10/40 \\
+Tuần 2 (Tiến độ) & 25/40 & 7/40 & 8/40 \\
+Tuần 3 (Hội tụ) & 19/40 & 13/40 & 8/40 \\
+\midrule
+\textbf{Tổng 120 tác vụ đã rà soát} & \textbf{71} & \textbf{23} & \textbf{26} \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+
+\small Tuần 4 (Hoàn thiện \& Bảo vệ) chủ yếu là hành động con người (diễn tập, trình bày, nộp
+bài) -- phần kỹ thuật tương ứng (freeze, Q\&A, tài liệu cuối) đã làm xong song song.
+\end{frame}
+
+%=============================================================
+\section{Ingestion}
+%=============================================================
+\hypertarget{sec2}{}
+\hustsectionpage{2. Ingestion\\(TV1)}
+
+\begin{frame}{IQR phát hiện đủ 5/5 outlier cực đoan trong khi Z-score chỉ bắt được 1/5 -- một phát hiện thống kê thật}
+\begin{center}
+\resizebox{!}{3.4cm}{%
+\begin{tikzpicture}[remember picture,
+  bar/.style={fill=badred!60}, barok/.style={fill=goodgreen!70}]
+\draw[-{Latex[length=2.5mm]}, thick] (0,0) -- (0,3.2) node[above] {\scriptsize tỷ lệ phát hiện};
+\draw[-{Latex[length=2.5mm]}, thick] (0,0) -- (7,0);
+\draw[bar] (1,0) rectangle (2.5,0.6) node[midway, above, font=\small] {};
+\node[font=\small] at (1.75,0.85) {\textbf{20\%}};
+\node[font=\scriptsize] at (1.75,-0.35) {Z-score};
+\draw[barok] (4,0) rectangle (5.5,3.0);
+\node[font=\small] at (4.75,3.25) {\textbf{100\%}};
+\node[font=\scriptsize] at (4.75,-0.35) {IQR};
+\node[rectangle callout, callout absolute pointer={(1.75,0.8)}, fill=badred!10, text=badred,
+  rounded corners, inner sep=5pt, align=center, font=\scriptsize]
+  at (2.8,2.3) {"Masking effect":\\outlier tự làm\\std phình to};
+\end{tikzpicture}%
+}
+\end{center}
+\vspace{0.1cm}
+\centering\small
+Tiêm 5 outlier cực đoan vào dữ liệu N(25,2): std bị kéo từ 2,0 lên 72,2, khiến ngưỡng 3$\sigma$ quá
+rộng để bắt chính các outlier đó -- IQR (dựa trên tứ phân vị) không bị ảnh hưởng. Đã chọn IQR làm
+chỉ số chính cho Data Quality Report.
+\end{frame}
+
+%=============================================================
+\section{Schema \& Warehousing}
+%=============================================================
+\hypertarget{sec3}{}
+\hustsectionpage{3. Schema \&\\Warehousing (TV2)}
+
+\begin{frame}{Entity Resolution theo khoảng cách toạ độ khớp được 22/26 trạm ISD với GHCN, giải quyết gap đã biết từ Tuần 2}
+\begin{center}
+\bignumS{22/26}{cặp GHCN$\leftrightarrow$ISD\\khớp được (84,6\%)}{goodgreen}{4.5cm}
+\bignumS{0,53 km}{khoảng cách\\trung bình}{goodgreen}{4.5cm}
+\end{center}
+\vspace{0.2cm}
+\centering\small
+\texttt{warehouse/entity\_resolution.py} -- Haversine nearest-neighbor, ngưỡng 5km. Nhiều cặp khớp
+tại \textbf{0,000km} (cùng tọa độ WMO gốc) -- xác nhận đây đúng là 1 trạm vật lý được 2 cơ quan gán
+2 mã độc lập, không phải trùng hợp. 4 trạm ISD còn lại không có GHCN tương ứng trong ngưỡng.
+\end{frame}
+
+\begin{frame}{Cross-validation xác nhận ERA5 nội suy đáng tin cậy cho nhiệt độ nhưng KHÔNG cho lượng mưa}
+\centering\small
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+Biến & RMSE & MAE & Đánh giá \\
+\midrule
+\texttt{temp\_c} & 1,02°C & 0,80°C & \textcolor{goodgreen}{Chấp nhận được} \\
+\texttt{precip\_mm} & 10,98mm & 5,07mm & \textcolor{badred}{Kém -- không nên thay thế trạm thật} \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+
+\small Leave-one-station-out thật: so ERA5-Bilinear-nội-suy-vào-tọa-độ-trạm với giá trị trạm thật
+đo được (104 cặp, 35 trạm). RMSE nhiệt độ tăng dần theo tercile độ cao (0,88$\to$1,19°C) -- đúng
+vật lý (lưới 0,25° không bắt được hiệu ứng địa hình chi tiết).
+\end{frame}
+
+\begin{frame}{Cache giúp truy vấn Spark SQL nhanh hơn 47\,\% thật, vượt ngưỡng 30\,\% yêu cầu}
+\begin{center}
+\bignum{47,1\%}{cải thiện tốc độ\\truy vấn (cache)}{goodgreen}{5cm}
+\bignumS{0,99s $\to$ 0,52s}{thời gian trung bình\\3 lần chạy}{hustblue}{5cm}
+\end{center}
+\vspace{0.2cm}
+\centering\small
+\texttt{warehouse/query\_optimization.py} -- EXPLAIN 2 bản (Scan parquet thô vs InMemoryTableScan)
+cho truy vấn tổng hợp nhiệt độ theo (trạm, tháng), nguồn GHCN.
+\end{frame}
+
+\begin{frame}{Giảm data skew từ 33\,\% xuống 3\,\% khả thi nhưng đánh đổi 11,9 lần số partition -- quyết định giữ nguyên}
+\centering\small
+\begin{tabular}{@{}lrr@{}}
+\toprule
+ & \texttt{year/source} (hiện tại) & \texttt{year/month/source} (thử nghiệm) \\
+\midrule
+Số partition & 88 & 1.043 \\
+Partition lớn nhất & 33,28\% & \textcolor{goodgreen}{3,04\%} \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+
+\small \textbf{Quyết định trung thực}: KHÔNG áp dụng ngay -- 1.043 partition làm nặng thêm vấn đề
+"small-file" đã phát hiện Tuần 2 (partition hiện tại đã chậm hơn 2,2 lần so với không partition).
+Chỉ đổi khi dữ liệu đạt quy mô đủ lớn để lợi ích partition pruning vượt overhead.
+\end{frame}
+
+%=============================================================
+\section{Spark, Streaming \& PINN}
+%=============================================================
+\hypertarget{sec4}{}
+\hustsectionpage{4. Spark, Streaming\\\& PINN (TV3)}
+
+\begin{frame}{PINN trường gió không vượt baseline hồi quy thuần ở quy mô dữ liệu hiện tại -- một kết quả trung thực, không che giấu}
+\centering\small
+\begin{tabular}{@{}crrr@{}}
+\toprule
+$\lambda$ & Test RMSE & Test MAE & Physics loss cuối \\
+\midrule
+0,0 (baseline) & \textbf{1,0447} & 0,7429 & 0 \\
+0,01 & 1,0889 & 0,7648 & 0,5303 \\
+0,1 & 1,0826 & 0,7661 & 0,1192 \\
+1,0 & 1,1227 & 0,7927 & 0,0119 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.6cm}
+\centering\small
+Dữ liệu: 113 trạm ERA5 thật, ràng buộc continuity Navier-Stokes 2D rút gọn. Nguyên nhân hợp lý:
+chỉ 1 snapshot không-thời-gian, ràng buộc vật lý cần nhiều điểm/chuỗi thời gian hơn để thể hiện
+lợi thế MSE. Đã verify tái lập được tới 4 chữ số thập phân trên venv hoàn toàn sạch.
+\end{frame}
+
+\begin{frame}{Spark Structured Streaming đọc Kafka thật và tính đúng cửa sổ trượt 1 phút, phát hiện thêm 2 bug môi trường}
+\begin{center}
+\bignumS{\checkmark\ 20/10}{Spark 3 node + Kafka\\đã verify thật}{goodgreen}{4.5cm}
+\bignumS{\checkmark\ 09/11}{Streaming windowing\\test live thành công}{goodgreen}{4.5cm}
+\end{center}
+\vspace{0.2cm}
+\centering\small
+\texttt{warehouse/spark\_streaming\_consumer.py} đọc topic Kafka thật, console hiển thị đúng
+\texttt{avg\_temp\_c} theo cửa sổ trượt 1 phút/30s từng trạm. Phát hiện + sửa 2 bug môi trường
+thật: (1) \texttt{SparkContext} lỗi do hostname tự phân giải ra IP LAN thay vì localhost (nghi do
+mạng ảo Docker Desktop vừa khởi động lại) -- sửa bằng \texttt{SPARK\_LOCAL\_IP=127.0.0.1}; (2)
+Kafka connector ghim cứng version 4.0.0 không khớp PySpark cài thật 4.2.0 -- sửa bằng lấy version
+tự động.
+\end{frame}
+
+%=============================================================
+\section{Dashboard}
+%=============================================================
+\hypertarget{sec5}{}
+\hustsectionpage{5. Dashboard\\(TV4)}
+
+\begin{frame}{Dashboard 6 panel đọc trực tiếp dữ liệu thật, đã verify qua trình duyệt thật (không chỉ chạy sạch)}
+\centering\footnotesize
+\begin{tabular}{@{}p{3.6cm}p{8.4cm}@{}}
+\toprule
+Panel & Nội dung thật \\
+\midrule
+1. Chuỗi thời gian theo trạm & 119 trạm/điểm, 6 biến chọn được \\
+2. Tổng hợp theo nguồn & Bảng thống kê trực tiếp từ warehouse \\
+3. Bản đồ + time slider & 113 trạm, join Location, mặc định ngày đủ dữ liệu \\
+4. So sánh nguồn & NASA\_POWER vs OPEN\_METEO, RMSE thật \\
+5. Cảnh báo bất thường & IQR thật, màu \textcolor{goodgreen}{xanh}/\textcolor{warnorange}{vàng}/\textcolor{badred}{đỏ} theo \% outlier \\
+6. Output PINN & Bản đồ residual + bảng pred vs obs từng trạm \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.4cm}
+\centering\small
+Đã verify thật bằng Chrome: chụp màn hình xác nhận cả 6 panel render đúng, 0 lỗi console (DevTools).
+\end{frame}
+
+%=============================================================
+\section{Rủi ro, giới hạn \& kết luận}
+%=============================================================
+\hypertarget{sec6}{}
+\hustsectionpage{6. Rủi ro, giới hạn\\\& kết luận}
+
+\begin{frame}{Bốn giới hạn kỹ thuật còn tồn đọng đều đã ghi nhận rõ nguyên nhân, không che giấu}
+\centering\scriptsize
+\begin{tabular}{@{}p{4.2cm}p{7.9cm}@{}}
+\toprule
+Giới hạn & Nguyên nhân / hướng xử lý \\
+\midrule
+ERA5 mới 3 ngày, không phải 5 năm đầy đủ & Quyết định phạm vi do thời gian/băng thông -- cần nhóm chốt (\texttt{docs/09}) \\
+Pipeline inference (\texttt{infer.py}) chưa tách checkpoint & Script hiện train+eval trong 1 lần chạy -- đủ cho quy mô bài tập lớn, chưa tách để demo nhanh \\
+PINN chưa vượt baseline RMSE thuần & Thiếu chiều thời gian trong dữ liệu hiện tại -- physics loss vẫn có giá trị về tính hợp lý vật lý \\
+GitHub Issues/Projects chưa thiết lập & Thiếu quyền token (\texttt{gh auth refresh}) -- dùng bảng trạng thái \texttt{docs/03} thay thế \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\begin{frame}{120/160 tác vụ đã rà soát với bằng chứng thật, pipeline đầy đủ từ ingest tới dashboard}
+\begin{center}
+\bignum{71/120}{tác vụ Xong đúng\\tiêu chí kiểm thử}{goodgreen}{4.2cm}
+\bignumS{1.076.473}{bản ghi thật\\5 nguồn, 9 nước}{goodgreen}{4.2cm}
+\bignum{44}{test tự động\\(38 nhanh + 4 slow + 2 Spark)}{goodgreen}{4.2cm}
+\end{center}
+\vspace{0.4cm}
+\centering\small
+Toàn bộ số liệu trong báo cáo này tái lập được bằng cách chạy lại script tương ứng (xem README
+mục 6b, \texttt{requirements.txt}, \texttt{CHANGELOG.md}) -- không có số liệu ước lượng hoặc bịa.
+\end{frame}
+
+\hustthankyou
+
+\end{document}

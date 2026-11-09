@@ -62,9 +62,15 @@ Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (*
     ├── 09-viec-ban-can-tu-lam.md       — việc CHỈ người dùng mới làm được (đăng ký, quyết định, nộp bài,
     │                                     Docker Desktop) — lọc ra từ 160 tác vụ, phần còn lại đã tự động hoá
     ├── 10-ket-qua-ky-thuat-tuan-2.md   — số liệu thật từ ETL/warehouse/Spark analytics, dùng cho báo cáo tiến độ
-    ├── 12-phat-hien-di-thuong-khi-hau.md — phương pháp + kiểm chứng phát hiện dị thường (nắng nóng 4/2024, bão Yagi, hạn Mekong)
-    └── 11-data-model-design.md         — ERD (Mermaid), naming convention, so sánh Kriging/Bilinear,
-                                          so sánh Streamlit/Grafana/Superset
+    ├── 11-data-model-design.md         — ERD (Mermaid), naming convention, so sánh Kriging/Bilinear,
+    │                                     so sánh Streamlit/Grafana/Superset
+    ├── 12-lich-su-he-sinh-thai-nguon-du-lieu.md — lịch sử, hệ sinh thái & nghiên cứu đã dùng từng nguồn
+    ├── 13-data-quality-report.md       — báo cáo chất lượng dữ liệu (missing, outlier, độ phủ)
+    ├── 14-ket-qua-ky-thuat-tuan-3-4.md — kết quả kỹ thuật Tuần 3-4 (Entity Resolution, PINN v2, Streaming)
+    ├── 15-qa-bao-ve.md                 — câu hỏi phản biện dự kiến + đáp án
+    ├── 16-phat-hien-di-thuong-khi-hau.md — phương pháp + kiểm chứng phát hiện dị thường (nắng nóng 4/2024,
+    │                                     bão Yagi, hạn Mekong), xác nhận chéo trạm–ERA5
+    └── ingestion.md, warehouse.md, model.md — tài liệu kỹ thuật từng tầng
 ```
 
 Script kiểm tra nguồn dữ liệu thật: `scripts/check_data_sources.py` (chạy `python3 scripts/check_data_sources.py`, kết quả lưu ở `data_samples/`).
@@ -125,11 +131,13 @@ python3 scripts/batch_download_week2.py sea-priority   # mở rộng GHCN/ISD ra
 python3 scripts/download_full_points.py                # ISD 10 năm + Open-Meteo/NASA POWER 5 năm (~1,4 GB, vài giờ)
 python3 scripts/download_era5_full.py                  # ERA5 9 biến × 5 năm (22 GB lưu, ~1 TB tải về, ~24 giờ;
                                                        #   chạy lại được sau khi ngắt — tháng đã có sẽ bỏ qua)
-python3 -m pytest tests/ -v                            # 35/35 test pass
+python3 warehouse/location.py                          # bảng Location -> warehouse/output/location.parquet (cần cho
+                                                       #   entity_resolution, validate_interpolation, PINN v2)
+python3 -m pytest tests/ -v                            # 54/54 test pass (cần Kafka broker cho test streaming)
 python3 warehouse/build_warehouse.py                   # 9.348.470 bản ghi -> warehouse/output/weatherobs.parquet
                                                        #   (--dataset week2 để build bộ mẫu nhỏ nếu chưa tải đủ)
 python3 warehouse/spark_analytics.py                   # correlation, data skew, benchmark
-python3 warehouse/anomaly_detection.py                 # dị thường khí hậu: z-score, đợt nóng, SPI, xác nhận chéo ERA5 (docs/12)
+python3 warehouse/anomaly_detection.py                 # dị thường khí hậu: z-score, đợt nóng, SPI, xác nhận chéo ERA5 (docs/16)
 python3 model/train_demo.py && python3 model/navier_stokes_autograd_check.py \
   && python3 model/pinn_rh_from_dewpoint.py            # 3 ví dụ PINN, đều chạy thật
 streamlit run dashboard/app.py                         # xem dữ liệu thật trên trình duyệt

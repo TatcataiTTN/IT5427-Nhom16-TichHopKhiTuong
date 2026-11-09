@@ -1,0 +1,343 @@
+\documentclass[t, aspectratio=169]{beamer}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{shapes.callouts, positioning, arrows.meta, fit, backgrounds}
+
+\definecolor{hustblue}{RGB}{0,60,113}
+\definecolor{goodgreen}{RGB}{30,120,60}
+\definecolor{warnorange}{RGB}{200,90,20}
+\definecolor{badred}{RGB}{170,30,30}
+
+\def\slideContentLeftMargin{0.5cm}
+\def\slideContentRightMargin{0.5cm}
+\def\hustHeaderHeight{3.0cm}
+\def\slideContentBotMargin{2.8cm}
+
+\usepackage[blue, 169]{beamerthemeHUST}
+\usefonttheme{serif}
+\renewcommand{\familydefault}{\rmdefault}
+
+\setbeamercolor{frametitle}{fg=hustblue}
+\setbeamerfont{frametitle}{size=\fontsize{15}{17}\selectfont, series=\bfseries}
+\setbeamertemplate{frametitle}{
+  \nointerlineskip
+  \begin{tikzpicture}[remember picture, overlay]
+    \node[anchor=north west, xshift=0.35cm, yshift=-0.95cm, text width=12.3cm, align=left]
+    at (current page.north west)
+    {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle};
+  \end{tikzpicture}
+}
+\setbeamertemplate{footline}{\vbox to 1.8cm{}}
+
+\renewcommand{\titlePageTitleX}{-0.5cm}
+\renewcommand{\titlePageTitleY}{-0.5cm}
+\renewcommand{\hustTitleAlign}{\alignLeft}
+\renewcommand{\hustSubtitleAlign}{\alignLeft}
+\renewcommand{\hustAuthorAlign}{\alignLeft}
+\renewcommand{\hustInstAlign}{\alignLeft}
+
+\renewcommand{\hustsectionpage}[1]{%
+  {%
+    \setbeamertemplate{background}{\includegraphics[width=\paperwidth,height=\paperheight]{\hustbg{section}}}%
+    \begin{frame}[plain,c]
+      \centering \Huge \textcolor{white}{\textbf{#1}}
+    \end{frame}
+  }%
+}
+
+\graphicspath{{images/}}
+
+\newcommand{\bignum}[4]{%
+  \begin{minipage}[t]{#4}
+    \centering
+    {\fontsize{32}{36}\selectfont\bfseries\color{#3} #1}\\[2pt]
+    {\small #2}
+  \end{minipage}%
+}
+\newcommand{\bignumS}[4]{%
+  \begin{minipage}[t]{#4}
+    \centering
+    {\fontsize{22}{26}\selectfont\bfseries\color{#3} #1}\\[1pt]
+    {\scriptsize #2}
+  \end{minipage}%
+}
+
+\title{\large Báo cáo tiến độ -- Tuần 1--2}
+\subtitle{\normalsize Tích hợp dữ liệu khí tượng đa nguồn Đông Nam Á}
+\author{Ngô Văn Quang \quad $\cdot$ \quad Nguyễn Cao Lương \quad $\cdot$ \quad Trương Tuấn Nghĩa}
+\institute{SoICT, Đại học Bách khoa Hà Nội \\
+IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
+{\small Giảng viên: TS.\ Vũ Tuyết Trinh \quad -- \quad 20/10/2026}}
+
+\begin{document}
+
+\husttitlepage
+
+\begin{frame}[shrink=5]{Nội dung}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\begin{enumerate}
+\item \hyperlink{sec1}{Tổng quan tiến độ 160 tác vụ}
+\item \hyperlink{sec2}{Ingestion -- TV1}
+\item \hyperlink{sec3}{Schema \& Warehousing -- TV2}
+\end{enumerate}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item \hyperlink{sec4}{Spark \& Physics-Informed ML -- TV3}
+\item \hyperlink{sec5}{Dashboard -- TV4}
+\item \hyperlink{sec6}{Rủi ro \& kế hoạch Tuần 3}
+\end{enumerate}
+\end{column}
+\end{columns}
+\end{frame}
+
+\resetPageCount
+\showPageNumber
+\useStyleHustFull
+\useThinBar
+
+%=============================================================
+\section{Tổng quan tiến độ}
+%=============================================================
+\hypertarget{sec1}{}
+\hustsectionpage{1. Tổng quan tiến độ\\160 tác vụ}
+
+\begin{frame}{51/80 tác vụ Tuần 1--2 đã đạt đúng tiêu chí kiểm thử đã đặt ra từ đầu, không tự nhận suông}
+\begin{center}
+\bignum{51}{tác vụ \textbf{Xong}\\(đạt đủ Kiểm thử/DoD)}{goodgreen}{3.6cm}
+\bignum{11}{tác vụ \textbf{Một phần}\\(đạt mục tiêu khác cách)}{warnorange}{3.6cm}
+\bignum{18}{tác vụ \textbf{Chưa làm}\\(hành động của nhóm)}{badred}{3.6cm}
+\end{center}
+\vspace{0.3cm}
+\centering\small
+Mỗi trạng thái được chấm theo đúng cột ``Kiểm thử'' trong \texttt{docs/03-ke-hoach-160-tasks.md}
+đã lập từ đề cương -- không phải tự đánh giá chủ quan. 18 tác vụ \textbf{Chưa làm} hầu hết là hành
+động của con người (họp nhóm, nộp bài, diễn tập) ngoài khả năng tự động hoá.
+\end{frame}
+
+\begin{frame}{TV3+TV4 (kiêm nhiệm) hoàn thành tỉ lệ cao nhất nhờ ưu tiên đúng Spark/Dashboard trước PINN/Kafka}
+\centering\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Vai trò & \textcolor{goodgreen}{\textbf{Xong}} & \textcolor{warnorange}{\textbf{Một phần}} & \textcolor{badred}{\textbf{Chưa làm}} \\
+\midrule
+TV1 -- Ingestion (Quang) & 6/10 & 3/10 & 1/10 \\
+TV2 -- Schema (Lương) & 7/10 & 2/10 & 1/10 \\
+TV3 -- Spark/PINN (Nghĩa) & 8/10 & 1/10 & 1/10 \\
+TV4 -- Dashboard/PM (Nghĩa) & 4/10 & 1/10 & 5/10 \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+
+\small TV4 thấp nhất vì 5 tác vụ còn lại là hoạt động nhóm tới hạn đúng hôm nay (họp, slide,
+diễn tập, trình bày) -- không phải do thiếu code.
+\end{frame}
+
+%=============================================================
+\section{Ingestion}
+%=============================================================
+\hypertarget{sec2}{}
+\hustsectionpage{2. Ingestion\\(TV1)}
+
+\begin{frame}{Pipeline đã nạp thật 1.076.473 bản ghi từ 5 nguồn, không còn là dữ liệu mẫu nhỏ}
+\centering\small
+\begin{tabular}{@{}lrl@{}}
+\toprule
+Nguồn & Số bản ghi thật & Phạm vi \\
+\midrule
+GHCN-Daily & 655.164 & 41 trạm (VN + ĐNA), toàn lịch sử tới 2025 \\
+NOAA ISD/Global Hourly & 358.273 & 26 trạm, năm 2024 \\
+Open-Meteo Historical & 52.704 & 6 điểm đại diện, năm 2024 \\
+ERA5 (ARCO, nội suy Bilinear) & 8.136 & 113 trạm, 15--17/6/2021 \\
+NASA POWER & 2.196 & 6 điểm đại diện, năm 2024 \\
+\midrule
+\textbf{Tổng} & \textbf{1.076.473} & \\
+\bottomrule
+\end{tabular}
+\vspace{0.2cm}
+\centering\small Nguồn số liệu: chạy thật \texttt{warehouse/build\_warehouse.py} 10/10/2026.
+\end{frame}
+
+\begin{frame}{GHCN và ISD dùng 2 hệ mã trạm độc lập cho cùng vị trí vật lý -- chưa thể so khớp qua ID}
+\begin{center}
+\begin{tikzpicture}[remember picture,
+  box/.style={rectangle, rounded corners, draw=hustblue, thick, fill=hustblue!8, align=center, inner sep=6pt, font=\small},
+  arr/.style={-{Latex[length=3mm]}, thick, badred}]
+\node[box, minimum width=5cm] (g) at (-3.6,1) {GHCN\\\texttt{VMM00048820}};
+\node[box, minimum width=5cm] (i) at (3.6,1) {ISD\\\texttt{489000-99999} (USAF+WBAN)};
+\node[rectangle callout, callout absolute pointer={(0,0.6)}, fill=badred!10, text=badred,
+  rounded corners, inner sep=6pt, align=center, font=\small]
+  at (0,-1.3) {Cùng 1 trạm vật lý\\(Hà Nội) nhưng\\2 ID không khớp};
+\draw[arr] (g) -- (0,-0.6); \draw[arr] (i) -- (0,-0.6);
+\end{tikzpicture}
+\end{center}
+\vspace{0.1cm}
+\centering\small
+Cần Entity Resolution dựa trên \textbf{khoảng cách toạ độ} (không phải so khớp ID) --
+đã ghi nhận làm việc Tuần 3 tại \texttt{docs/11} mục 1, không bỏ qua.
+\end{frame}
+
+%=============================================================
+\section{Schema \& Warehousing}
+%=============================================================
+\hypertarget{sec3}{}
+\hustsectionpage{3. Schema \&\\Warehousing (TV2)}
+
+\begin{frame}{Kho Mediated Schema đạt 100\% referential integrity trên 119 vị trí, ETL không mất 1 bản ghi}
+\begin{center}
+\bignumS{119}{vị trí\\(113 trạm + 6 điểm)}{goodgreen}{3.5cm}
+\bignumS{100\%}{referential\\integrity}{goodgreen}{3.5cm}
+\bignumS{1.076.473=1.076.473}{bản ghi vào = ra\\qua Spark ETL}{goodgreen}{5cm}
+\end{center}
+\vspace{0.3cm}
+\centering\small
+\texttt{warehouse/location.py} + \texttt{warehouse/build\_warehouse.py}, partition theo
+\texttt{year/source} qua Spark, 88 partition thật. Survivorship (ISD/GHCN $>$ ERA5 $>$ Open-Meteo
+$>$ POWER) đã test với overlap thật GHCN vs ERA5 (15--17/6/2021): chọn đúng nguồn ưu tiên cao hơn.
+\end{frame}
+
+\begin{frame}{Partitioning theo year/source làm CHẬM truy vấn 2,2 lần ở quy mô dữ liệu hiện tại}
+\begin{center}
+\begin{tikzpicture}[remember picture,
+  bar/.style={fill=hustblue!70}, barslow/.style={fill=badred!70}]
+\draw[-{Latex[length=2.5mm]}, thick] (0,0) -- (0,3.2) node[above] {\scriptsize giây};
+\draw[-{Latex[length=2.5mm]}, thick] (0,0) -- (7,0);
+\draw[bar] (1,0) rectangle (2.5,1.73*1.5) node[midway, above, font=\small] {};
+\node[font=\small] at (1.75,1.73*1.5+0.25) {0,173s};
+\node[font=\scriptsize] at (1.75,-0.35) {Không partition};
+\draw[barslow] (4,0) rectangle (5.5,3.81*1.5);
+\node[font=\small] at (4.75,3.81*1.5+0.25) {\textbf{0,381s}};
+\node[font=\scriptsize] at (4.75,-0.35) {Có partition (88 thư mục)};
+\node[rectangle callout, callout absolute pointer={(4.75,2.9)}, fill=badred!10, text=badred,
+  rounded corners, inner sep=5pt, align=center, font=\scriptsize]
+  at (6.3,3.4) {Chậm hơn\\$\approx$2,2 lần};
+\end{tikzpicture}
+\end{center}
+\vspace{0.1cm}
+\centering\small
+Nguyên nhân: ở quy mô $\sim$1 triệu dòng, Spark quét toàn bộ cực nhanh; overhead liệt kê 88 thư
+mục nhỏ (small-file problem) vượt lợi ích partition pruning. Giữ nguyên partition key, benchmark
+lại khi ERA5 full 5 năm ($\approx$35GB) -- \texttt{docs/10} mục 2.
+\end{frame}
+
+%=============================================================
+\section{Spark \& PINN}
+%=============================================================
+\hypertarget{sec4}{}
+\hustsectionpage{4. Spark \&\\Physics-Informed ML (TV3)}
+
+\begin{frame}{Ma trận tương quan Spark xác nhận gió-độ ẩm là cặp biến liên kết mạnh nhất (+0,57)}
+\centering\footnotesize
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+ & temp\_c & rh\_pct & precip\_mm & wind\_speed & pressure\_msl \\
+\midrule
+temp\_c & \textbf{1,00} & 0,11 & -0,07 & 0,16 & 0,06 \\
+rh\_pct & 0,11 & \textbf{1,00} & -0,16 & \textcolor{goodgreen}{\textbf{0,57}} & 0,43 \\
+precip\_mm & -0,07 & -0,16 & \textbf{1,00} & -0,10 & -0,07 \\
+wind\_speed & 0,16 & \textcolor{goodgreen}{\textbf{0,57}} & -0,10 & \textbf{1,00} & 0,51 \\
+pressure\_msl & 0,06 & 0,43 & -0,07 & 0,51 & \textbf{1,00} \\
+\bottomrule
+\end{tabular}
+\vspace{0.25cm}
+\centering\small
+Tính thật trên 1.076.473 dòng (\texttt{VectorAssembler} + \texttt{Correlation.corr}). Đường chéo
+=1,0, ma trận đối xứng -- đúng kiểm thử. Gió mạnh đi kèm hệ thống áp thấp/mưa -- hợp lý khí tượng.
+\end{frame}
+
+\begin{frame}{Ba kỹ thuật Physics-Informed Neural Network đều hội tụ đúng nghiệm vật lý kỳ vọng}
+\centering\small
+\begin{tabular}{@{}p{3.8cm}p{4cm}p{4cm}@{}}
+\toprule
+Kỹ thuật & Kiểm chứng & Kết quả thật \\
+\midrule
+Phương trình nhiệt 1D & So nghiệm giải tích $e^{-\alpha\pi^2 t}\sin(\pi x)$ & Hội tụ đúng sau 100 epoch \\
+Clausius-Clapeyron (RH từ điểm sương) & Physics loss trên 5.000 bản ghi ISD thật & Loss 1068 $\to$ 2,9, MAE 1,07 điểm\% \\
+Navier-Stokes 2D rút gọn & Gradient qua \texttt{autograd} không lỗi & Phát hiện đúng 1 case \texttt{grad=None} hợp lệ (bias lớp cuối) \\
+\bottomrule
+\end{tabular}
+\vspace{0.2cm}
+\centering\small \texttt{model/train\_demo.py}, \texttt{model/pinn\_rh\_from\_dewpoint.py},
+\texttt{model/navier\_stokes\_autograd\_check.py} -- 3/3 test subprocess pass.
+\end{frame}
+
+\begin{frame}{Cụm Spark 3 node và Kafka broker đã chạy THẬT hôm nay, không còn là kế hoạch trên giấy}
+\begin{center}
+\bignumS{Kafka}{broker thật, producer\\publish 70 message JSON}{goodgreen}{4.5cm}
+\bignumS{3 node}{Spark cluster\\(1 master + 2 worker)}{goodgreen}{4.5cm}
+\end{center}
+\vspace{0.2cm}
+\centering\small
+\texttt{docker-compose.kafka.yml} + \texttt{kafka-console-consumer} đọc lại đúng JSON từ topic
+\texttt{weatherobs.ghcn}. Phát hiện \& sửa 2 lỗi thật ngay trong lúc triển khai: (1) tag
+\texttt{bitnami/kafka:3.7}/\texttt{spark:3.5} bị Bitnami rút khỏi Docker Hub -- đổi sang
+\texttt{bitnamilegacy}; (2) producer xuất \texttt{NaN} (không hợp lệ JSON chuẩn) cho giá trị
+thiếu -- đã sửa thành \texttt{null}.
+\end{frame}
+
+%=============================================================
+\section{Dashboard}
+%=============================================================
+\hypertarget{sec5}{}
+\hustsectionpage{5. Dashboard\\(TV4)}
+
+\begin{frame}{Dashboard Streamlit hiển thị dữ liệu thật qua 3 thành phần, không còn dữ liệu giả}
+\centering\small
+\begin{tabular}{@{}p{3.6cm}p{8.4cm}@{}}
+\toprule
+Thành phần & Trạng thái thật \\
+\midrule
+Chuỗi thời gian theo trạm & Dropdown 73 trạm/điểm thật, đổi trạm cập nhật đúng dữ liệu \\
+Bảng tổng hợp theo nguồn & Tổng hợp trực tiếp từ warehouse Parquet (pandas, không mock) \\
+Bản đồ + time slider & \texttt{st.map()}, join với dimension \texttt{Location} (119 vị trí), mặc định 15/6/2024 (66 vị trí hợp lệ) \\
+\bottomrule
+\end{tabular}
+\vspace{0.2cm}
+\centering\small
+\texttt{dashboard/app.py} -- đã chạy sạch \texttt{streamlit run}, verify bằng mắt không lỗi runtime.
+\end{frame}
+
+%=============================================================
+\section{Rủi ro \& kế hoạch}
+%=============================================================
+\hypertarget{sec6}{}
+\hustsectionpage{6. Rủi ro \&\\kế hoạch Tuần 3}
+
+\begin{frame}{Bốn rủi ro mới phát hiện khi chạy pipeline thật đều đã có phương án dự phòng cụ thể}
+\centering\scriptsize
+\begin{tabular}{@{}p{4.3cm}p{1.6cm}p{6.1cm}@{}}
+\toprule
+Rủi ro mới & Mức ảnh hưởng & Phương án dự phòng \\
+\midrule
+GHCN/ISD khác hệ mã trạm, chưa so khớp được qua ID & Trung bình-Cao & Entity Resolution theo khoảng cách toạ độ, Tuần 3 \\
+Partition hiện tại chậm \& tốn dung lượng hơn ở quy mô 1M dòng & Thấp (hiện tại) & Giữ partition key, benchmark lại khi ERA5 full 5 năm ($\approx$35GB) \\
+ERA5 mới có 3 ngày, chưa đủ 5 năm như đề cương & Trung bình & Quyết định phạm vi tải phụ thuộc thời gian/băng thông -- cần nhóm chốt \\
+Khối lượng TV3+TV4 kiêm nhiệm vẫn nặng nhất & Cao & Đã ưu tiên đúng: Spark batch + Dashboard trước, PINN/Kafka sau \\
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\begin{frame}{Tuần 3 tập trung đúng 3 việc: Entity Resolution, ERA5 quy mô lớn, và Spark Streaming thật}
+\begin{center}
+\bignumS{Entity\\Resolution}{GHCN $\leftrightarrow$ ISD\\theo khoảng cách toạ độ}{hustblue}{4cm}
+\bignumS{ERA5\\quy mô lớn}{quyết định phạm vi\\tải 5 năm ($\approx$35GB)}{hustblue}{4cm}
+\bignumS{Spark\\Streaming}{windowing thật trên\\Kafka broker đã chạy}{hustblue}{4cm}
+\end{center}
+\vspace{0.3cm}
+\centering\small
+51/80 tác vụ Tuần 1--2 đã Xong đúng tiêu chí kiểm thử; hạ tầng Docker (Spark cluster + Kafka)
+đã chạy thật ngay trong ngày báo cáo -- sẵn sàng cho Tuần 3 không còn vướng hạ tầng.
+\end{frame}
+
+\hustthankyou
+
+\end{document}

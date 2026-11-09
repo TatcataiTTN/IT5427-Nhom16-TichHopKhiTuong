@@ -41,5 +41,11 @@ def test_clausius_clapeyron_physics_loss_on_real_data():
     assert "PASS" in r.stdout
 
 
+def test_pinn_wind_field_v2_lambda_sweep_on_real_era5_data():
+    r = _run("model/pinn_wind_field_v2.py")
+    assert r.returncode == 0, f"Script loi:\n{r.stdout}\n{r.stderr}"
+    assert "PASS" in r.stdout
+
+
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))
