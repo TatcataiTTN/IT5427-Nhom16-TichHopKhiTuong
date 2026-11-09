@@ -222,6 +222,16 @@ def classify_cross_source(z_station: pd.Series, z_era5: pd.Series) -> pd.Series:
 # ----------------------------------------------------------------------------------------------
 # Bước Spark
 # ----------------------------------------------------------------------------------------------
+def spark_doy(date_col: str = "date"):
+    """Ngày-trong-năm 1..365 trong Spark (29/2 gộp vào 28/2) — khớp doy365() và dùng chung cho
+    batch lẫn streaming (warehouse/spark_streaming_anomaly.py)."""
+    from pyspark.sql import functions as F
+    d = F.col(date_col)
+    leap_after_feb = (F.month(d) > 2) & (F.year(d) % 4 == 0)
+    return F.when((F.month(d) == 2) & (F.dayofmonth(d) == 29), 59).otherwise(
+        F.dayofyear(d) - F.when(leap_after_feb, 1).otherwise(0))
+
+
 def build_daily(spark):
     """WeatherObs (giờ/ngày, nhiều nguồn) -> 1 dòng/(vị trí, nguồn, ngày)."""
     from pyspark.sql import functions as F
@@ -362,17 +372,19 @@ def main():
     print(f"  {daily.count():,} ngay-vi-tri-nguon")
 
     print("== 2/6: Khi hau nen ±15 ngay + di thuong chuan hoa (Spark) ==")
-    doy_col = F.when(F.expr("month(date) = 2 AND day(date) = 29"), 59).otherwise(
-        F.dayofyear("date") - F.when(F.expr("month(date) > 2 AND (year(date) % 4 = 0)"), 1).otherwise(0))
-    parts = []
+    doy_col = spark_doy("date")
+    parts, clims = [], []
     for var in DAILY_VARS:
-        clim = build_climatology(spark, daily, var)
+        clim = build_climatology(spark, daily, var).cache()
+        clims.append(clim.withColumn("var", F.lit(var)))
         a = (daily.filter(F.col(var).isNotNull()).withColumn("doy", doy_col)
              .join(clim, ["location_id", "source", "doy"], "inner")
              .select("location_id", "source", "date", F.lit(var).alias("var"), F.col(var).alias("value"),
                      "clim_mean", "clim_std", "clim_p90", "clim_n"))
         parts.append(a.toPandas())
     anom = pd.concat(parts, ignore_index=True)
+    # Lưu khí hậu nền để luồng streaming đối chiếu từng bản ghi mới (warehouse/spark_streaming_anomaly.py)
+    clims[0].unionByName(clims[1]).write.mode("overwrite").parquet(os.path.join(OUT, "climatology.parquet"))
     anom["z"] = (anom["value"] - anom["clim_mean"]) / anom["clim_std"].where(anom["clim_std"] > 0)
     anom["flag"] = anomaly_flag(anom["z"])
     anom["nen_ngan"] = anom["source"].map(lambda s: BASELINES[s][1] - BASELINES[s][0] + 1 < SHORT_BASELINE_YEARS)
