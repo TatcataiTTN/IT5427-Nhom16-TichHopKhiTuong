@@ -13,9 +13,13 @@ import pandas as pd
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from warehouse.anomaly_detection import (
     anomaly_flag,
+    classify_combined,
     classify_cross_source,
     doy365,
+    haversine_km,
     heatwave_events,
+    neighbor_pairs,
+    neighbor_support,
     precip_annual_indices,
     precip_extreme_flag,
     spi_from_totals,
@@ -134,3 +138,42 @@ def test_precip_annual_indices_values_and_coverage():
     assert row["R95p"] == 230.0 and row["R99p"] == 150.0
     # Năm thiếu > 10% ngày số liệu thì bị bỏ
     assert precip_annual_indices(d.head(200), pct).empty
+
+
+# ---------------------------- Trạm lân cận ----------------------------
+def test_haversine_known_distance():
+    # Hà Nội (Nội Bài) -> TP.HCM (Tân Sơn Nhất) ~ 1.140 km
+    assert 1100 < haversine_km(21.221, 105.807, 10.818, 106.652) < 1180
+
+
+def test_neighbor_pairs_exclude_same_site_and_far_stations():
+    st = pd.DataFrame({"location_id": ["A", "A_twin", "B", "C"],
+                       "lat": [21.0, 21.001, 21.9, 25.0], "lon": [105.8, 105.8, 105.8, 105.8]})
+    pairs = neighbor_pairs(st, radius_km=200, same_site_km=5)
+    a = set(pairs.loc[pairs["location_id"] == "A", "nb_id"])
+    assert a == {"B"}                 # A_twin < 5 km (cùng trạm vật lý), C > 200 km
+
+
+def test_neighbor_support_counts_same_sign_neighbors():
+    anoms = pd.DataFrame({"location_id": ["A"], "date": ["2024-04-30"], "var": ["temp_mean"], "z": [2.5]})
+    z_all = pd.DataFrame({"location_id": ["B", "C", "D"], "date": ["2024-04-30"] * 3,
+                          "var": ["temp_mean"] * 3, "z": [1.5, 0.3, -2.0]})
+    pairs = pd.DataFrame({"location_id": ["A", "A", "A"], "nb_id": ["B", "C", "D"], "dist_km": [50, 80, 120]})
+    sup = neighbor_support(anoms, z_all, pairs)
+    assert sup.loc[0, "n_lan_can"] == 3
+    assert abs(sup.loc[0, "ty_le_lan_can_dong_y"] - 1 / 3) < 1e-12
+
+
+def test_classify_combined_uses_either_reference():
+    z_st = pd.Series([2.5, 2.5, 3.5, 3.5, 2.2, 3.5])
+    z_e5 = pd.Series([1.5, np.nan, 0.1, np.nan, 0.7, 0.2])
+    n_nb = pd.Series([0, 2, 2, 0, 1, 3])
+    frac = pd.Series([np.nan, 0.5, 0.0, np.nan, 0.3, 0.67])
+    assert list(classify_combined(z_st, z_e5, n_nb, frac)) == [
+        "xac_nhan_khi_hau",   # ERA5 đồng ý
+        "xac_nhan_khi_hau",   # không có ERA5 nhưng 50% lân cận đồng ý
+        "nghi_loi_du_lieu",   # cực đoan, ERA5 bình thường, không lân cận nào đồng ý
+        "khong_doi_chung",    # không có ERA5 lẫn lân cận
+        "di_thuong_cuc_bo",   # đối chứng ủng hộ yếu
+        "xac_nhan_khi_hau",   # ERA5 không đồng ý nhưng đa số lân cận đồng ý -> lân cận lật lại kết luận
+    ]

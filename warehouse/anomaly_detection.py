@@ -44,6 +44,8 @@ MIN_CLIM_N = 100            # số ngày tối thiểu trong cửa sổ nền đ
 Z_ANOMALY, Z_EXTREME = 2.0, 3.0
 HEATWAVE_MIN_DAYS = 3
 HOURLY_SOURCES = ("ISD", "ERA5", "OPEN_METEO")
+NEIGHBOR_RADIUS_KM = 200    # bán kính tìm trạm lân cận (mạng trạm ĐNA thưa: 43/61 trạm có >= 1 láng giềng)
+SAME_SITE_KM = 5            # dưới ngưỡng này coi là CÙNG trạm vật lý (cặp GHCN<->ISD của Entity Resolution)
 DAILY_VARS = ["temp_mean", "pmsl_min"]  # biến tính dị thường chuẩn hoá (xấp xỉ phân bố chuẩn)
 
 
@@ -148,6 +150,59 @@ def precip_annual_indices(daily: pd.DataFrame, pct: pd.DataFrame) -> pd.DataFram
     out = out[out["n_days"] >= MIN_YEAR_COVERAGE * days_in_year].copy()
     out["R95pTOT_pct"] = (100 * out["R95p"] / out["PRCPTOT"].where(out["PRCPTOT"] > 0)).round(1)
     return out
+
+
+def haversine_km(lat1, lon1, lat2, lon2):
+    lat1, lon1, lat2, lon2 = map(np.radians, (lat1, lon1, lat2, lon2))
+    a = np.sin((lat2 - lat1) / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin((lon2 - lon1) / 2) ** 2
+    return 2 * 6371.0 * np.arcsin(np.sqrt(a))
+
+
+def neighbor_pairs(stations: pd.DataFrame, radius_km: float = NEIGHBOR_RADIUS_KM,
+                   same_site_km: float = SAME_SITE_KM) -> pd.DataFrame:
+    """Cặp (trạm, trạm lân cận) cách nhau trong (same_site_km, radius_km]. Bỏ các cặp gần hơn same_site_km:
+    đó là cùng một trạm vật lý được GHCN và ISD gán 2 mã (cùng cảm biến) — không phải bằng chứng độc lập."""
+    s = stations[["location_id", "lat", "lon"]].dropna().drop_duplicates("location_id").reset_index(drop=True)
+    d = haversine_km(s["lat"].values[:, None], s["lon"].values[:, None], s["lat"].values[None], s["lon"].values[None])
+    i, j = np.where((d > same_site_km) & (d <= radius_km))
+    return pd.DataFrame({"location_id": s["location_id"].values[i], "nb_id": s["location_id"].values[j],
+                         "dist_km": d[i, j]})
+
+
+def neighbor_support(anoms: pd.DataFrame, z_all: pd.DataFrame, pairs: pd.DataFrame) -> pd.DataFrame:
+    """Với mỗi dị thường (location_id, date, var, z), đếm trạm lân cận có số liệu cùng ngày, cùng biến
+    (n_lan_can) và tỷ lệ lân cận lệch CÙNG chiều với |z| >= 1 (ty_le_lan_can_dong_y)."""
+    nb = (anoms[["location_id", "date", "var", "z"]].reset_index()
+          .merge(pairs, on="location_id")
+          .merge(z_all.rename(columns={"location_id": "nb_id", "z": "z_nb"}), on=["nb_id", "date", "var"]))
+    nb = nb.dropna(subset=["z_nb"]).drop_duplicates(["index", "nb_id"])
+    nb["agree"] = (np.sign(nb["z_nb"]) == np.sign(nb["z"])) & (nb["z_nb"].abs() >= 1.0)
+    agg = nb.groupby("index").agg(n_lan_can=("nb_id", "size"), ty_le_lan_can_dong_y=("agree", "mean"))
+    out = pd.DataFrame(index=anoms.index)
+    out["n_lan_can"] = agg["n_lan_can"].reindex(anoms.index).fillna(0).astype(int)
+    out["ty_le_lan_can_dong_y"] = agg["ty_le_lan_can_dong_y"].reindex(anoms.index)
+    return out
+
+
+def classify_combined(z_station: pd.Series, z_era5: pd.Series, n_nb: pd.Series, frac_nb: pd.Series) -> pd.Series:
+    """Phân loại dị thường tại trạm theo 2 nguồn đối chứng độc lập: ERA5 cùng vị trí và trạm lân cận.
+      xac_nhan_khi_hau  — ERA5 cùng chiều (|z| >= 1) HOẶC >= 50% trạm lân cận cùng chiều (|z| >= 1)
+      nghi_loi_du_lieu  — trạm cực đoan (|z| >= 3), có ít nhất 1 đối chứng, và MỌI đối chứng hiện có đều
+                          không ủng hộ (ERA5 |z| < 0,5 hoặc ngược chiều; < 20% lân cận cùng chiều)
+      di_thuong_cuc_bo  — có đối chứng nhưng chỉ ủng hộ yếu (hiện tượng cục bộ, đối chứng không bắt được)
+      khong_doi_chung   — không có ERA5 (trước 2020) lẫn trạm lân cận cùng ngày"""
+    has_e5, has_nb = z_era5.notna(), n_nb > 0
+    same = np.sign(z_station) == np.sign(z_era5)
+    e5_agree = has_e5 & same & (z_era5.abs() >= 1.0)
+    e5_reject = has_e5 & ((z_era5.abs() < 0.5) | ~same)
+    nb_agree = has_nb & (frac_nb >= 0.5)
+    nb_reject = has_nb & (frac_nb < 0.2)
+    extreme = z_station.abs() >= Z_EXTREME
+    return pd.Series(np.select(
+        [~has_e5 & ~has_nb,
+         e5_agree | nb_agree,
+         extreme & (e5_reject | ~has_e5) & (nb_reject | ~has_nb)],
+        ["khong_doi_chung", "xac_nhan_khi_hau", "nghi_loi_du_lieu"], "di_thuong_cuc_bo"), index=z_station.index)
 
 
 def classify_cross_source(z_station: pd.Series, z_era5: pd.Series) -> pd.Series:
@@ -331,7 +386,23 @@ def main():
     station = anom["source"].isin(["GHCN", "ISD"]) & (anom["flag"] != "binh_thuong")
     anom["xac_nhan"] = None
     anom.loc[station, "xac_nhan"] = classify_cross_source(anom.loc[station, "z"], anom.loc[station, "z_era5"])
-    print("  " + anom.loc[station, "xac_nhan"].value_counts().to_string().replace("\n", "\n  "))
+    print("  Chi doi chieu ERA5:\n  " + anom.loc[station, "xac_nhan"].value_counts().to_string().replace("\n", "\n  "))
+    # Them doi chung thu 2: tram lan can (GHCN/ISD khac tram vat ly, trong ban kinh NEIGHBOR_RADIUS_KM)
+    loc_tbl = build_location_table()
+    st_ids = anom.loc[anom["source"].isin(["GHCN", "ISD"]), "location_id"].unique()
+    pairs = neighbor_pairs(loc_tbl[loc_tbl["location_id"].isin(st_ids)])
+    z_all = anom.loc[anom["source"].isin(["GHCN", "ISD"]), ["location_id", "date", "var", "z"]].dropna()
+    z_all = z_all.groupby(["location_id", "date", "var"], as_index=False)["z"].mean()
+    sup = neighbor_support(anom.loc[station], z_all, pairs)
+    anom["n_lan_can"] = 0
+    anom["ty_le_lan_can_dong_y"] = np.nan
+    anom.loc[station, ["n_lan_can", "ty_le_lan_can_dong_y"]] = sup[["n_lan_can", "ty_le_lan_can_dong_y"]]
+    anom["xac_nhan_tong_hop"] = None
+    anom.loc[station, "xac_nhan_tong_hop"] = classify_combined(
+        anom.loc[station, "z"], anom.loc[station, "z_era5"], anom.loc[station, "n_lan_can"],
+        anom.loc[station, "ty_le_lan_can_dong_y"])
+    print(f"  {len(pairs)} cap tram lan can (<= {NEIGHBOR_RADIUS_KM} km, bo cung tram vat ly < {SAME_SITE_KM} km)")
+    print("  ERA5 + tram lan can:\n  " + anom.loc[station, "xac_nhan_tong_hop"].value_counts().to_string().replace("\n", "\n  "))
     anom.to_parquet(os.path.join(OUT, "anomaly_daily.parquet"), index=False)
 
     print("== 4/6: Dot nong (>= 3 ngay lien tiep > bach phan vi 90) ==")
@@ -388,6 +459,7 @@ def main():
         "bat_thuong": int((anom.flag == "bat_thuong").sum()),
         "cuc_doan": int((anom.flag == "cuc_doan").sum()),
         "xac_nhan_cheo": anom.loc[station, "xac_nhan"].value_counts().to_dict(),
+        "xac_nhan_tong_hop": anom.loc[station, "xac_nhan_tong_hop"].value_counts().to_dict(),
         "dot_nong": int(len(events)),
         "ngay_mua_cuc_doan_vuot_p99": int((precip_ext.flag == "mua_cuc_doan").sum()),
     }
