@@ -500,7 +500,7 @@ NASA POWER & 10.962 & 6 điểm đại diện, 2020--2024, theo ngày \\
 
 Kho dữ liệu phủ 119 vị trí (113 trạm quan trắc thật, định danh qua bảng \textit{Location}) trên 9
 quốc gia Đông Nam Á, đạt 100\% tính toàn vẹn tham chiếu (referential integrity) khi kiểm tra tự
-động bằng bộ 54 unit/integration test đi kèm mã nguồn. Kho được ghi qua Spark thành 109 partition
+động bằng bộ 74 unit/integration test đi kèm mã nguồn. Kho được ghi qua Spark thành 109 partition
 (\texttt{year/source}), số dòng đọc lại khớp 100\% số dòng ghi vào; toàn bộ quá trình build mất
 khoảng 2,5 phút.
 
@@ -582,6 +582,13 @@ dựng lại và kiểm chứng trên Linux (Docker Engine) bằng các image ch
 \texttt{apache/spark:4.2.0} (cùng phiên bản PySpark 4.2.0 của driver) và \texttt{apache/kafka:3.7.0},
 sau khi các image Bitnami cũ bị gỡ khỏi Docker Hub.
 
+Trên hạ tầng này, nhóm triển khai thêm \emph{phát hiện dị thường theo luồng}
+(\path{warehouse/spark_streaming_anomaly.py}): producer phát lại bản ghi trạm vào Kafka, Spark Structured
+Streaming lấy tối đa 150 bản ghi mỗi micro-batch, join tĩnh với bảng khí hậu nền đã tính bằng batch
+(Mục~6.8), tính dị thường chuẩn hoá $z$ và phát cảnh báo $|z| \ge 2$ ngay trong micro-batch. Phát lại đợt
+nắng nóng 1/4--15/5/2024 (1.407 bản ghi) cho 179 cảnh báo xuất hiện dần qua 10 micro-batch, khớp
+179/179 với kết quả batch và giá trị $z$ giống hệt -- vì hai đường xử lý dùng chung một logic tính toán.
+
 Quá trình kiểm thử trực tiếp phát hiện và khắc phục hai sự cố môi trường thực tế, không phải lỗi
 logic xử lý: \emph{thứ nhất}, phiên Spark cục bộ không khởi tạo được do hệ điều hành tự phân giải
 tên máy sang địa chỉ mạng LAN thay vì \texttt{localhost} -- nhiều khả năng do ngăn xếp mạng ảo của
@@ -595,14 +602,15 @@ thay vì chỉ trình bày thiết kế trên giấy.
 
 \section{Trực quan hoá và cảnh báo}
 
-Dashboard (Streamlit) đọc trực tiếp kho dữ liệu Parquet thật (9,3 triệu bản ghi), cung cấp bảy
+Dashboard (Streamlit) đọc trực tiếp kho dữ liệu Parquet thật (9,3 triệu bản ghi), cung cấp mười
 thành phần: chuỗi thời gian theo trạm, bảng tổng hợp theo nguồn, bản đồ phân bố kèm thanh trượt thời
 gian, bảng so sánh giá trị giữa hai nguồn có đủ dữ liệu chồng lấp thời gian (NASA POWER và
 Open-Meteo, 2020--2024), bảng cảnh báo bất thường tự động (dựa trên IQR, phân loại theo mức độ
 nghiêm trọng), bảng kết quả đầu ra của mô hình PINN trường gió, và phần dị thường khí hậu (bản đồ
-dị thường chuẩn hoá theo thang phân kỳ, danh sách đợt nóng, chỉ số SPI-3 -- Mục~6.8). Bảng trung
+dị thường chuẩn hoá theo thang phân kỳ, danh sách đợt nóng, chỉ số SPI-3, mưa cực đoan -- Mục~6.8),
+xu hướng khí hậu dài hạn (Mục~6.9), trôi cảm biến (Mục~6.10) và cảnh báo theo luồng. Bảng trung
 bình theo ngày được tính sẵn và lưu cache, nên đổi ngày hoặc đổi trạm chỉ mất khoảng 0,6 giây. Toàn
-bộ bảy thành phần đã được xác minh bằng cách chạy ứng dụng thật và kiểm tra trực tiếp qua trình
+bộ mười thành phần đã được xác minh bằng cách chạy ứng dụng thật và kiểm tra trực tiếp qua trình
 duyệt, không có lỗi runtime.
 
 \section{Phát hiện dị thường khí hậu}
@@ -617,7 +625,10 @@ chuẩn hoá $z$ ($|z| \ge 2$ bất thường, $|z| \ge 3$ cực đoan), đợt 
 (từ ba ngày liên tiếp vượt bách phân vị 90), và chỉ số hạn/ẩm SPI-1, SPI-3 (khớp phân bố gamma theo
 từng tháng, McKee 1993) -- vì lượng mưa không có phân bố chuẩn nên không dùng $z$-score cho mưa.
 
-Hệ thống được kiểm chứng với ba sự kiện khí hậu có thật (Bảng~\ref{tab:anomaly-events}).
+Với lượng mưa, hệ thống dùng các chỉ số ETCCDI: ngưỡng bách phân vị 95 và 99 tính trên các \emph{ngày
+ướt} ($\ge 1$~mm) của giai đoạn nền, cùng các chỉ số năm Rx1day (lượng mưa ngày lớn nhất), R95p/R99p
+(tổng lượng mưa của các ngày vượt ngưỡng) và PRCPTOT. Hệ thống được kiểm chứng với các sự kiện khí hậu
+có thật (Bảng~\ref{tab:anomaly-events}).
 
 \begin{table}[H]
 \centering
@@ -633,6 +644,9 @@ cao vượt mọi năm khác từ 2010 (các năm còn lại $\le$ 4,1\%), nên 
 là xu hướng ấm lên dài hạn \\
 Bão Yagi, 6--8/9/2024 (ERA5, 8 trạm miền Bắc Việt Nam) & Áp suất mực nước biển thấp nhất 978,8~hPa
 tại Hải Phòng, $z = -7{,}2$ -- đúng khu vực bão đổ bộ; 88\% số trạm có $z \le -3$ \\
+Mưa do bão Yagi, 6--11/9/2024 (ERA5) & Ngày 7/9/2024 là ngày mưa lớn nhất cả chuỗi 2020--2024 tại 5
+trạm miền Bắc (tới 222,6~mm tại Hà Đông, gấp khoảng 3 lần ngưỡng p99); 11/13 cặp trạm--nguồn vượt p99;
+trạm GHCN Phù Liễn mất số liệu đúng 7--8/9 khi bão đổ bộ \\
 Hạn Mekong 2019--2020 (SPI-3) & SPI-3 trung bình $-0{,}59$; tỷ lệ tháng hạn 22\% so với 13\% của toàn
 chuỗi -- đúng chiều nhưng tín hiệu yếu vì chỉ hai trạm có đủ số liệu mưa \\
 \bottomrule
@@ -640,14 +654,53 @@ chuỗi -- đúng chiều nhưng tín hiệu yếu vì chỉ hai trạm có đ�
 \end{table}
 
 Điểm gắn trực tiếp với nội dung tích hợp dữ liệu của học phần là bước \emph{xác nhận chéo đa
-nguồn}: mỗi dị thường tại trạm (GHCN/ISD) được đối chiếu với ERA5 nội suy vào đúng
-\texttt{location\_id} của trạm, cùng ngày. Nếu ERA5 lệch cùng chiều ($|z| \ge 1$), đó là tín hiệu
-khí hậu thật trên diện rộng (5.375 trường hợp); nếu trạm cực đoan ($|z| \ge 3$) nhưng ERA5 bình
-thường hoặc lệch ngược chiều, đó là nghi lỗi dữ liệu (25 trường hợp). Ví dụ thật: trạm ISD Phnom
+nguồn}: mỗi dị thường tại trạm (GHCN/ISD) được đối chiếu với hai đối chứng độc lập -- ERA5 nội suy vào
+đúng \texttt{location\_id} của trạm, và các trạm GHCN/ISD khác trong bán kính 200~km (loại các cặp
+cách nhau dưới 5~km, vốn là cùng một trạm vật lý được hai cơ quan gán hai mã theo kết quả Entity
+Resolution). Dị thường được xác nhận là khí hậu thật khi ERA5 lệch cùng chiều ($|z| \ge 1$) hoặc ít
+nhất một nửa số trạm lân cận lệch cùng chiều (19.067 trường hợp); bị coi là nghi lỗi dữ liệu khi trạm ở
+mức cực đoan ($|z| \ge 3$) nhưng mọi đối chứng hiện có đều không ủng hộ (335 trường hợp). So với chỉ
+dùng ERA5, trạm lân cận giảm số dị thường không có đối chứng từ 33.052 xuống 16.044 -- chủ yếu ở giai
+đoạn trước 2020 khi chưa có ERA5 -- và lật lại 3 ca từng bị nghi lỗi thành dị thường khí hậu thật. Ví dụ thật: trạm ISD Phnom
 Penh ghi áp suất 981,6~hPa ngày 3/7/2023 ($z = -9{,}1$) trong khi ERA5 tại cùng vị trí hoàn toàn
 bình thường ($z = +1{,}6$), và lặp lại suốt tháng 7--9/2023 -- dấu hiệu cảm biến áp suất hỏng hoặc
 trôi, không phải bão. Một nguồn đơn lẻ không thể tự phân biệt ``khí hậu cực đoan thật'' với ``cảm
 biến hỏng''; khi tích hợp trạm điểm với lưới tái phân tích, hai trường hợp này tách được ra.
+
+\section{Xu hướng khí hậu dài hạn}
+
+Để tách biến đổi khí hậu dài hạn khỏi dị thường ngắn hạn, nhóm áp dụng hai phương pháp phi tham số
+chuẩn trong khí hậu học trên chuỗi nhiệt độ trung bình năm của các trạm GHCN (\path{warehouse/climate_trends.py}):
+kiểm định Mann--Kendall (có hiệu chỉnh nhóm giá trị trùng) để xác định xu hướng có ý nghĩa thống kê,
+và độ dốc Sen (trung vị độ dốc của mọi cặp năm) để đo tốc độ thay đổi. Cả hai đều không giả định phân
+bố chuẩn và bền với giá trị ngoại lai. Một năm chỉ hợp lệ khi có ít nhất 80\% số ngày có số liệu, và
+mỗi chuỗi cần tối thiểu 30 năm.
+
+Trong giai đoạn chung 1975--2024, \textbf{25/27 trạm ấm lên có ý nghĩa thống kê} ($p < 0{,}05$), với độ
+dốc Sen trung vị \textbf{+0,21\textdegree{}C mỗi thập kỷ}; nhanh nhất là Jakarta (+0,41), Penang (+0,35),
+Bangkok (+0,35) và Cao Bằng (+0,34\textdegree{}C/thập kỷ). Đối với lượng mưa, chỉ một đến sáu trạm có đủ
+30 năm số liệu, nên chưa đủ cơ sở để kết luận về xu hướng mưa. Hai hạn chế cần lưu ý: kiểm định
+Mann--Kendall giả định chuỗi không tự tương quan (chưa áp dụng hiệu chỉnh Hamed--Rao), và nhiệt độ
+GHCN là TAVG hoặc trung bình của TMAX và TMIN, nên nếu một trạm thay đổi cách tính giữa chừng có thể
+tạo ra xu hướng giả -- dạng lỗi mà Mục~6.10 phát hiện được khi có ERA5 làm chuỗi tham chiếu.
+
+\section{Phát hiện trôi cảm biến}
+
+Nhóm áp dụng kỹ thuật đồng nhất hoá chuỗi khí hậu (homogenization) với chuỗi tham chiếu
+(\path{warehouse/sensor_drift.py}): với mỗi trạm, tính chuỗi chênh lệch trung bình tháng giữa giá trị
+trạm và ERA5 nội suy tại cùng vị trí, cùng ngày. Biến động khí hậu thật xuất hiện ở cả trạm lẫn ERA5 nên
+bị triệt tiêu trong chênh lệch; phần còn lại phản ánh vấn đề của cảm biến hoặc điểm đo. Trôi dần được
+kiểm định bằng Mann--Kendall kết hợp độ dốc Sen; nhảy bậc đột ngột được kiểm định bằng phép kiểm định
+Pettitt. Một chuỗi chỉ bị gắn cờ khi vừa có ý nghĩa thống kê ($p < 0{,}05$) vừa vượt ngưỡng vật lý
+(nhiệt độ 0,3\textdegree{}C/năm hoặc bước 0,5\textdegree{}C; áp suất 0,5~hPa/năm hoặc bước 1~hPa).
+
+Trên 80 chuỗi trạm--biến, hệ thống gắn cờ 4 chuỗi. Rõ nhất là cảm biến áp suất của trạm ISD Phnom
+Penh: trôi $-0{,}65$~hPa/năm, điểm gãy tháng 11/2022 với bước nhảy $-2{,}6$~hPa -- khớp với ca nghi
+lỗi dữ liệu phát hiện độc lập ở Mục~6.8. Ba trạm nhiệt độ còn lại (Viêng Chăn, Cần Thơ và một trạm
+GHCN ở Thái Lan) có bước nhảy từ $-0{,}5$ đến $-0{,}7$\textdegree{}C quanh 2021--2022, nhiều khả năng do
+thay thiết bị hoặc dời vị trí đo; việc xác nhận nguyên nhân cần hồ sơ lịch sử trạm. Để kiểm chứng theo
+đúng tiêu chí kế hoạch, nhóm tiêm trôi và bước nhảy nhân tạo (gấp hai lần ngưỡng) vào 76 chuỗi thật
+đang ổn định: hệ thống phát hiện được 100\% trường hợp trôi và 98--100\% trường hợp nhảy bậc.
 
 \section{Đánh giá chất lượng dữ liệu}
 
@@ -687,9 +740,9 @@ tiết, Bảng~\ref{tab:final-progress}), mỗi tác vụ được đối chiế
 \midrule
 Tuần 1 -- Đề cương & 30/40 & 4/40 & 6/40 \\
 Tuần 2 -- Tiến độ & 30/40 & 5/40 & 5/40 \\
-Tuần 3 -- Hội tụ & 19/40 & 12/40 & 9/40 \\
+Tuần 3 -- Hội tụ & 21/40 & 12/40 & 7/40 \\
 \midrule
-\textbf{Tổng} & \textbf{79} & \textbf{21} & \textbf{20} \\
+\textbf{Tổng} & \textbf{81} & \textbf{21} & \textbf{18} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -750,7 +803,10 @@ kiểm chứng mà đã được tích hợp thành một kho dữ liệu thốn
 đề cương (ERA5 năm năm, ISD mười năm), bao gồm cả việc phát hiện và xử lý các vấn đề nảy sinh ngoài
 dự tính (hai hệ mã trạm độc lập giữa GHCN và ISD, hiệu ứng masking của Z-score, chi phí thực tế của
 chiến lược partition, bốn lỗi số liệu trong pipeline), và trên kho dữ liệu đó hệ thống phát hiện đúng
-các sự kiện khí hậu có thật (nắng nóng 2024, bão Yagi); \emph{thứ hai}, hai kỹ
+các sự kiện khí hậu có thật (nắng nóng 2024, bão Yagi cả về áp suất lẫn lượng mưa), tách được xu hướng
+ấm lên dài hạn (+0,21\textdegree{}C mỗi thập kỷ, 25/27 trạm) khỏi dị thường ngắn hạn, phát hiện được
+cảm biến trôi bằng chuỗi tham chiếu ERA5, và phát cảnh báo theo luồng qua Kafka và Spark Structured
+Streaming; \emph{thứ hai}, hai kỹ
 thuật lý thuyết cốt lõi của học phần -- GAV schema mapping và Survivorship-based record linkage --
 không chỉ được áp dụng mà đã được kiểm chuẩn định lượng (referential integrity 100\%, RMSE nội suy
 không gian theo từng biến); \emph{thứ ba}, chiến lược giảm tải cho vai trò kiêm nhiệm đã phát huy
@@ -761,7 +817,9 @@ trước, các hạng mục nâng cao (PINN, Spark Streaming) được triển k
 Nhóm cũng xác định rõ các giới hạn còn tồn đọng tại thời điểm báo cáo: mô hình PINN trường gió
 chưa vượt trội một mô hình hồi quy thuần về sai số bình phương trung bình ở quy mô dữ liệu hiện
 tại; khí hậu nền của ERA5 và ISD còn ngắn (5--10 năm) nên kết luận về dị thường khí hậu chủ yếu dựa
-trên GHCN; và chỉ số SPI mới tính được cho 12 trạm do GHCN thiếu nhiều số liệu mưa ở Đông Nam Á. Các giới hạn này được
+trên GHCN; chỉ số SPI và xu hướng mưa mới tính được cho rất ít trạm do GHCN thiếu nhiều số liệu mưa ở
+Đông Nam Á; mạng trạm thưa khiến 16.044 dị thường vẫn chưa có đối chứng; và luồng phát hiện dị thường
+mới xử lý bản ghi theo ngày, chưa gom nguồn theo giờ theo thời gian sự kiện. Các giới hạn này được
 ghi nhận trung thực kèm nguyên nhân kỹ thuật cụ thể (Chương~6 và~8), không che giấu nhằm tạo ấn
 tượng kết quả tốt hơn thực tế -- một nguyên tắc nhóm tuân thủ xuyên suốt quá trình thực hiện đề tài.
 
