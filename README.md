@@ -70,6 +70,8 @@ Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (*
     ├── 15-qa-bao-ve.md                 — câu hỏi phản biện dự kiến + đáp án
     ├── 16-phat-hien-di-thuong-khi-hau.md — phương pháp + kiểm chứng phát hiện dị thường (nắng nóng 4/2024,
     │                                     bão Yagi, hạn Mekong), xác nhận chéo trạm–ERA5
+    ├── 17-dac-trung-va-yeu-cau-xu-ly-du-lieu.md — đặc trưng dữ liệu đo thật (thiếu, ngoài khoảng, cờ QC,
+    │                                     đơn vị, ngữ nghĩa, thời gian, không gian) và yêu cầu xử lý
     └── ingestion.md, warehouse.md, model.md — tài liệu kỹ thuật từng tầng
 ```
 
