@@ -27,7 +27,7 @@ thật, cùng ngày. Chạy lại 09/11/2026 trên warehouse đầy đủ (ERA5 
 | Biến | Số cặp | RMSE | MAE |
 |---|---|---|---|
 | `temp_c` | 108.542 | 1,14°C | 0,85°C |
-| `wind_speed_ms` | 47.139 | 1,02 m/s | 0,75 m/s |
+| `wind_speed_ms` | 47.139 | 1,05 m/s | 0,78 m/s |
 | `precip_mm` | 30.567 | 19,83mm | 7,75mm |
 
 Theo tercile độ cao: RMSE nhiệt độ 0,99 / 0,94 / **1,42**°C (thấp → cao) — nhóm trạm cao nhất sai số
@@ -67,10 +67,10 @@ cài lại từ `requirements.txt`, chạy lại cho RMSE giống hệt tới 4 
 
 | | Baseline (không cache) | Sau tối ưu (cache) |
 |---|---|---|
-| Thời gian trung bình (3 lần chạy) | 0,371s | 0,118s |
-| **Cải thiện** | | **68,1%** (vượt ngưỡng 30% yêu cầu) |
+| Thời gian trung bình (3 lần chạy) | 0,362s | 0,111s |
+| **Cải thiện** | | **69,4%** (vượt ngưỡng 30% yêu cầu) |
 
-(Chạy lại 09/11/2026 trên warehouse 9.348.470 bản ghi; bản trước trên 1.076.473 bản ghi: 0,990s → 0,523s, 47,1%.)
+(Chạy lại 10/11/2026 trên warehouse 8.955.315 bản ghi; bản trước trên 1.076.473 bản ghi: 0,990s → 0,523s, 47,1%.)
 
 ## 6. Data skew — repartition thử nghiệm (TV2 #6, TV3 #7)
 
@@ -78,21 +78,21 @@ cài lại từ `requirements.txt`, chạy lại cho RMSE giống hệt tới 4 
 
 | Partition key | Số partition | Partition lớn nhất |
 |---|---|---|
-| `year/source` (hiện tại) | 109 | 10,62% (2020, ERA5) |
-| `year/month/source` (thử nghiệm) | 1.306 | 0,90% |
+| `year/source` (hiện tại) | 109 | 11,08% (2020, ERA5) |
+| `year/month/source` (thử nghiệm) | 1.306 | 0,94% |
 
 (Chạy lại 09/11/2026 trên warehouse đầy đủ; bản trước trên 1.076.473 dòng: 88 → 1.043 partition,
 33,28% → 3,04%.)
 
 **Trade-off trung thực**: skew giảm 91,5% nhưng số partition tăng 12 lần — làm nặng thêm vấn đề
-"small-file" đã ghi nhận ở `docs/10`. Đo lại công bằng trên 9,3 triệu dòng, partition hiện tại vẫn
-chậm hơn 1,5–2,4 lần so với không partition (Parquet tự bỏ qua row-group nhờ thống kê min/max).
+"small-file" đã ghi nhận ở `docs/10`. Đo lại công bằng trên 9,0 triệu dòng, partition hiện tại vẫn
+chậm hơn 1,5–2,5 lần so với không partition (Parquet tự bỏ qua row-group nhờ thống kê min/max).
 **Khuyến nghị: giữ nguyên** partition key hiện tại.
 
 ## 7. Data Quality Report (TV2 #8)
 
 `warehouse/data_quality_report.py` → `docs/13-data-quality-report.md` — tỷ lệ missing/outlier/độ
-phủ thật theo từng nguồn trên 9.348.470 dòng (chạy lại 09/11/2026 trên warehouse đầy đủ). Phát hiện đáng chú ý: GHCN 100% missing ở
+phủ thật theo từng nguồn trên 8.955.315 dòng (chạy lại 10/11/2026 trên warehouse đầy đủ). Phát hiện đáng chú ý: GHCN 100% missing ở
 `rh_pct`/`wind_speed_ms`/`pressure_msl_hpa` — giới hạn cấu trúc nguồn (GHCN-Daily chỉ báo cáo
 TMAX/TMIN/PRCP), không phải lỗi pipeline.
 

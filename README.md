@@ -121,14 +121,14 @@ Danh sách trạm quan trắc dùng thẳng trong code: `reference/*.csv` (xem `
     └── test_model_pinn.py         — 3 test tích hợp, chạy thật cả 3 script PINN (đánh dấu `slow`)
 ```
 
-**Chạy thử toàn bộ pipeline** (đã verify thật 13/10/2026 trên bộ dữ liệu đầy đủ: 9.348.470 bản ghi, 119 vị trí, 5 nguồn):
+**Chạy thử toàn bộ pipeline** (đã verify thật 10/11/2026 trên bộ dữ liệu đầy đủ: 8.955.315 bản ghi sau kiểm soát chất lượng, 119 vị trí, 5 nguồn):
 ```bash
 # 0) Đặt JAVA_HOME trỏ tới JDK 17/21 (PySpark 4.x không chạy với Java 11):
 export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home   # macOS + Homebrew
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64                             # Ubuntu (apt install openjdk-17-jdk)
 export MKL_THREADING_LAYER=GNU    # chỉ cần nếu dùng Anaconda + torch cài từ pip (tránh lỗi MKL/libgomp)
 
-# Cách nhanh: tải bộ dữ liệu đã build sẵn (warehouse 9,3 triệu bản ghi + dữ liệu thô các nguồn điểm, ~435 MB)
+# Cách nhanh: tải bộ dữ liệu đã build sẵn (warehouse 9,0 triệu bản ghi + dữ liệu thô các nguồn điểm, ~435 MB)
 gh release download data-v2.0-full && tar -xzf warehouse-full.tar.gz && tar -xzf raw-points.tar.gz
 # Hoặc tự tải từ nguồn gốc:
 python3 scripts/batch_download_week2.py full           # bộ mẫu Tuần 2 + GHCN toàn lịch sử (data_samples/ bị gitignore)
@@ -138,8 +138,8 @@ python3 scripts/download_era5_full.py                  # ERA5 9 biến × 5 năm
                                                        #   chạy lại được sau khi ngắt — tháng đã có sẽ bỏ qua)
 python3 warehouse/location.py                          # bảng Location -> warehouse/output/location.parquet (cần cho
                                                        #   entity_resolution, validate_interpolation, PINN v2)
-python3 -m pytest tests/ -v                            # 74/74 test pass (cần Kafka broker cho test streaming)
-python3 warehouse/build_warehouse.py                   # 9.348.470 bản ghi -> warehouse/output/weatherobs.parquet
+python3 -m pytest tests/ -v                            # 83/83 test pass (cần Kafka broker cho test streaming)
+python3 warehouse/build_warehouse.py                   # 8.955.315 bản ghi -> warehouse/output/weatherobs.parquet
                                                        #   (--dataset week2 để build bộ mẫu nhỏ nếu chưa tải đủ)
 python3 warehouse/spark_analytics.py                   # correlation, data skew, benchmark
 python3 warehouse/anomaly_detection.py                 # dị thường khí hậu: z-score, đợt nóng, SPI, mưa cực đoan,

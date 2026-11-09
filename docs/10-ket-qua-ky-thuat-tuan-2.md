@@ -3,7 +3,8 @@
 Tài liệu này gộp số liệu thật từ pipeline đã chạy (`ingestion/`, `warehouse/`), dùng làm nguồn cho
 3 mục "Viết phần ... cho báo cáo tiến độ" (TV1 #10, TV2 #10, TV3 #10 trong `docs/03`). Toàn bộ số
 liệu lấy trực tiếp từ lần chạy `warehouse/build_warehouse.py` + `warehouse/spark_analytics.py`
-trên **bộ dữ liệu đầy đủ** ngày 13/10/2026 — không ước lượng.
+trên **bộ dữ liệu đầy đủ** ngày 13/10/2026, chạy lại ngày 10/11/2026 sau khi thêm kiểm soát chất lượng ở
+Ingestion (`docs/17`) — không ước lượng.
 
 > Lịch sử: bản 10/10/2026 chạy trên bộ mẫu nhỏ (1.076.473 bản ghi, ERA5 3 ngày). Bản này thay thế
 > hoàn toàn sau khi tải đủ dữ liệu theo phạm vi đề cương (ERA5 5 năm, ISD 10 năm). Bộ mẫu nhỏ vẫn
@@ -16,11 +17,11 @@ trên **bộ dữ liệu đầy đủ** ngày 13/10/2026 — không ước lư�
 | Nguồn | Số bản ghi trong warehouse | Phạm vi | Dữ liệu thô |
 |---|---|---|---|
 | ERA5 (ARCO, nội suy Bilinear vào trạm) | 4.954.824 | 113 trạm × 43.848 giờ (2020–2024), 9 biến | 22 GB (540 file NetCDF, lưới 137×197 ô vùng ĐNA) |
-| NOAA ISD/Global Hourly | 3.464.430 | 26 trạm (10 VN + 16 ĐNA ưu tiên), 10 năm 2015–2024 | 1,3 GB CSV (258/260 file) |
+| NOAA ISD/Global Hourly | 3.071.275 | 26 trạm (10 VN + 16 ĐNA ưu tiên), 10 năm 2015–2024; đã gộp 393.155 bản tin trùng | 1,3 GB CSV (258/260 file) |
 | GHCN-Daily | 655.166 | 41 trạm (10 VN + 31 ĐNA ưu tiên), toàn lịch sử 1943–2026 | 63 MB CSV |
 | Open-Meteo Historical | 263.088 | 6 điểm đại diện, 5 năm 2020–2024, tần suất giờ | 13 MB JSON |
 | NASA POWER | 10.962 | 6 điểm đại diện, 5 năm 2020–2024, tần suất ngày | 1 MB JSON |
-| **Tổng** | **9.348.470** | 119 vị trí, 5 nguồn | **~23,4 GB** |
+| **Tổng** | **8.955.315** | 119 vị trí, 5 nguồn | **~23,4 GB** |
 
 **Kiểm chứng đầy đủ ERA5 (tiêu chí TV1 #1 "không thiếu tháng nào"):** 540/540 file (9 biến × 60
 tháng), mỗi biến đủ 43.848/43.848 giờ (kể cả 2 năm nhuận 2020, 2024), 0% NaN. Khoảng giá trị hợp lý
@@ -56,7 +57,7 @@ mưa giờ lớn nhất 77 mm.
 - Nội suy ERA5 lưới → trạm (`warehouse/interpolation.py::interpolate_era5_month`): vector hoá, nội suy
   cả 113 trạm trong 1 lần gọi/tháng (~2,5 s/tháng), kết quả khớp tuyệt đối với cách nội suy từng trạm cũ
 - ETL end-to-end qua Spark, partition theo `year/source` — `warehouse/build_warehouse.py`:
-  **109 partition**, đếm vào = ra khớp 100% (9.348.470 = 9.348.470), chạy hết **2 phút 26 giây**, RAM
+  **109 partition**, đếm vào = ra khớp 100% (8.955.315 = 8.955.315), chạy hết **~2 phút 48 giây**, RAM
   đỉnh ~0,5 GB (parse từng nguồn → Parquet tạm → Spark đọc và ghi partition, không dồn ~10 triệu dòng
   qua `createDataFrame` trên driver)
 - Survivorship (ISD/GHCN > ERA5 > Open-Meteo > NASA_POWER) — `warehouse/survivorship.py`
@@ -67,19 +68,19 @@ mưa giờ lớn nhất 77 mm.
 |---|---|---|---|
 | ERA5 | ~34,8 GB (8 biến, 5 năm) | 22 GB (9 biến, 5 năm, NetCDF nén zlib) | Khớp bậc độ lớn; nén zlib giảm ~40% so với float32 thô |
 | Các nguồn điểm | < 100 MB | 1,4 GB | ISD mở rộng từ 1 năm lên 10 năm, 26 trạm |
-| Warehouse Parquet | — | 303 MB | Warehouse chỉ giữ ERA5 **tại 113 vị trí trạm** (sau nội suy), không giữ cả lưới — lưới đầy đủ nằm ở Raw Zone |
+| Warehouse Parquet | — | 299 MB | Warehouse chỉ giữ ERA5 **tại 113 vị trí trạm** (sau nội suy), không giữ cả lưới — lưới đầy đủ nằm ở Raw Zone |
 
 **Benchmark partition (đo lại công bằng trên dữ liệu đầy đủ):** trung vị 5 lần chạy sau 1 lần làm
 nóng JVM, so với bản sao không partition ghi từ **chính** warehouse hiện tại:
 
 | Truy vấn | Có partition | Không partition | Kết quả |
 |---|---|---|---|
-| Đếm ISD năm 2024 | 0,173 s | 0,080 s | partition chậm hơn 2,2× |
-| Trung bình nhiệt độ ISD 2024 | 0,222 s | 0,093 s | chậm hơn 2,4× |
-| Trung bình theo tháng/trạm ERA5 2024 | 0,299 s | 0,202 s | chậm hơn 1,5× |
-| Tổng mưa theo năm/trạm GHCN 1991–2000 | 0,185 s | 0,106 s | chậm hơn 1,7× |
+| Đếm ISD năm 2024 | 0,224 s | 0,090 s | partition chậm hơn 2,5× |
+| Trung bình nhiệt độ ISD 2024 | 0,171 s | 0,088 s | chậm hơn 1,9× |
+| Trung bình theo tháng/trạm ERA5 2024 | 0,283 s | 0,191 s | chậm hơn 1,5× |
+| Tổng mưa theo năm/trạm GHCN 1991–2000 | 0,184 s | 0,099 s | chậm hơn 1,9× |
 
-**Kết luận trung thực: ở quy mô 9,3 triệu dòng / 303 MB, partition `year/source` vẫn KHÔNG nhanh
+**Kết luận trung thực: ở quy mô 9,0 triệu dòng / 299 MB, partition `year/source` vẫn KHÔNG nhanh
 hơn.** Nguyên nhân: bản không partition vẫn được Parquet lọc hiệu quả nhờ **thống kê min/max theo
 row-group** (dữ liệu được ghi theo cụm nguồn/năm nên Spark bỏ qua được hầu hết row-group không liên
 quan), trong khi 109 thư mục partition phát sinh chi phí liệt kê file. Lợi ích partition pruning chỉ
@@ -94,17 +95,17 @@ sau so warehouse mới với bản sao cũ; script đã sửa để ghi lại m�
 chạy thật, producer replay 500/500 message JSON hợp lệ.
 
 **Ma trận tương quan Pearson** (tính thật trên warehouse đầy đủ, **từng cặp biến, chỉ trên dòng có
-đủ cả 2 biến** — từ 274.050 đến 8.662.032 dòng tuỳ cặp):
+đủ cả 2 biến** — từ 274.050 đến 8.284.685 dòng tuỳ cặp):
 
 | | temp_c | rh_pct | precip_mm | wind_speed_ms | pressure_msl_hpa |
 |---|---|---|---|---|---|
-| temp_c | +1.00 | −0.60 | −0.01 | +0.12 | −0.61 |
-| rh_pct | −0.60 | +1.00 | +0.10 | −0.30 | +0.04 |
-| precip_mm | −0.01 | +0.10 | +1.00 | +0.08 | −0.11 |
-| wind_speed_ms | +0.12 | −0.30 | +0.08 | +1.00 | +0.05 |
-| pressure_msl_hpa | −0.61 | +0.04 | −0.11 | +0.05 | +1.00 |
+| temp_c | +1.00 | −0.59 | −0.01 | +0.12 | −0.61 |
+| rh_pct | −0.59 | +1.00 | +0.10 | −0.31 | +0.05 |
+| precip_mm | −0.01 | +0.10 | +1.00 | +0.09 | −0.11 |
+| wind_speed_ms | +0.12 | −0.31 | +0.09 | +1.00 | +0.05 |
+| pressure_msl_hpa | −0.61 | +0.05 | −0.11 | +0.05 | +1.00 |
 
-Hai tương quan mạnh đều đúng vật lý: **nhiệt độ – độ ẩm tương đối −0,60** (chu kỳ ngày: trời nóng thì
+Hai tương quan mạnh đều đúng vật lý: **nhiệt độ – độ ẩm tương đối −0,59** (chu kỳ ngày: trời nóng thì
 RH giảm vì áp suất hơi bão hoà tăng theo Clausius-Clapeyron) và **nhiệt độ – áp suất −0,61** (mùa
 nóng ứng với áp thấp nóng lục địa, mùa lạnh ứng với áp cao lạnh). Mưa tương quan yếu với mọi biến —
 khớp nhận định Veracity thấp của mưa đối lưu ở docs/06.
@@ -114,11 +115,11 @@ script thay NaN bằng 0 trước khi tính — mỗi nguồn thiếu biến kh�
 mưa, NASA POWER không có áp suất MSL) nên các cột "cùng bị thiếu" bị coi là cùng bằng 0. Đã sửa sang
 tương quan từng cặp (pairwise deletion).
 
-**Kiểm tra data skew:** 109 partition, partition lớn nhất (`year=2020, source=ERA5`) chiếm **10,62%**
+**Kiểm tra data skew:** 109 partition, partition lớn nhất (`year=2020, source=ERA5`) chiếm **11,08%**
 tổng dữ liệu — dưới ngưỡng 50%, đạt yêu cầu. ERA5 phân bố đều theo năm (~990 nghìn dòng/năm) nên 5
 partition lớn nhất đều là ERA5 với tỷ lệ gần như bằng nhau.
 
-**Dashboard với dữ liệu đầy đủ:** nạp 9,3 triệu bản ghi lần đầu ~3,7 s; đã thêm cache bảng trung bình
+**Dashboard với dữ liệu đầy đủ:** nạp 9,0 triệu bản ghi lần đầu ~3,7 s; đã thêm cache bảng trung bình
 theo ngày → đổi ngày/trạm còn ~0,6 s (trước đó ~4 s mỗi lần kéo thanh trượt).
 
 **Chưa làm (ghi nhận trung thực):** Spark Structured Streaming consumer cho Kafka, PINN training
@@ -131,7 +132,7 @@ xem trạng thái đầy đủ tại `docs/03-ke-hoach-160-tasks.md`.
 |---|---|---|
 | Docker không chạy được, chặn Spark cluster + Kafka | — | **Đã giải quyết 13/10**: chạy thật trên Docker Engine (Linux). Image Bitnami đã bị gỡ khỏi Docker Hub → đổi sang image chính thức `apache/*` |
 | GHCN và ISD dùng 2 hệ mã trạm độc lập cho cùng vị trí vật lý | Trung bình-Cao | Entity Resolution theo khoảng cách toạ độ ở Tuần 3 (`docs/11` mục 1) |
-| Partition `year/source` chậm hơn ở quy mô hiện tại (đã đo lại trên 9,3 triệu dòng) | Thấp | Giữ partition (đúng thiết kế cho quy mô lớn hơn/object storage), trình bày kết quả đo thật trong báo cáo |
+| Partition `year/source` chậm hơn ở quy mô hiện tại (đã đo lại trên 9,0 triệu dòng) | Thấp | Giữ partition (đúng thiết kế cho quy mô lớn hơn/object storage), trình bày kết quả đo thật trong báo cáo |
 | Tải lại ERA5 tốn ~1 TB lưu lượng, ~24 giờ | Trung bình | Dữ liệu thô không nằm trong git — chia sẻ thư mục `data_samples/` (hoặc chỉ `warehouse/output/`, 303 MB) cho thành viên khác thay vì tải lại |
 | Khối lượng TV3+TV4 (PINN, Streaming, Dashboard, dị thường) vẫn là phần nặng nhất | Cao | Phần phát hiện dị thường có thể chuyển một phần sang TV1 (gần với outlier detection Tuần 3) |
 

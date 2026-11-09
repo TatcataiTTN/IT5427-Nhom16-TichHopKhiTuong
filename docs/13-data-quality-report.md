@@ -1,14 +1,14 @@
 # Data Quality Report (TV2 #8, Tuần 3)
 
-Sinh tự động từ `warehouse/data_quality_report.py`, chạy thật trên `warehouse/output/weatherobs.parquet` ngày 2026-11-09. Tổng 9,348,470 bản ghi.
+Sinh tự động từ `warehouse/data_quality_report.py`, chạy thật trên `warehouse/output/weatherobs.parquet` ngày 2026-11-10. Tổng 8,955,315 bản ghi.
 
 ## 1. Tỷ lệ Missing theo nguồn (%)
 
 | source     |   n_records |   temp_c_missing_pct |   rh_pct_missing_pct |   precip_mm_missing_pct |   wind_speed_ms_missing_pct |   pressure_msl_hpa_missing_pct |
 |:-----------|------------:|---------------------:|---------------------:|------------------------:|----------------------------:|-------------------------------:|
 | ERA5       |     4954824 |                  0   |                100   |                     0   |                         0   |                            0   |
-| ISD        |     3464430 |                  0.1 |                  0.3 |                   100   |                         0.8 |                           83.3 |
-| GHCN       |      655166 |                  4.1 |                100   |                    41.3 |                       100   |                          100   |
+| ISD        |     3071275 |                  0.1 |                  0.3 |                   100   |                         0.4 |                           81.1 |
+| GHCN       |      655166 |                  0.3 |                100   |                    41.3 |                       100   |                          100   |
 | OPEN_METEO |      263088 |                  0   |                  0   |                     0   |                         0   |                            0   |
 | NASA_POWER |       10962 |                  0   |                  0   |                     0   |                         0   |                          100   |
 
@@ -16,10 +16,10 @@ Sinh tự động từ `warehouse/data_quality_report.py`, chạy thật trên `
 
 | source     |   temp_c_outlier_pct |   rh_pct_outlier_pct |   precip_mm_outlier_pct |   wind_speed_ms_outlier_pct |   pressure_msl_hpa_outlier_pct |
 |:-----------|---------------------:|---------------------:|------------------------:|----------------------------:|-------------------------------:|
-| GHCN       |                 7.6  |               nan    |                   16.19 |                      nan    |                         nan    |
-| ISD        |                 4.32 |                 0.65 |                  nan    |                        0.72 |                           3.28 |
+| GHCN       |                 7.41 |               nan    |                   16.18 |                      nan    |                         nan    |
+| ISD        |                 4.46 |                 0.68 |                  nan    |                        0.74 |                           3.27 |
 | ERA5       |                 4.92 |               nan    |                   15.03 |                        2.95 |                           4.01 |
-| NASA_POWER |                 8.95 |                 7.94 |                    7.63 |                        1.17 |                         nan    |
+| NASA_POWER |                 8.95 |                 7.94 |                    7.63 |                        0.87 |                         nan    |
 | OPEN_METEO |                 3.76 |                 0.88 |                   15.07 |                        2.02 |                           6.7  |
 
 Lưu ý phương pháp: dùng IQR thay vì Z-score làm chỉ số chính vì IQR bền vững hơn với outlier cực đoan (xem `ingestion/veracity.py` — Z-score bị hiệu ứng "masking": outlier cực đoan tự làm std phình to, che giấu chính nó). Outlier ở đây chỉ được GẮN CỜ, không tự động xoá — một số giá trị "outlier" thống kê là hiện tượng thời tiết cực đoan có thật (bão, đợt nắng nóng), không phải lỗi dữ liệu.

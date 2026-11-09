@@ -3,7 +3,7 @@
 Mục tiêu chính trong tên đề tài ("phát hiện dị thường khí hậu", `docs/01` mục 2). Code:
 `warehouse/anomaly_detection.py` (Spark + pandas), unit test `tests/test_anomaly.py` (9 test),
 hiển thị ở dashboard mục 4. Số liệu dưới đây lấy từ lần chạy thật ngày 13/10/2026 trên warehouse
-đầy đủ (9.348.470 bản ghi) — chạy hết ~52 giây.
+đầy đủ (8.955.315 bản ghi, đã qua kiểm soát chất lượng ở Ingestion — `docs/17`) — chạy hết ~45 giây.
 
 ```bash
 python3 warehouse/anomaly_detection.py   # cần warehouse/output/weatherobs.parquet (build_warehouse.py)
@@ -21,7 +21,7 @@ lấy từ chuẩn khí tượng quốc tế, không tự đặt.
 
 | Bước | Cách làm | Ghi chú |
 |---|---|---|
-| 1. Tổng hợp theo ngày (Spark) | 9,3 triệu bản ghi → 977.239 ngày × vị trí × nguồn: nhiệt độ TB ngày, tổng mưa, gió max, áp suất MSL thấp nhất | Ngày của nguồn đo theo giờ (ISD, ERA5, Open-Meteo) chỉ hợp lệ khi có quan trắc ở **đủ 4 khối 6 giờ** — tránh trung bình bị lệch nóng khi thiếu số liệu ban đêm |
+| 1. Tổng hợp theo ngày (Spark) | 9,0 triệu bản ghi → 977.239 ngày × vị trí × nguồn: nhiệt độ TB ngày, tổng mưa, gió max, áp suất MSL thấp nhất | Ngày của nguồn đo theo giờ (ISD, ERA5, Open-Meteo) chỉ hợp lệ khi có quan trắc ở **đủ 4 khối 6 giờ** — tránh trung bình bị lệch nóng khi thiếu số liệu ban đêm |
 | 2. Khí hậu nền (Spark) | Theo (vị trí, nguồn, ngày-trong-năm), cửa sổ trượt **±15 ngày**: trung bình, độ lệch chuẩn, bách phân vị 90 | Mỗi ngày nền được nhân thành 31 bản ghi lệch ngày rồi `groupBy` — chạy phân tán. 29/2 gộp vào 28/2 |
 | 3. Dị thường chuẩn hoá | z = (x − TB nền) / ĐLC nền; \|z\| ≥ 2 bất thường, ≥ 3 cực đoan | Áp dụng cho nhiệt độ TB ngày và áp suất MSL thấp nhất ngày |
 | 4. Đợt nóng | ≥ 3 ngày liên tiếp nhiệt độ TB ngày > bách phân vị 90 của nền | Chỉ số **TG90p** của ETCCDI (WMO), gom thành đợt. Ngày *thiếu dữ liệu* ≤ 1 ngày giữa 2 ngày nóng được nối qua (thiếu số liệu ≠ trời mát); ngày *có dữ liệu mà không nóng* làm đứt đợt |
@@ -79,16 +79,18 @@ trạm đủ điều kiện tính SPI).
 
 | Trạm | ERA5 cùng vị trí, cùng ngày | Phân loại | Số trường hợp |
 |---|---|---|---|
-| Bất thường | Cùng chiều, \|z\| ≥ 1 | `xac_nhan_khi_hau` — tín hiệu khí hậu thật trên diện rộng | **5.375** |
-| Cực đoan (\|z\| ≥ 3) | Gần bình thường (\|z\| < 0,5) hoặc ngược chiều | `nghi_loi_du_lieu` — nghi lỗi cảm biến/ghi chép | **25** |
-| Bất thường | Lệch nhẹ | `chua_xac_dinh` — dị thường cục bộ, ERA5 (~28 km) có thể không bắt được | 514 |
-| Bất thường | Không có (trước 2020) | `khong_co_era5` | 33.052 |
+| Bất thường | Cùng chiều, \|z\| ≥ 1 | `xac_nhan_khi_hau` — tín hiệu khí hậu thật trên diện rộng | **5.380** |
+| Cực đoan (\|z\| ≥ 3) | Gần bình thường (\|z\| < 0,5) hoặc ngược chiều | `nghi_loi_du_lieu` — nghi lỗi cảm biến/ghi chép | **23** |
+| Bất thường | Lệch nhẹ | `chua_xac_dinh` — dị thường cục bộ, ERA5 (~28 km) có thể không bắt được | 507 |
+| Bất thường | Không có (trước 2020) | `khong_co_era5` | 34.453 |
 
-**Ví dụ lỗi dữ liệu thật phát hiện được:** trạm ISD Phnom Penh (48991099999) ghi áp suất MSL
-**981,6 hPa ngày 3/7/2023 (z = −9,1)** trong khi ERA5 cùng vị trí *bình thường* (z = +1,6) — không có
-bão nào qua Phnom Penh hôm đó. Cùng trạm còn liên tục ghi áp suất thấp bất thường (z ≈ −4,4 đến −4,9)
-suốt 7–9/2023 khi ERA5 vẫn bình thường → dấu hiệu **cảm biến áp suất hỏng/trôi**. Đây là đầu vào trực
-tiếp cho việc phát hiện outlier và sensor drift ở Tuần 3 (TV1 #2, #3).
+**Ví dụ lỗi dữ liệu thật phát hiện được:** trạm ISD Phnom Penh (48991099999) ngày 3/7/2023. Giá trị
+thấp nhất 981,6 hPa đã bị chính NOAA gắn mã QC "nghi ngờ" nên bị loại ngay ở Ingestion (`docs/17` mục 3).
+Nhưng các giá trị *đạt* QC của NOAA cùng ngày vẫn dao động 995,0–1053,6 hPa (nhảy 25 hPa trong 3 giờ):
+áp suất thấp nhất ngày **995,0 hPa (z = −5,5)** trong khi ERA5 cùng vị trí *bình thường* (z = +1,6) —
+không có bão nào qua Phnom Penh hôm đó. Trạm này có 13 ngày bị đánh giá nghi lỗi, dày đặc trong
+6–9/2023 (z ≈ −3,2 đến −5,5) khi ERA5 vẫn bình thường → dấu hiệu **cảm biến áp suất hỏng/trôi**, khớp với
+kết quả phát hiện trôi cảm biến ở mục 7.
 
 Ý nghĩa với học phần: một nguồn đơn lẻ không thể tự phân biệt "khí hậu cực đoan thật" với "cảm biến
 hỏng". Khi **tích hợp** trạm điểm với lưới tái phân tích qua Record Linkage không-thời gian
@@ -120,12 +122,12 @@ chiều (|z| ≥ 1); nghi lỗi dữ liệu khi trạm cực đoan và **mọi**
 
 | Phân loại | Chỉ ERA5 | ERA5 + trạm lân cận |
 |---|---|---|
-| Xác nhận khí hậu thật | 5.375 | **19,067** |
-| Dị thường cục bộ / chưa xác định | 514 | 3,520 |
-| Nghi lỗi dữ liệu | 25 | 335 |
-| Không có đối chứng | 33.052 | **16,044** |
+| Xác nhận khí hậu thật | 5.380 | **20.357** |
+| Dị thường cục bộ / chưa xác định | 507 | 3.725 |
+| Nghi lỗi dữ liệu | 23 | 343 |
+| Không có đối chứng | 34.453 | **15.938** |
 
-Trạm lân cận phủ được giai đoạn trước 2020 (chưa có ERA5): 13.554 dị thường từng không có đối chứng nay
+Trạm lân cận phủ được giai đoạn trước 2020 (chưa có ERA5): 14.842 dị thường từng không có đối chứng nay
 được xác nhận. 3 ca từng bị nghi lỗi (chỉ dựa ERA5) được trạm lân cận lật lại thành khí hậu thật.
 
 ## 6. Xu hướng khí hậu dài hạn (`warehouse/climate_trends.py`)
@@ -161,7 +163,7 @@ ngưỡng vật lý (nhiệt độ 0,3 °C/năm hoặc bước 0,5 °C; áp su�
 
 Trạm Phnom Penh khớp với ca nghi lỗi phát hiện độc lập ở mục 3. **Kiểm chứng bằng mô phỏng** (đúng tiêu
 chí kế hoạch): tiêm trôi / bước nhảy gấp 2 lần ngưỡng vào 76 chuỗi thật đang ổn định → phát hiện
-**100% trôi** và **98–100% nhảy bậc**.
+**100% trôi** và **95–98% nhảy bậc**.
 
 ## 8. Phát hiện dị thường theo luồng (`warehouse/spark_streaming_anomaly.py`)
 
@@ -186,7 +188,7 @@ trạm Thái Lan 38,6 °C (nền 30,2 °C, z = +3,53). Có test tích hợp vớ
 - Nhiệt độ GHCN là TAVG hoặc (TMAX+TMIN)/2 — schema `WeatherObs` hiện chưa tách TMAX, nên chưa tính
   được TX90p (ngày nóng theo nhiệt độ cao nhất) chuẩn ETCCDI.
 - SPI chỉ có 12 trạm do GHCN thiếu số liệu mưa; có thể bổ sung bằng mưa ERA5 khi có nền dài hơn.
-- Trạm lân cận thưa (18/61 trạm không có láng giềng trong 200 km) — 16.044 dị thường vẫn không có
+- Trạm lân cận thưa (18/61 trạm không có láng giềng trong 200 km) — 15.938 dị thường vẫn không có
   đối chứng.
 - Luồng streaming hiện dùng bản ghi GHCN theo ngày; nguồn theo giờ (ISD, ERA5) cần thêm bước gom ngày
   theo event-time + watermark.

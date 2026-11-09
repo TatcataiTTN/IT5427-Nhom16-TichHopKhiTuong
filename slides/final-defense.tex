@@ -116,7 +116,7 @@ IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
 
 \begin{frame}{Pipeline tích hợp 5 nguồn khí tượng đa dạng thành 1 kho dữ liệu thống nhất, có thể truy vấn được}
 \begin{center}
-\bignum{9.348.470}{bản ghi thật\\5 nguồn}{goodgreen}{4.6cm}
+\bignum{8.955.315}{bản ghi thật\\5 nguồn}{goodgreen}{4.6cm}
 \bignum{119}{vị trí\\(113 trạm + 6 điểm)}{goodgreen}{3.4cm}
 \bignum{9}{nước Đông Nam Á}{goodgreen}{3.4cm}
 \end{center}
@@ -179,18 +179,18 @@ rộng để bắt chính các outlier đó -- IQR (dựa trên tứ phân vị)
 chỉ số chính cho Data Quality Report.
 \end{frame}
 
-\begin{frame}{Đã tải đủ dữ liệu theo phạm vi đề cương: kho dữ liệu tăng 8,7 lần lên 9,3 triệu bản ghi}
+\begin{frame}{Đã tải đủ dữ liệu theo phạm vi đề cương: kho dữ liệu tăng 8,3 lần lên 9,0 triệu bản ghi}
 \centering\footnotesize
 \begin{tabular}{@{}lrrl@{}}
 \toprule
 Nguồn & Trước & Hiện tại & Phạm vi hiện tại \\
 \midrule
 ERA5 (nội suy vào 113 trạm) & 8.136 & \textbf{4.954.824} & 2020--2024, 9 biến, theo giờ \\
-NOAA ISD & 358.273 & \textbf{3.464.430} & 26 trạm, 2015--2024 \\
+NOAA ISD & 358.273 & \textbf{3.071.275} & 26 trạm, 2015--2024 (đã gộp trùng) \\
 GHCN-Daily & 655.164 & 655.166 & 41 trạm, 1943--2026 \\
 Open-Meteo + NASA POWER & 54.900 & \textbf{274.050} & 6 điểm, 2020--2024 \\
 \midrule
-\textbf{Tổng} & 1.076.473 & \textbf{9.348.470} & 119 vị trí, 109 partition \\
+\textbf{Tổng} & 1.076.473 & \textbf{8.955.315} & 119 vị trí, 109 partition \\
 \bottomrule
 \end{tabular}
 \vspace{0.15cm}
@@ -209,10 +209,29 @@ Lỗi & Nguyên nhân & Hệ quả / sửa \\
 \midrule
 Gió Open-Meteo \textbf{phóng đại 3,6 lần} & API trả km/h (\texttt{hourly\_units}) nhưng ghi thẳng vào cột \texttt{wind\_speed\_ms} & Sai mọi so sánh gió đa nguồn -- parser đọc đơn vị và quy đổi, có test \\ \addlinespace[2pt]
 \textbf{Tương quan giả} (gió--độ ẩm +0,57) & Thay NaN bằng 0 trước khi tính; mỗi nguồn thiếu biến khác nhau & Tính từng cặp: lộ ra nhiệt độ--độ ẩm \textbf{$-$0,60}, nhiệt độ--áp suất \textbf{$-$0,61} (đúng vật lý) \\ \addlinespace[2pt]
-Benchmark partition so với \textbf{bản sao cũ} & Bản không partition chỉ ghi 1 lần; luôn in ``nhanh hơn'' & Đo lại công bằng: partition chậm hơn 1,5--2,4 lần ở 9,3 triệu dòng \\ \addlinespace[2pt]
+Benchmark partition so với \textbf{bản sao cũ} & Bản không partition chỉ ghi 1 lần; luôn in ``nhanh hơn'' & Đo lại công bằng: partition chậm hơn 1,5--2,5 lần ở 9,0 triệu dòng \\ \addlinespace[2pt]
 Bức xạ ERA5 \textbf{sai đại lượng} & Mapping dùng bức xạ đỉnh khí quyển (TOA) & Đổi sang bức xạ bề mặt, cùng đại lượng với NASA POWER / Open-Meteo \\ \addlinespace[2pt]
 \bottomrule
 \end{tabular}
+\end{frame}
+
+\begin{frame}{Kiểm soát chất lượng 4 tầng khi nạp: loại 3.661 giá trị chính NOAA đã đánh dấu sai}
+\centering\scriptsize
+\begin{tabular}{@{}p{3.1cm}p{5.3cm}p{4.2cm}@{}}
+\toprule
+Tầng / việc & Phát hiện trên dữ liệu thật & Xử lý \\
+\midrule
+1. Cờ QC của nguồn & GHCN 406 giá trị \texttt{Q\_FLAG}; ISD 3.255 giá trị mã 2/6 (gồm 2 bản tin gió 83\,m/s) & Bỏ giá trị, ghi \texttt{qc\_flag}, giữ dòng \\
+2. Giới hạn vật lý & 0 vi phạm còn lại sau tầng 1 & Giữ làm lưới an toàn \\
+3--4. Nhảy phi vật lý & 18 điểm nhiệt độ ($>$10\,°C/1\,giờ), 18 điểm áp suất ($>$10\,hPa/3\,giờ) & Gắn cờ \texttt{JUMP}, giữ giá trị \\
+Bản tin trùng ISD & 393.155 dòng: cùng quan trắc gửi cả METAR và SYNOP & Gộp 1 dòng/thời điểm \\
+Gió khác độ cao & NASA đo ở 2\,m: chỉ bằng \textbf{0,65} lần gió 10\,m & Tải \texttt{WS10M} \\
+Nhiệt độ 2 định nghĩa & TAVG thấp hơn (TMAX+TMIN)/2 trung bình 0,25\,°C & Cột \texttt{temp\_def} \\
+\bottomrule
+\end{tabular}
+
+\scriptsize Thêm áp suất trạm ISD (trước đó trống); sửa 1 lỗi parser cũ: thiếu nhiệt độ GHCN 4,1\,\% $\to$ 0,3\,\%.
+Kết luận chính không đổi sau khi làm sạch. Chi tiết: \texttt{docs/17}.
 \end{frame}
 
 %=============================================================
@@ -240,7 +259,7 @@ tại \textbf{0,000km} (cùng tọa độ WMO gốc) -- xác nhận đây đúng
 Biến & RMSE & MAE & Đánh giá \\
 \midrule
 \texttt{temp\_c} & 1,14°C & 0,85°C & \textcolor{goodgreen}{Chấp nhận được} \\
-\texttt{wind\_speed\_ms} & 1,02 m/s & 0,75 m/s & \textcolor{goodgreen}{Chấp nhận được} \\
+\texttt{wind\_speed\_ms} & 1,05 m/s & 0,78 m/s & \textcolor{goodgreen}{Chấp nhận được} \\
 \texttt{precip\_mm} & 19,83mm & 7,75mm & \textcolor{badred}{Kém -- không nên thay thế trạm thật} \\
 \bottomrule
 \end{tabular}
@@ -251,10 +270,10 @@ Biến & RMSE & MAE & Đánh giá \\
 \textbf{1,42}°C -- nhóm trạm cao nhất sai số lớn nhất, đúng vật lý (lưới 0,25° không bắt được địa hình).
 \end{frame}
 
-\begin{frame}{Cache giúp truy vấn Spark SQL nhanh hơn 68\,\% thật trên 9,3 triệu bản ghi, vượt ngưỡng 30\,\% yêu cầu}
+\begin{frame}{Cache giúp truy vấn Spark SQL nhanh hơn 69\,\% thật trên 9,0 triệu bản ghi, vượt ngưỡng 30\,\% yêu cầu}
 \begin{center}
-\bignum{68,1\%}{cải thiện tốc độ\\truy vấn (cache)}{goodgreen}{5cm}
-\bignumS{0,37s $\to$ 0,12s}{thời gian trung bình\\3 lần chạy}{hustblue}{5cm}
+\bignum{69,4\%}{cải thiện tốc độ\\truy vấn (cache)}{goodgreen}{5cm}
+\bignumS{0,36s $\to$ 0,11s}{thời gian trung bình\\3 lần chạy}{hustblue}{5cm}
 \end{center}
 \vspace{0.2cm}
 \centering\small
@@ -262,21 +281,21 @@ Biến & RMSE & MAE & Đánh giá \\
 cho truy vấn tổng hợp nhiệt độ theo (trạm, tháng), nguồn GHCN.
 \end{frame}
 
-\begin{frame}{Giảm data skew từ 10,6\,\% xuống 0,9\,\% khả thi nhưng đánh đổi 12 lần số partition -- quyết định giữ nguyên}
+\begin{frame}{Giảm data skew từ 11,1\,\% xuống 0,9\,\% khả thi nhưng đánh đổi 12 lần số partition -- quyết định giữ nguyên}
 \centering\small
 \begin{tabular}{@{}lrr@{}}
 \toprule
  & \texttt{year/source} (hiện tại) & \texttt{year/month/source} (thử nghiệm) \\
 \midrule
 Số partition & 109 & 1.306 \\
-Partition lớn nhất & 10,62\% & \textcolor{goodgreen}{0,90\%} \\
+Partition lớn nhất & 11,08\% & \textcolor{goodgreen}{0,94\%} \\
 \bottomrule
 \end{tabular}
 \vspace{0.3cm}
 
-\small \textbf{Quyết định trung thực}: KHÔNG áp dụng -- skew hiện tại (10,6\%) đã thấp, còn 1.306 partition
-làm nặng thêm vấn đề ``small-file'': đo lại công bằng trên 9,3 triệu dòng, partition hiện tại vẫn
-\textbf{chậm hơn 1,5--2,4 lần} so với không partition, vì Parquet đã tự bỏ qua dữ liệu không liên quan nhờ
+\small \textbf{Quyết định trung thực}: KHÔNG áp dụng -- skew hiện tại (11,1\%) đã thấp, còn 1.306 partition
+làm nặng thêm vấn đề ``small-file'': đo lại công bằng trên 9,0 triệu dòng, partition hiện tại vẫn
+\textbf{chậm hơn 1,5--2,5 lần} so với không partition, vì Parquet đã tự bỏ qua dữ liệu không liên quan nhờ
 thống kê min/max theo row-group. Lợi ích partition pruning chỉ rõ ở quy mô lớn hơn hoặc trên S3/GCS.
 \end{frame}
 
@@ -380,17 +399,17 @@ do chỉ 2 trạm đủ số liệu mưa.\\[4pt]
 \toprule
 Kết luận & Chỉ đối chiếu ERA5 & ERA5 + trạm lân cận ($\le$ 200\,km) \\
 \midrule
-\textcolor{goodgreen}{Dị thường khí hậu thật} (đối chứng cùng chiều) & 5.375 & \textbf{19.067} \\
-Dị thường cục bộ (đối chứng ủng hộ yếu) & 514 & 3.520 \\
-\textcolor{badred}{Nghi lỗi dữ liệu} (trạm cực đoan, mọi đối chứng phản bác) & 25 & 335 \\
-Không có đối chứng & 33.052 & \textbf{16.044} \\
+\textcolor{goodgreen}{Dị thường khí hậu thật} (đối chứng cùng chiều) & 5.380 & \textbf{20.357} \\
+Dị thường cục bộ (đối chứng ủng hộ yếu) & 507 & 3.725 \\
+\textcolor{badred}{Nghi lỗi dữ liệu} (trạm cực đoan, mọi đối chứng phản bác) & 23 & 343 \\
+Không có đối chứng & 34.453 & \textbf{15.938} \\
 \bottomrule
 \end{tabular}
 \vspace{0.3cm}
 
 \small Trạm lân cận phủ giai đoạn trước 2020 (chưa có ERA5) và lật lại 3 ca từng bị nghi lỗi. Cặp trạm
 $<$ 5\,km bị loại: đó là cùng một trạm vật lý GHCN/ISD (Entity Resolution), cùng cảm biến. Ví dụ thật:
-ISD \textbf{Phnom Penh} ghi 981,6\,hPa ngày 3/7/2023 ($z = -9{,}1$) khi ERA5 bình thường -- cảm biến lỗi, không phải bão.
+ISD \textbf{Phnom Penh} 3/7/2023: áp suất dao động 995--1054\,hPa dù đã ``qua QC của NOAA, $z = -5{,}5$ khi ERA5 bình thường -- cảm biến lỗi, không phải bão.
 \end{frame}
 
 \begin{frame}{Bão Yagi: 7/9/2024 là ngày mưa lớn nhất 5 năm ERA5 tại 5 trạm miền Bắc, gấp 3 lần p99}
@@ -471,7 +490,7 @@ Cần Thơ & nhiệt độ & bước $-$0,52\,°C \\
 THW00041018 & nhiệt độ & bước $-$0,69\,°C \\
 \bottomrule
 \end{tabular}\\[3pt]
-\textbf{Mô phỏng} tiêm lỗi vào 76 chuỗi thật ổn định: phát hiện \textbf{100\%} trôi, \textbf{98--100\%} nhảy bậc.
+\textbf{Mô phỏng} tiêm lỗi vào 76 chuỗi thật ổn định: phát hiện \textbf{100\%} trôi, \textbf{95--98\%} nhảy bậc.
 \end{column}
 \end{columns}
 \end{frame}
@@ -482,7 +501,7 @@ THW00041018 & nhiệt độ & bước $-$0,69\,°C \\
 \hypertarget{sec5}{}
 \hustsectionpage{5. Dashboard\\(TV4)}
 
-\begin{frame}{Dashboard 10 panel đọc trực tiếp 9,3 triệu bản ghi thật, đã verify qua trình duyệt thật}
+\begin{frame}{Dashboard 10 panel đọc trực tiếp 9,0 triệu bản ghi thật, đã verify qua trình duyệt thật}
 \centering\scriptsize
 \begin{tabular}{@{}p{3.4cm}p{9.2cm}@{}}
 \toprule
@@ -519,7 +538,7 @@ Panel & Nội dung thật \\
 Giới hạn & Nguyên nhân / hướng xử lý \\
 \midrule
 Khí hậu nền ngắn với ERA5/ISD (5--10 năm) & Kết luận khí hậu chỉ dựa trên GHCN nền WMO 1991--2020; SPI mới có 12 trạm do GHCN thiếu số liệu mưa \\
-Mạng trạm thưa & 18/61 trạm không có láng giềng trong 200\,km; 16.044 dị thường vẫn chưa có đối chứng \\
+Mạng trạm thưa & 18/61 trạm không có láng giềng trong 200\,km; 15.938 dị thường vẫn chưa có đối chứng \\
 Pipeline inference (\texttt{infer.py}) chưa tách checkpoint & Script hiện train+eval trong 1 lần chạy -- đủ cho quy mô bài tập lớn, chưa tách để demo nhanh \\
 PINN chưa vượt baseline RMSE thuần & Thiếu chiều thời gian trong dữ liệu hiện tại -- physics loss vẫn có giá trị về tính hợp lý vật lý \\
 GitHub Projects board chưa thiết lập & Đã dùng Issues/Pull Request trên GitHub; trạng thái tác vụ theo dõi ở \texttt{docs/03} \\
@@ -530,8 +549,8 @@ GitHub Projects board chưa thiết lập & Đã dùng Issues/Pull Request trên
 \begin{frame}{120/160 tác vụ đã rà soát với bằng chứng thật, pipeline đầy đủ từ ingest tới dashboard}
 \begin{center}
 \bignum{81/120}{tác vụ Xong đúng\\tiêu chí kiểm thử}{goodgreen}{4.2cm}
-\bignumS{9.348.470}{bản ghi thật\\5 nguồn, 9 nước}{goodgreen}{4.2cm}
-\bignum{74}{test tự động\\(gồm Spark + Kafka thật)}{goodgreen}{4.2cm}
+\bignumS{8.955.315}{bản ghi thật\\5 nguồn, 9 nước}{goodgreen}{4.2cm}
+\bignum{83}{test tự động\\(gồm Spark + Kafka thật)}{goodgreen}{4.2cm}
 \end{center}
 \vspace{0.4cm}
 \centering\small
