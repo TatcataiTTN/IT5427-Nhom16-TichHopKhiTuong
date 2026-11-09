@@ -86,7 +86,7 @@ def download_openmeteo():
 def download_nasa_power():
     outdir = os.path.join(OUT, "nasa_power")
     os.makedirs(outdir, exist_ok=True)
-    params = "T2M,RH2M,PRECTOTCORR,WS2M,ALLSKY_SFC_SW_DWN,PS"
+    params = "T2M,RH2M,PRECTOTCORR,WS2M,WS10M,ALLSKY_SFC_SW_DWN,PS"  # WS10M: gió 10 m như các nguồn khác (docs/17)
     start, end = POINT_START.replace("-", ""), POINT_END.replace("-", "")
     report = []
     for name, (lat, lon) in POINTS.items():

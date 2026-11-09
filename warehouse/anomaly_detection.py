@@ -3,7 +3,7 @@
 Phát hiện dị thường khí hậu trên warehouse WeatherObs (mục tiêu chính của đề tài, docs/01 mục 2).
 
 Phương pháp (chuẩn khí tượng, không tự đặt ngưỡng tuỳ ý):
-  1. Tổng hợp theo ngày bằng Spark (~9,3 triệu dòng -> ~1 triệu ngày-trạm). Ngày của nguồn đo theo
+  1. Tổng hợp theo ngày bằng Spark (~9 triệu dòng -> ~1 triệu ngày-trạm). Ngày của nguồn đo theo
      giờ chỉ hợp lệ khi phủ đủ 4 khối 6 giờ (tránh lệch theo chu kỳ ngày đêm khi thiếu quan trắc đêm).
   2. Khí hậu nền (climatology) theo (vị trí, nguồn, ngày-trong-năm) với cửa sổ trượt ±15 ngày, tính
      bằng Spark: trung bình, độ lệch chuẩn, bách phân vị 90. Giai đoạn nền:

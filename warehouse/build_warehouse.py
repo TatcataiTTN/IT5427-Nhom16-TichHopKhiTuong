@@ -29,7 +29,7 @@ import sys
 import pandas as pd
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from ingestion.parsers import WEATHEROBS_COLUMNS, parse_ghcn, parse_isd, parse_nasa_power, parse_openmeteo
+from ingestion.parsers import NUMERIC_COLUMNS, WEATHEROBS_COLUMNS, parse_ghcn, parse_isd, parse_nasa_power, parse_openmeteo
 from warehouse.interpolation import bilinear_interpolate_era5, interpolate_era5_month
 from warehouse.location import build_location_table
 
@@ -46,8 +46,10 @@ def _normalize(df: pd.DataFrame) -> pd.DataFrame:
     df = df[WEATHEROBS_COLUMNS].dropna(subset=["timestamp_utc", "location_id"]).copy()
     df["location_id"] = df["location_id"].astype(str)
     df["source"] = df["source"].astype(str)
+    for c in ("temp_def", "qc_flag"):
+        df[c] = df[c].astype("string")
     df["timestamp_utc"] = pd.to_datetime(df["timestamp_utc"], utc=True).astype("datetime64[us, UTC]")
-    for c in WEATHEROBS_COLUMNS[3:]:
+    for c in NUMERIC_COLUMNS:
         df[c] = pd.to_numeric(df[c], errors="coerce").astype("float64")
     return df
 

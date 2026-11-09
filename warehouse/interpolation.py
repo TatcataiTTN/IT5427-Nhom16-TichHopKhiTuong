@@ -59,6 +59,8 @@ def bilinear_interpolate_era5(nc_path: str, stations: pd.DataFrame) -> pd.DataFr
             "cloud_cover_pct": np.nan,
             "soil_temp_c": np.nan,
             "soil_moist_m3m3": np.nan,
+            "temp_def": "INST",
+            "qc_flag": np.nan,
         })
         rows.append(sub)
 
@@ -117,6 +119,8 @@ def interpolate_era5_month(era5_dir: str, month: str, stations: pd.DataFrame) ->
         "cloud_cover_pct": at_stations("total_cloud_cover") * 100.0,
         "soil_temp_c": np.nan,
         "soil_moist_m3m3": np.nan,
+        "temp_def": "INST",
+        "qc_flag": np.nan,
     })
     return out
 
