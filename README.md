@@ -126,6 +126,9 @@ export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home  
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64                             # Ubuntu (apt install openjdk-17-jdk)
 export MKL_THREADING_LAYER=GNU    # chỉ cần nếu dùng Anaconda + torch cài từ pip (tránh lỗi MKL/libgomp)
 
+# Cách nhanh: tải bộ dữ liệu đã build sẵn (warehouse 9,3 triệu bản ghi + dữ liệu thô các nguồn điểm, ~435 MB)
+gh release download data-v2.0-full && tar -xzf warehouse-full.tar.gz && tar -xzf raw-points.tar.gz
+# Hoặc tự tải từ nguồn gốc:
 python3 scripts/batch_download_week2.py full           # bộ mẫu Tuần 2 + GHCN toàn lịch sử (data_samples/ bị gitignore)
 python3 scripts/batch_download_week2.py sea-priority   # mở rộng GHCN/ISD ra 8 nước ĐNA còn lại
 python3 scripts/download_full_points.py                # ISD 10 năm + Open-Meteo/NASA POWER 5 năm (~1,4 GB, vài giờ)
