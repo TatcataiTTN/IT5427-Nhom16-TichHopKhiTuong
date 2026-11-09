@@ -136,11 +136,14 @@ python3 scripts/download_era5_full.py                  # ERA5 9 biến × 5 năm
                                                        #   chạy lại được sau khi ngắt — tháng đã có sẽ bỏ qua)
 python3 warehouse/location.py                          # bảng Location -> warehouse/output/location.parquet (cần cho
                                                        #   entity_resolution, validate_interpolation, PINN v2)
-python3 -m pytest tests/ -v                            # 54/54 test pass (cần Kafka broker cho test streaming)
+python3 -m pytest tests/ -v                            # 74/74 test pass (cần Kafka broker cho test streaming)
 python3 warehouse/build_warehouse.py                   # 9.348.470 bản ghi -> warehouse/output/weatherobs.parquet
                                                        #   (--dataset week2 để build bộ mẫu nhỏ nếu chưa tải đủ)
 python3 warehouse/spark_analytics.py                   # correlation, data skew, benchmark
-python3 warehouse/anomaly_detection.py                 # dị thường khí hậu: z-score, đợt nóng, SPI, xác nhận chéo ERA5 (docs/16)
+python3 warehouse/anomaly_detection.py                 # dị thường khí hậu: z-score, đợt nóng, SPI, mưa cực đoan,
+                                                       #   xác nhận chéo ERA5 + trạm lân cận (docs/16)
+python3 warehouse/climate_trends.py                    # xu hướng dài hạn: Mann-Kendall + độ dốc Sen
+python3 warehouse/sensor_drift.py                      # trôi cảm biến: bias trạm − ERA5, Pettitt
 python3 model/train_demo.py && python3 model/navier_stokes_autograd_check.py \
   && python3 model/pinn_rh_from_dewpoint.py            # 3 ví dụ PINN, đều chạy thật
 streamlit run dashboard/app.py                         # xem dữ liệu thật trên trình duyệt
@@ -149,6 +152,10 @@ streamlit run dashboard/app.py                         # xem dữ liệu thật 
 # Cả 2 file dùng image chính thức apache/* (Bitnami đã gỡ bitnami/kafka, bitnami/spark khỏi Docker Hub).
 docker compose -f docker-compose.kafka.yml up -d       # Kafka broker (KRaft) tại localhost:9092
 python3 ingestion/kafka_producer.py --limit 100        # replay dữ liệu vào topic weatherobs.<source>
+python3 ingestion/kafka_producer.py --source GHCN --start 2024-04-01 --end 2024-05-15 --limit 0 \
+    --topic weatherobs.ghcn.replay                     # phát lại đợt nắng nóng 4–5/2024
+python3 warehouse/spark_streaming_anomaly.py --topic weatherobs.ghcn.replay --duration 60
+                                                       # phát hiện dị thường theo luồng -> cảnh báo
 docker compose -f docker-compose.spark.yml up -d       # Spark 4.2.0: 1 master + 2 worker, UI http://localhost:8080
 ```
 
