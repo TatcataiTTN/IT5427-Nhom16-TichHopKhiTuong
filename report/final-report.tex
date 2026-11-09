@@ -500,7 +500,7 @@ NASA POWER & 2.196 & 6 điểm đại diện, năm 2024 \\
 
 Kho dữ liệu phủ 119 vị trí (113 trạm quan trắc thật, định danh qua bảng \textit{Location}) trên 9
 quốc gia Đông Nam Á, đạt 100\% tính toàn vẹn tham chiếu (referential integrity) khi kiểm tra tự
-động bằng bộ 46 unit/integration test đi kèm mã nguồn.
+động bằng bộ 44 unit/integration test đi kèm mã nguồn.
 
 \section{Giải quyết dị biệt định danh: Entity Resolution GHCN--ISD}
 
@@ -560,12 +560,22 @@ giống hệt tới bốn chữ số thập phân.
 Cụm Spark giả lập ba node (một master, hai worker) và một Kafka broker được triển khai bằng Docker
 Compose và kiểm chứng hoạt động thật: API của Spark Master xác nhận hai worker ở trạng thái
 \texttt{ALIVE}, một tác vụ Spark thật (tổng các số nguyên từ 0 đến 999.999) được gửi và chạy phân
-tán cho kết quả chính xác; Kafka producer phát 70 bản ghi JSON thật vào một topic, Kafka consumer
-đọc lại đúng nội dung. Việc triển khai phần Spark Structured Streaming kết hợp cửa sổ thời gian
-(windowing) đọc trực tiếp từ Kafka đã được viết mã hoàn chỉnh
-(\texttt{warehouse/spark\_streaming\_consumer.py}) nhưng chưa kiểm thử trực tiếp lần thứ hai do
-Docker Desktop không tự khởi động lại được trên máy triển khai tại thời điểm viết báo cáo -- một
-hạn chế về môi trường vận hành, không phải về thiết kế hay logic xử lý.
+tán cho kết quả chính xác; Kafka producer phát bản ghi JSON thật vào một topic, Kafka consumer đọc
+lại đúng nội dung. Phần Spark Structured Streaming kết hợp cửa sổ thời gian (windowing) đọc trực
+tiếp từ Kafka (\texttt{warehouse/spark\_streaming\_consumer.py}) đã được kiểm thử trực tiếp thành
+công: hệ thống tính đúng nhiệt độ trung bình theo trạm trên cửa sổ trượt một phút, bước nhảy 30
+giây, hiển thị kết quả qua nhiều micro-batch liên tiếp trên console.
+
+Quá trình kiểm thử trực tiếp phát hiện và khắc phục hai sự cố môi trường thực tế, không phải lỗi
+logic xử lý: \emph{thứ nhất}, phiên Spark cục bộ không khởi tạo được do hệ điều hành tự phân giải
+tên máy sang địa chỉ mạng LAN thay vì \texttt{localhost} -- nhiều khả năng do ngăn xếp mạng ảo của
+Docker Desktop vừa khởi động lại làm thay đổi định tuyến mạng trên máy chủ -- khắc phục bằng biến
+môi trường \texttt{SPARK\_LOCAL\_IP}; \emph{thứ hai}, phiên bản connector Kafka cấu hình cứng
+(4.0.0) không tương thích nhị phân với phiên bản PySpark thực tế đang cài (4.2.0), gây lỗi
+\texttt{NoSuchMethodError} -- khắc phục bằng cách lấy phiên bản connector tự động theo môi trường
+cài đặt thay vì cố định trong mã nguồn. Cả hai sự cố minh hoạ đúng tính chất "kiểm thử trên môi
+trường thật phát hiện vấn đề mà môi trường lý thuyết không bộc lộ" -- lý do nhóm ưu tiên chạy thật
+thay vì chỉ trình bày thiết kế trên giấy.
 
 \section{Trực quan hoá và cảnh báo}
 
@@ -648,7 +658,7 @@ Tràn bộ nhớ khi xử lý dữ liệu ERA5 đa chiều & Trung bình & Áp d
 \midrule
 \multicolumn{3}{@{}l}{\textit{Rủi ro mới phát hiện khi triển khai thực tế (Tuần 3--4)}} \\
 \midrule
-Docker Desktop không tự khởi động lại trên môi trường triển khai (lặp lại 2 lần) & Trung bình & Mã nguồn Spark Streaming đã hoàn chỉnh và chạy thật thành công lần đầu; chỉ cần khởi động lại thủ công để kiểm thử lần hai, không ảnh hưởng tới pipeline batch đang chạy ổn định ở chế độ \texttt{local[*]} \\
+Docker Desktop không tự khởi động lại trên môi trường triển khai (gặp 2 lần, đã khắc phục cả 2) & Trung bình & Khởi động lại thủ công; sau đó kiểm thử trực tiếp Spark Streaming thành công (Chương 6, Mục 6.6), không ảnh hưởng tới pipeline batch vẫn chạy ổn định ở chế độ \texttt{local[*]} trong suốt thời gian đó \\
 GHCN và ISD dùng hai hệ mã trạm độc lập, không khớp trực tiếp qua định danh & Trung bình & Đã giải quyết bằng liên kết theo khoảng cách toạ độ (Haversine), khớp 84,6\% số trạm trong ngưỡng 5km \\
 Tăng số partition để giảm data skew làm trầm trọng thêm vấn đề tệp nhỏ & Thấp (đã kiểm soát) & Giữ nguyên chiến lược partition hiện tại, chỉ áp dụng khi dữ liệu đạt quy mô đủ lớn để lợi ích vượt chi phí \\
 \bottomrule
@@ -671,10 +681,9 @@ hiệu quả trong thực tế -- hai hạng mục bắt buộc (Spark batch và
 trước, các hạng mục nâng cao (PINN, Spark Streaming) được triển khai sau theo đúng thứ tự ưu tiên
 đã hoạch định.
 
-Nhóm cũng xác định rõ các giới hạn còn tồn đọng tại thời điểm báo cáo: pipeline Spark Structured
-Streaming windowing đã hoàn chỉnh về mã nguồn nhưng chưa kiểm thử trực tiếp lần thứ hai do hạn chế
-môi trường triển khai (Docker Desktop); mô hình PINN trường gió chưa vượt trội một mô hình hồi quy
-thuần về sai số bình phương trung bình ở quy mô dữ liệu hiện tại; và việc mở rộng ERA5 lên đầy đủ
+Nhóm cũng xác định rõ các giới hạn còn tồn đọng tại thời điểm báo cáo: mô hình PINN trường gió
+chưa vượt trội một mô hình hồi quy thuần về sai số bình phương trung bình ở quy mô dữ liệu hiện
+tại; và việc mở rộng ERA5 lên đầy đủ
 năm năm dữ liệu vẫn phụ thuộc quyết định của nhóm về thời gian và băng thông. Các giới hạn này được
 ghi nhận trung thực kèm nguyên nhân kỹ thuật cụ thể (Chương~6 và~8), không che giấu nhằm tạo ấn
 tượng kết quả tốt hơn thực tế -- một nguyên tắc nhóm tuân thủ xuyên suốt quá trình thực hiện đề tài.

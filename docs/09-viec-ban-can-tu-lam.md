@@ -35,15 +35,13 @@ và chỉ bạn (hoặc nhóm) làm được**.
 có khớp với những gì Quang/Lương thực sự làm không (xem mục 3), thời lượng trình bày có hợp lý
 không, câu chữ có cần chỉnh cho tự nhiên hơn không.
 
-## 2. Hạ tầng Docker — vẫn lặp lại vấn đề cũ, cần bạn mở thủ công lần nữa
+## 2. ĐÃ XONG — Docker Desktop đã mở lại, Spark Streaming test live thành công
 
-Đã thử tự mở Docker Desktop (`open -a Docker`) nhưng **daemon không lên lại được lần thứ 2**
-(lần đầu 20/10 cũng gặp y hệt vấn đề này, sau đó tự lên được sau vài lần thử). Hiện tại chỉ có tiến
-trình `com.docker.vmnetd` chạy, không có app chính.
-
-**Cần bạn**: mở Docker Desktop thủ công (biểu tượng cá voi ở thanh menu macOS chuyển "running"), rồi
-báo tôi — tôi sẽ test lại `warehouse/spark_streaming_consumer.py` (code đã viết xong, logic đã
-review kỹ, chỉ chưa chạy live được) ngay lập tức, không cần chờ thêm.
+~~Mở Docker Desktop thủ công~~ — bạn đã mở giúp, daemon lên lại được. Đã test ngay sau đó:
+Spark Structured Streaming đọc Kafka thật, tính đúng `avg_temp_c` theo cửa sổ trượt 1 phút/30s.
+Phát hiện + sửa 2 bug môi trường thật trong lúc chạy live (hostname tự phân giải sai IP, version
+connector Kafka không khớp PySpark cài thật) — chi tiết tại `docs/14` mục 9. **Không còn việc gì
+cần bạn làm cho mục này.**
 
 ## 3. Việc nhóm — vẫn cần xác nhận thật từ Quang & Lương
 
@@ -66,7 +64,7 @@ review kỹ, chỉ chưa chạy live được) ngay lập tức, không cần ch
 Toàn bộ pipeline kỹ thuật: kiểm chứng + tải dữ liệu 9 nước ĐNA, ETL (`ingestion/`, `warehouse/`),
 Entity Resolution GHCN↔ISD, cross-validation nội suy, Spark SQL optimization, 2 mô hình PINN thật,
 Dashboard 6 panel (đã verify qua browser), Data Quality Report, Spark cluster 3 node + Kafka broker
-(verify thật 20/10), 46 test tự động, toàn bộ tài liệu kỹ thuật (`docs/ingestion.md`,
+và Structured Streaming windowing (verify live thật 09/11), 44 test tự động, toàn bộ tài liệu kỹ thuật (`docs/ingestion.md`,
 `docs/warehouse.md`, `docs/model.md`, `data_dictionary.md`, `CHANGELOG.md`, `requirements.txt`),
 báo cáo cuối kỳ và slide bảo vệ. Xem chi tiết tại `docs/03-ke-hoach-160-tasks.md` (cột "Trạng thái")
 và `docs/14-ket-qua-ky-thuat-tuan-3-4.md`.

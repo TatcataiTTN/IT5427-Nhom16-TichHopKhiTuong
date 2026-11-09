@@ -1,21 +1,36 @@
 #!/usr/bin/env python3
 """
 Spark Structured Streaming doc tu Kafka topic va tinh aggregate theo cua so thoi gian
-(docs/03 Tuan 2 TV3 #2 + TV1 #9, carryover sang Tuan 3 vi bi chan boi Docker chua chay).
+(docs/03 Tuan 2 TV3 #2 + TV1 #9). Da chay LIVE thanh cong that 09/11/2026 sau khi Docker Desktop
+len duoc lan thu 2 - xem docs/14 muc cap nhat cho bang ket qua window that.
 
 Doc topic "weatherobs.ghcn" (ghi boi ingestion/kafka_producer.py), tinh nhiet do trung binh
 theo cua so 1 phut truot moi 30 giay (tumbling/sliding window tren processing time, vi du lieu
 "replay" khong co watermark thuc te dang tin cay).
 
 CAN: Kafka broker + 1 topic co du lieu that truoc khi chay (xem docker-compose.kafka.yml +
-ingestion/kafka_producer.py). Can goi JAR connector Kafka cho Spark (tu dong tai qua --packages).
+ingestion/kafka_producer.py). Can goi JAR connector Kafka cho Spark (tu dong tai qua --packages,
+da tu dong khop dung version PySpark dang cai de tranh NoSuchMethodError).
+
+2 bug moi that da gap + sua khi chay live lan dau (09/11/2026):
+  1. SparkContext local[*] that bai khi khoi tao do Spark tu phan giai hostname ra IP LAN that
+     (vd 192.168.1.168) thay vi localhost - rat co the do mang ao cua Docker Desktop (vpnkit/
+     gVisor) vua khoi dong lai gay xung dot route. Sua bang bien moi truong SPARK_LOCAL_IP=127.0.0.1.
+  2. Kafka connector ghim cung version "4.0.0" nhung may that chay PySpark 4.2.0 -> binary
+     khong tuong thich, loi "NoSuchMethodError: SerializedOffset.<init>". Sua bang cach lay
+     version PySpark dang cai that (pyspark.__version__) thay vi ghim cung so.
 
 Chay:
   JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home \
+  SPARK_LOCAL_IP=127.0.0.1 \
     python3 warehouse/spark_streaming_consumer.py --topic weatherobs.ghcn --duration 30
 """
 import argparse
 import os
+
+# Fallback neu nguoi dung quen set env var: tranh loi SparkContext khoi tao that bai do
+# hostname resolve ra IP LAN that thay vi localhost (xem docstring, bug that da gap 09/11/2026).
+os.environ.setdefault("SPARK_LOCAL_IP", "127.0.0.1")
 
 SCHEMA_FIELDS = [
     "location_id", "timestamp_utc", "temp_c", "rh_pct", "dewpoint_c", "precip_mm",
@@ -35,10 +50,14 @@ def main():
     from pyspark.sql.types import StructType, StructField, StringType, DoubleType, IntegerType
     import pyspark.sql.functions as F
 
+    import pyspark
+    spark_version = pyspark.__version__  # connector phai KHOP dung version PySpark dang cai
+    # (vd Spark 4.0.0 vs 4.2.0 khong tuong thich nhi phan -- da tung gap NoSuchMethodError
+    # tren SerializedOffset khi ghim cung 4.0.0 trong luc may that chay PySpark 4.2.0)
     spark = (
         SparkSession.builder.appName("Nhom16-streaming-windowing")
         .master("local[*]")
-        .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.13:4.0.0")
+        .config("spark.jars.packages", f"org.apache.spark:spark-sql-kafka-0-10_2.13:{spark_version}")
         .getOrCreate()
     )
     spark.sparkContext.setLogLevel("WARN")

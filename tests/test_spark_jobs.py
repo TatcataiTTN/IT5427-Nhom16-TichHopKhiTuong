@@ -45,3 +45,35 @@ def test_query_optimization_cache_speeds_up_and_passes_threshold():
     r = _run_spark_script("warehouse/query_optimization.py")
     assert r.returncode == 0, f"Script loi:\n{r.stdout[-3000:]}\n{r.stderr[-3000:]}"
     assert "PASS" in r.stdout or "KET QUA THAT" in r.stdout
+
+
+def _kafka_broker_reachable(host="localhost", port=9092, timeout=2):
+    import socket
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
+@pytest.mark.skipif(not WAREHOUSE_EXISTS, reason="warehouse/output/weatherobs.parquet chua duoc build")
+@pytest.mark.skipif(not _kafka_broker_reachable(), reason="Kafka broker khong chay (docker compose -f docker-compose.kafka.yml up -d)")
+def test_spark_structured_streaming_reads_kafka_and_windows_real_data():
+    # Phat du lieu that vao topic truoc khi doc streaming
+    produce = subprocess.run(
+        [sys.executable, os.path.join(ROOT, "ingestion", "kafka_producer.py"), "--limit", "30", "--speed", "0"],
+        capture_output=True, text=True, timeout=30, cwd=ROOT,
+    )
+    assert produce.returncode == 0, f"Producer loi:\n{produce.stdout}\n{produce.stderr}"
+
+    env = os.environ.copy()
+    java_home = _java17_home()
+    if java_home:
+        env["JAVA_HOME"] = java_home
+    r = subprocess.run(
+        [sys.executable, os.path.join(ROOT, "warehouse", "spark_streaming_consumer.py"), "--topic", "weatherobs.ghcn", "--duration", "15"],
+        capture_output=True, text=True, timeout=60, cwd=ROOT, env=env,
+    )
+    assert r.returncode == 0, f"Script loi:\n{r.stdout[-3000:]}\n{r.stderr[-3000:]}"
+    assert "PASS" in r.stdout
+    assert "avg_temp_c" in r.stdout, "Khong thay cot ket qua window trong output"

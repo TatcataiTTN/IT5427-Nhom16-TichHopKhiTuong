@@ -264,17 +264,19 @@ chỉ 1 snapshot không-thời-gian, ràng buộc vật lý cần nhiều điể
 lợi thế MSE. Đã verify tái lập được tới 4 chữ số thập phân trên venv hoàn toàn sạch.
 \end{frame}
 
-\begin{frame}{Spark cluster 3 node và Kafka broker đã chạy thật 20/10, nhưng Streaming windowing vẫn chặn bởi Docker lặp lại}
+\begin{frame}{Spark Structured Streaming đọc Kafka thật và tính đúng cửa sổ trượt 1 phút, phát hiện thêm 2 bug môi trường}
 \begin{center}
 \bignumS{\checkmark\ 20/10}{Spark 3 node + Kafka\\đã verify thật}{goodgreen}{4.5cm}
-\bignumS{$\times$ 09/11}{Docker không tự\\khởi động lại được}{badred}{4.5cm}
+\bignumS{\checkmark\ 09/11}{Streaming windowing\\test live thành công}{goodgreen}{4.5cm}
 \end{center}
 \vspace{0.2cm}
 \centering\small
-\texttt{warehouse/spark\_streaming\_consumer.py} (Structured Streaming, window 1 phút) đã viết xong
-và review logic đầy đủ, nhưng CHƯA test live lần 2 được -- Docker Desktop không tự khởi động trên
-máy (cùng lỗi \texttt{com.docker.vmnetd} không kèm app chính, như lần 20/10). Cần người dùng tự mở
-Docker Desktop thủ công.
+\texttt{warehouse/spark\_streaming\_consumer.py} đọc topic Kafka thật, console hiển thị đúng
+\texttt{avg\_temp\_c} theo cửa sổ trượt 1 phút/30s từng trạm. Phát hiện + sửa 2 bug môi trường
+thật: (1) \texttt{SparkContext} lỗi do hostname tự phân giải ra IP LAN thay vì localhost (nghi do
+mạng ảo Docker Desktop vừa khởi động lại) -- sửa bằng \texttt{SPARK\_LOCAL\_IP=127.0.0.1}; (2)
+Kafka connector ghim cứng version 4.0.0 không khớp PySpark cài thật 4.2.0 -- sửa bằng lấy version
+tự động.
 \end{frame}
 
 %=============================================================
@@ -309,13 +311,12 @@ Panel & Nội dung thật \\
 \hypertarget{sec6}{}
 \hustsectionpage{6. Rủi ro, giới hạn\\\& kết luận}
 
-\begin{frame}{Năm giới hạn kỹ thuật còn tồn đọng đều đã ghi nhận rõ nguyên nhân, không che giấu}
+\begin{frame}{Bốn giới hạn kỹ thuật còn tồn đọng đều đã ghi nhận rõ nguyên nhân, không che giấu}
 \centering\scriptsize
 \begin{tabular}{@{}p{4.2cm}p{7.9cm}@{}}
 \toprule
 Giới hạn & Nguyên nhân / hướng xử lý \\
 \midrule
-Spark Streaming windowing chưa test live & Docker Desktop không tự khởi động lại (2 lần: 20/10, 09/11) -- code sẵn sàng, cần người dùng mở app thủ công \\
 ERA5 mới 3 ngày, không phải 5 năm đầy đủ & Quyết định phạm vi do thời gian/băng thông -- cần nhóm chốt (\texttt{docs/09}) \\
 Pipeline inference (\texttt{infer.py}) chưa tách checkpoint & Script hiện train+eval trong 1 lần chạy -- đủ cho quy mô bài tập lớn, chưa tách để demo nhanh \\
 PINN chưa vượt baseline RMSE thuần & Thiếu chiều thời gian trong dữ liệu hiện tại -- physics loss vẫn có giá trị về tính hợp lý vật lý \\
@@ -328,7 +329,7 @@ GitHub Issues/Projects chưa thiết lập & Thiếu quyền token (\texttt{gh a
 \begin{center}
 \bignum{71/120}{tác vụ Xong đúng\\tiêu chí kiểm thử}{goodgreen}{4.2cm}
 \bignumS{1.076.473}{bản ghi thật\\5 nguồn, 9 nước}{goodgreen}{4.2cm}
-\bignum{46}{test tự động\\(38 nhanh + 5 slow + 3 Spark)}{goodgreen}{4.2cm}
+\bignum{44}{test tự động\\(38 nhanh + 4 slow + 2 Spark)}{goodgreen}{4.2cm}
 \end{center}
 \vspace{0.4cm}
 \centering\small

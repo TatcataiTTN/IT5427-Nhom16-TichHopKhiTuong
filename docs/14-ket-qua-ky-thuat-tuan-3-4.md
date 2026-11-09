@@ -97,13 +97,28 @@ TMAX/TMIN/PRCP), không phải lỗi pipeline.
 - **Output PINN**: bản đồ residual + bảng pred vs obs từng trạm, đọc trực tiếp
   `warehouse/output/pinn_wind_field_output.parquet`.
 
-## 9. Hạ tầng Docker — vướng mắc lặp lại (ghi nhận trung thực)
+## 9. Spark Structured Streaming + Kafka — test live thành công (09/11/2026, cập nhật)
 
-Spark Structured Streaming + Kafka windowing (TV3 Tuần 2 #2 carryover) **vẫn chưa test live
-được** — Docker Desktop không tự khởi động được trên máy lần thứ 2 (lần đầu 20/10, lần này
-09/11), cùng một kiểu lỗi (`com.docker.vmnetd` chạy nhưng app chính không lên). Code đã viết xong
-và review logic đầy đủ (`warehouse/spark_streaming_consumer.py`) nhưng cần người dùng tự mở
-Docker Desktop thủ công để verify — xem `docs/09` mục cập nhật mới nhất.
+Sau khi Docker Desktop lên được (người dùng tự mở lại thủ công), đã test live thành công:
+`warehouse/spark_streaming_consumer.py` đọc topic Kafka thật (`weatherobs.ghcn`), tính
+`avg_temp_c` theo cửa sổ trượt 1 phút/30 giây cho từng trạm, console hiển thị đúng kết quả qua
+nhiều batch liên tiếp.
+
+Trong lúc chạy live lần đầu, phát hiện + sửa 2 bug thật (không phải lỗi logic nghiệp vụ, mà lỗi
+môi trường/tương thích phiên bản):
+1. **Lỗi mạng khởi tạo SparkContext**: `local[*]` SparkSession thất bại do Spark tự phân giải
+   hostname máy ra địa chỉ IP LAN thật (`192.168.1.168`) thay vì `localhost`, khiến driver/executor
+   nội bộ không giao tiếp được (`BlockManagerId.executorId()` null). Nhiều khả năng do mạng ảo
+   của Docker Desktop (vpnkit/gVisor) vừa khởi động lại làm thay đổi route mạng trên máy host. Sửa
+   bằng biến môi trường `SPARK_LOCAL_IP=127.0.0.1` (đã thêm `os.environ.setdefault(...)` ngay
+   trong script để tự áp dụng, không bắt buộc người dùng nhớ set tay).
+2. **Lỗi tương thích phiên bản connector Kafka**: script ban đầu ghim cứng
+   `spark-sql-kafka-0-10_2.13:4.0.0`, nhưng máy thật chạy PySpark 4.2.0 — không tương thích nhị
+   phân, lỗi `NoSuchMethodError: SerializedOffset.<init>`. Sửa bằng lấy version tự động từ
+   `pyspark.__version__` thay vì ghim cứng.
+
+Có test tự động đi kèm (`tests/test_spark_jobs.py::test_spark_structured_streaming_reads_kafka_and_windows_real_data`,
+tự `skip` nếu Kafka broker không chạy).
 
 ---
 *Tái lập: chạy lại từng script liệt kê ở mỗi mục. Toàn bộ có unit test đi kèm trong `tests/`

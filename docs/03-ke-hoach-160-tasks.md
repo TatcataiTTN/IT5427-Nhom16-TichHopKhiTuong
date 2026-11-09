@@ -18,8 +18,9 @@
 - 🟡 **Một phần** — có kết quả thật nhưng chưa khớp 100% tiêu chí gốc (vd quy mô nhỏ hơn, công cụ khác tương đương, hoặc thiếu 1 phần việc).
 - ⬜ **Chưa làm** — chưa có kết quả, hoặc là hành động của con người (họp nhóm, nộp bài, thuyết trình, đăng ký tài khoản) ngoài khả năng hỗ trợ tự động — xem `docs/09-viec-ban-can-tu-lam.md`.
 - **Tổng Tuần 1 (40 tác vụ): 27 ✅ / 3 🟡 / 10 ⬜**
-- **Tổng Tuần 2 (40 tác vụ): 25 ✅ / 7 🟡 / 8 ⬜**
-- **Tổng 80 tác vụ đã rà soát: 52 ✅ / 10 🟡 / 18 ⬜** (so với lần rà soát trước 10/10/2026: 27 ✅ / 16 🟡 / 37 ⬜ — tăng 25 tác vụ Xong sau khi Docker Desktop lên được 20/10: Spark cluster 3 node + Kafka broker đã chạy và test thật, không còn là kế hoạch trên giấy)
+- **Tổng Tuần 2 (40 tác vụ): 26 ✅ / 7 🟡 / 7 ⬜**
+- **Tổng Tuần 3 (40 tác vụ): 19 ✅ / 13 🟡 / 8 ⬜** (chi tiết `docs/14-ket-qua-ky-thuat-tuan-3-4.md`)
+- **Tổng 120 tác vụ đã rà soát (Tuần 1-3): 72 ✅ / 23 🟡 / 25 ⬜** (so với lần rà soát trước 20/10/2026: 52 ✅ / 10 🟡 / 18 ⬜ trên 80 tác vụ — tăng thêm 40 tác vụ Tuần 3 vào phạm vi rà soát, cộng 09/11/2026: Spark Structured Streaming windowing test live thành công, TV3 Tuần 2 #2 chuyển ⬜→✅)
 - **10 tác vụ ⬜ còn lại chủ yếu là hành động con người** (họp nhóm, nộp bài, thuyết trình, thu thập tiến độ từ Quang/Lương) — xem `docs/09`. Phần kỹ thuật tự động hoá được gần như đã làm hết trong khả năng của môi trường hiện tại (bị chặn bởi Docker Desktop chưa khởi động cho 2 tác vụ Kafka/Spark-cluster).
 
 ---
@@ -127,7 +128,7 @@
 | # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
 |---|---|---|---|---|---|
 | 1 | Dựng cụm Spark giả lập nhiều node bằng Docker Compose (driver + 2–3 worker) | 7/10 | Cluster khởi động đủ số node, UI Spark truy cập được | Spark Master UI hiển thị đủ số worker đã cấu hình | ✅ Xong — test thật 20/10 sau khi Docker Desktop lên: Master API (`/json/`) báo `aliveworkers: 2`, đã `spark-submit` 1 job thật (tổng 0..999999) chạy phân tán trên worker `172.23.0.3`, kết quả đúng `499999500000`. Image `bitnami/spark:3.5` cũ bị Bitnami rút, đã đổi `bitnamilegacy/spark:4.0.0` |
-| 2 | Kết nối Spark Streaming với Kafka topic từ TV1, xử lý windowing cơ bản | 8/10 | Job Streaming chạy, tính được aggregate theo cửa sổ thời gian | Console output hiển thị kết quả window đúng chu kỳ đã set | ⬜ Hạ tầng (Spark cluster + Kafka broker) đã sẵn sàng thật từ 20/10 (#1, TV1 #9) — còn thiếu code Structured Streaming windowing, chuyển sang Tuần 3 |
+| 2 | Kết nối Spark Streaming với Kafka topic từ TV1, xử lý windowing cơ bản | 8/10 | Job Streaming chạy, tính được aggregate theo cửa sổ thời gian | Console output hiển thị kết quả window đúng chu kỳ đã set | ✅ Xong — test live thật 09/11/2026: `warehouse/spark_streaming_consumer.py` đọc topic Kafka thật, console hiển thị đúng `avg_temp_c` theo cửa sổ trượt 1 phút/30s cho từng trạm. Phát hiện + sửa 2 bug thật khi chạy live: (1) `SparkContext` lỗi do hostname tự phân giải ra IP LAN thay vì localhost (có thể do mạng ảo Docker Desktop) — sửa bằng `SPARK_LOCAL_IP=127.0.0.1`; (2) Kafka connector ghim cứng version 4.0.0 không khớp PySpark cài thật 4.2.0 (`NoSuchMethodError`) — sửa bằng lấy version tự động từ `pyspark.__version__`. Có test tự động (`tests/test_spark_jobs.py`) |
 | 3 | Spark transformation tính ma trận tương quan giữa các biến khí tượng | 9/10 | Ma trận correlation xuất ra đúng kích thước n×n | Giá trị đường chéo = 1.0, ma trận đối xứng | ✅ Xong — `warehouse/spark_analytics.py`, ma trận 5×5 thật trên 1.076.473 dòng, đường chéo=1.0, đối xứng đúng |
 | 4 | Pipeline tiền xử lý dữ liệu đầu vào cho PINN (chuẩn hoá, tensor hoá) | 10/10 | Hàm trả tensor đúng shape (batch, features) | Unit test: input DataFrame mẫu → output tensor đúng dtype/shape | ✅ Xong — `model/pinn_rh_from_dewpoint.py` (DataFrame ISD thật → tensor `(batch,2)`) |
 | 5 | Cài framework huấn luyện (PyTorch + DeepXDE/custom loss) | 12/10 | Môi trường train chạy được ví dụ tối thiểu | Script `train_demo.py` chạy hết 1 epoch không lỗi | ✅ Xong, vượt yêu cầu — `model/train_demo.py` chạy 100 epoch, hội tụ đúng nghiệm giải tích |
