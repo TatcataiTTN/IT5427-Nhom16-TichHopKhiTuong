@@ -3,6 +3,35 @@
 (docs/03 Tuần 3 TV2 #7 "Thiết lập data lineage/versioning cơ bản cho warehouse") — sinh từ lịch sử
 commit thật (`git log`), không viết tay tách rời khỏi lịch sử thật.
 
+## [Tuần 3-4] 2026-11-10 — merge PR #2 (Ngô Văn Quang)
+
+### Fixed
+- `model/pinn_wind_field_v2.py` — trung bình cộng trực tiếp hướng gió theo độ (đại lượng vòng
+  tròn, sai: 350°+10° trung bình ra 180°) → đổi sang trung bình vector (u,v). Phát hiện qua
+  GitHub Issue #1.
+- Gió Open-Meteo bị phóng đại 3,6 lần (API trả km/h, ghi thẳng vào cột m/s) → đọc đơn vị từ
+  `hourly_units`, quy đổi đúng.
+- Ma trận tương quan giả do fill NaN=0 trước khi tính → tương quan Pearson từng cặp (pairwise
+  deletion, chỉ dòng đủ 2 biến).
+- Benchmark partition bị đảo chiều do ghi đệm không công bằng (chỉ ghi 1 lần) → ghi lại mỗi lần
+  chạy, làm nóng JVM + trung vị 5 lần đo.
+- Biến bức xạ ERA5 dùng `toa_incident_solar_radiation` (đỉnh khí quyển) thay vì
+  `surface_solar_radiation_downwards` (bề mặt) — sai tầng khí quyển so với NASA POWER/Open-Meteo.
+- Docker image `bitnamilegacy/*` bị gỡ khỏi Docker Hub → chuyển sang `apache/kafka:3.7.0`,
+  `apache/spark:4.2.0` (khớp phiên bản PySpark driver).
+
+### Added
+- Tải đầy đủ ERA5 5 năm (2020–2024) + mở rộng ISD/Open-Meteo/NASA POWER — warehouse từ 1.076.473
+  lên **9.348.470 bản ghi** (`scripts/download_era5_full.py`, `scripts/download_full_points.py`).
+- Khung kiểm soát chất lượng theo tầng ở Ingestion (`qc_flag`, giới hạn vật lý, nhảy giá trị, khử
+  trùng bản tin ISD) — `docs/17`.
+- Phát hiện dị thường khí hậu: z-score theo khí hậu nền WMO 1991–2020, đợt nóng ETCCDI, SPI-1/
+  SPI-3, mưa cực đoan, xu hướng dài hạn Mann-Kendall/Sen, trôi cảm biến (Mann-Kendall + Pettitt),
+  dị thường theo luồng Kafka→Spark Streaming — xác nhận với sự kiện thật (bão Yagi, nắng nóng
+  4-5/2024, hạn Mekong 2019-2020) — `warehouse/anomaly_detection.py`, `warehouse/climate_trends.py`,
+  `warehouse/sensor_drift.py`, `warehouse/spark_streaming_anomaly.py`, `docs/16`.
+- 39 test tự động mới (tổng 83 test: 76 nhanh + 7 slow).
+
 ## [Tuần 3-4] 2026-11-09
 
 ### Added

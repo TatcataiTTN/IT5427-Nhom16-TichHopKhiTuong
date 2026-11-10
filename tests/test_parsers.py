@@ -118,6 +118,18 @@ def test_parse_openmeteo_pressure_is_msl_not_surface():
     assert (p > 960).all() and (p < 1040).all()
 
 
+def test_parse_openmeteo_wind_converted_kmh_to_ms():
+    # Open-Meteo tra gio theo km/h (hourly_units) -> parser phai chia 3.6 sang m/s
+    fp = os.path.join(DATA, "openmeteo_2024", "hanoi.json")
+    raw = pd.read_json(fp, typ="series")
+    assert raw["hourly_units"]["wind_speed_10m"] == "km/h"
+    df = parse_openmeteo(fp, "hanoi")
+    raw_kmh = pd.Series(raw["hourly"]["wind_speed_10m"], dtype=float)
+    assert np.allclose(df["wind_speed_ms"], raw_kmh / 3.6, equal_nan=True)
+    # Gio trung binh nam o Ha Noi ~2-4 m/s, khong phai ~10 (gia tri km/h chua doi)
+    assert df["wind_speed_ms"].mean() < 5
+
+
 # ---------------------------- Clausius-Clapeyron (PINN-lite, docs/06 muc 4b) ----------------------------
 def test_clausius_clapeyron_rh_100_when_saturated():
     t = pd.Series([25.0, 30.0])

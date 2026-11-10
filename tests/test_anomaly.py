@@ -1,0 +1,179 @@
+"""
+Unit test cho warehouse/anomaly_detection.py — kiểm thử các hàm thuần trên dữ liệu tổng hợp có đáp án
+biết trước (z-score, đợt nóng, SPI, xác nhận chéo đa nguồn).
+
+Chạy: pytest tests/test_anomaly.py -v
+"""
+import os
+import sys
+
+import numpy as np
+import pandas as pd
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from warehouse.anomaly_detection import (
+    anomaly_flag,
+    classify_combined,
+    classify_cross_source,
+    doy365,
+    haversine_km,
+    heatwave_events,
+    neighbor_pairs,
+    neighbor_support,
+    precip_annual_indices,
+    precip_extreme_flag,
+    spi_from_totals,
+    wet_day_percentiles,
+)
+
+
+# ---------------------------- Ngày-trong-năm ----------------------------
+def test_doy365_aligns_leap_and_normal_years():
+    d = pd.Series(pd.to_datetime(["2023-03-01", "2024-03-01", "2024-02-29", "2024-02-28", "2024-12-31"]))
+    assert doy365(d).tolist() == [60, 60, 59, 59, 365]
+
+
+# ---------------------------- Phân loại z ----------------------------
+def test_anomaly_flag_thresholds():
+    z = pd.Series([0.0, 1.99, 2.0, -2.5, 3.0, -4.0])
+    assert list(anomaly_flag(z)) == ["binh_thuong", "binh_thuong", "bat_thuong", "bat_thuong", "cuc_doan", "cuc_doan"]
+
+
+# ---------------------------- Đợt nóng ----------------------------
+def _series(temps, start="2024-04-01", p90=30.0, loc="A"):
+    dates = pd.date_range(start, periods=len(temps), freq="D")
+    return pd.DataFrame({"location_id": loc, "source": "GHCN", "date": dates.date,
+                         "temp_mean": temps, "clim_p90": p90})
+
+
+def test_heatwave_needs_three_consecutive_hot_days():
+    df = _series([31, 31, 29, 31, 31, 31, 29])  # đợt 2 ngày (không đủ) + đợt 3 ngày
+    ev = heatwave_events(df)
+    assert len(ev) == 1
+    assert str(ev.loc[0, "start"]) == "2024-04-04" and ev.loc[0, "days"] == 3
+
+
+def test_heatwave_bridges_single_missing_day_but_not_cool_day():
+    # 2 ngày nóng, 1 ngày THIẾU dữ liệu, 2 ngày nóng -> 1 đợt 4 ngày nóng, dài 5 ngày theo lịch
+    df = _series([31, 31, np.nan, 31, 31])
+    ev = heatwave_events(df)
+    assert len(ev) == 1 and ev.loc[0, "days"] == 4 and ev.loc[0, "span_days"] == 5
+    # Cùng mẫu nhưng ngày giữa CÓ dữ liệu và mát -> đứt thành 2 đợt 2 ngày -> không có đợt nào đủ 3 ngày
+    assert heatwave_events(_series([31, 31, 28, 31, 31])).empty
+
+
+def test_heatwave_does_not_join_different_stations():
+    df = pd.concat([_series([31, 31]), _series([31, 31], start="2024-04-03", loc="B")])
+    assert heatwave_events(df).empty
+
+
+# ---------------------------- SPI ----------------------------
+def test_spi_on_gamma_sample_is_standard_normal():
+    rng = np.random.default_rng(0)
+    base = pd.Series(rng.gamma(shape=2.0, scale=50.0, size=3000))
+    spi = spi_from_totals(base, base)
+    assert abs(spi.mean()) < 0.05 and abs(spi.std() - 1) < 0.05
+
+
+def test_spi_sign_and_zero_rain_handling():
+    rng = np.random.default_rng(1)
+    vals = rng.gamma(2.0, 50.0, size=40)
+    vals[:8] = 0.0  # 20% tháng không mưa
+    base = pd.Series(vals)
+    spi = spi_from_totals(pd.Series([0.0, float(np.median(vals[8:])), 600.0]), base)
+    assert spi.iloc[0] < -0.5          # tháng không mưa -> khô
+    assert spi.iloc[2] > 2             # tháng mưa rất nhiều -> ẩm bất thường
+    assert spi.iloc[0] < spi.iloc[1] < spi.iloc[2]
+
+
+def test_spi_requires_enough_baseline_years():
+    assert spi_from_totals(pd.Series([10.0]), pd.Series([5.0] * 10)).isna().all()
+
+
+# ---------------------------- Xác nhận chéo trạm vs ERA5 ----------------------------
+def test_classify_cross_source():
+    z_st = pd.Series([2.5, 3.5, -3.2, 2.2, 2.4])
+    z_e5 = pd.Series([1.8, 0.1, 1.5, 0.6, np.nan])
+    assert list(classify_cross_source(z_st, z_e5)) == [
+        "xac_nhan_khi_hau",   # cùng chiều, ERA5 cũng lệch rõ
+        "nghi_loi_du_lieu",   # trạm cực đoan, ERA5 bình thường
+        "nghi_loi_du_lieu",   # trạm cực đoan lạnh, ERA5 ngược chiều
+        "chua_xac_dinh",      # trạm bất thường vừa, ERA5 lệch nhẹ
+        "khong_co_era5",
+    ]
+
+
+# ---------------------------- Mưa cực đoan (ETCCDI) ----------------------------
+def _rain(values, start="2020-01-01", loc="A", source="ERA5"):
+    dates = pd.date_range(start, periods=len(values), freq="D")
+    return pd.DataFrame({"location_id": loc, "source": source, "date": dates.date, "precip_sum": values})
+
+
+def test_wet_day_percentiles_ignore_dry_days():
+    # 300 ngày khô (0 mm) + 200 ngày ướt 1..200 mm: p95 phải tính trên ngày ướt, không bị ngày khô kéo xuống
+    vals = np.concatenate([np.zeros(300), np.arange(1, 201, dtype=float)])
+    p = wet_day_percentiles(_rain(vals), {"ERA5": (2020, 2024)})
+    assert len(p) == 1
+    assert abs(p.loc[0, "p95"] - np.quantile(np.arange(1, 201), 0.95)) < 1e-9
+    assert p.loc[0, "n_wet"] == 200
+
+
+def test_wet_day_percentiles_require_enough_wet_days():
+    assert wet_day_percentiles(_rain(np.full(50, 5.0)), {"ERA5": (2020, 2024)}).empty
+
+
+def test_precip_extreme_flag():
+    f = precip_extreme_flag(pd.Series([10.0, 60.0, 120.0]), pd.Series([50.0] * 3), pd.Series([100.0] * 3))
+    assert list(f) == ["binh_thuong", "mua_lon", "mua_cuc_doan"]
+
+
+def test_precip_annual_indices_values_and_coverage():
+    vals = np.zeros(366)                  # 2020 là năm nhuận, đủ ngày
+    vals[[10, 20, 30]] = [5.0, 80.0, 150.0]
+    d = _rain(vals)
+    pct = pd.DataFrame({"location_id": ["A"], "source": ["ERA5"], "p95": [50.0], "p99": [100.0], "n_wet": [999]})
+    idx = precip_annual_indices(d, pct)
+    row = idx.iloc[0]
+    assert row["Rx1day"] == 150.0 and row["PRCPTOT"] == 235.0
+    assert row["R95p"] == 230.0 and row["R99p"] == 150.0
+    # Năm thiếu > 10% ngày số liệu thì bị bỏ
+    assert precip_annual_indices(d.head(200), pct).empty
+
+
+# ---------------------------- Trạm lân cận ----------------------------
+def test_haversine_known_distance():
+    # Hà Nội (Nội Bài) -> TP.HCM (Tân Sơn Nhất) ~ 1.140 km
+    assert 1100 < haversine_km(21.221, 105.807, 10.818, 106.652) < 1180
+
+
+def test_neighbor_pairs_exclude_same_site_and_far_stations():
+    st = pd.DataFrame({"location_id": ["A", "A_twin", "B", "C"],
+                       "lat": [21.0, 21.001, 21.9, 25.0], "lon": [105.8, 105.8, 105.8, 105.8]})
+    pairs = neighbor_pairs(st, radius_km=200, same_site_km=5)
+    a = set(pairs.loc[pairs["location_id"] == "A", "nb_id"])
+    assert a == {"B"}                 # A_twin < 5 km (cùng trạm vật lý), C > 200 km
+
+
+def test_neighbor_support_counts_same_sign_neighbors():
+    anoms = pd.DataFrame({"location_id": ["A"], "date": ["2024-04-30"], "var": ["temp_mean"], "z": [2.5]})
+    z_all = pd.DataFrame({"location_id": ["B", "C", "D"], "date": ["2024-04-30"] * 3,
+                          "var": ["temp_mean"] * 3, "z": [1.5, 0.3, -2.0]})
+    pairs = pd.DataFrame({"location_id": ["A", "A", "A"], "nb_id": ["B", "C", "D"], "dist_km": [50, 80, 120]})
+    sup = neighbor_support(anoms, z_all, pairs)
+    assert sup.loc[0, "n_lan_can"] == 3
+    assert abs(sup.loc[0, "ty_le_lan_can_dong_y"] - 1 / 3) < 1e-12
+
+
+def test_classify_combined_uses_either_reference():
+    z_st = pd.Series([2.5, 2.5, 3.5, 3.5, 2.2, 3.5])
+    z_e5 = pd.Series([1.5, np.nan, 0.1, np.nan, 0.7, 0.2])
+    n_nb = pd.Series([0, 2, 2, 0, 1, 3])
+    frac = pd.Series([np.nan, 0.5, 0.0, np.nan, 0.3, 0.67])
+    assert list(classify_combined(z_st, z_e5, n_nb, frac)) == [
+        "xac_nhan_khi_hau",   # ERA5 đồng ý
+        "xac_nhan_khi_hau",   # không có ERA5 nhưng 50% lân cận đồng ý
+        "nghi_loi_du_lieu",   # cực đoan, ERA5 bình thường, không lân cận nào đồng ý
+        "khong_doi_chung",    # không có ERA5 lẫn lân cận
+        "di_thuong_cuc_bo",   # đối chứng ủng hộ yếu
+        "xac_nhan_khi_hau",   # ERA5 không đồng ý nhưng đa số lân cận đồng ý -> lân cận lật lại kết luận
+    ]

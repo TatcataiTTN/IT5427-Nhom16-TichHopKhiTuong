@@ -21,15 +21,17 @@ lý được 2 cơ quan gán 2 mã khác nhau, không phải trùng hợp ngẫu
 ## 2. Cross-validation nội suy không gian (TV2 #3-4)
 
 `warehouse/validate_interpolation.py` — so ERA5-Bilinear-nội-suy-vào-tọa-độ-trạm với giá trị trạm
-thật, 104 cặp (location_id, ngày), 35 trạm:
+thật, cùng ngày. Chạy lại 09/11/2026 trên warehouse đầy đủ (ERA5 2020–2024): 108.542 cặp nhiệt độ,
+61 trạm (bản trước trên ERA5 3 ngày: 104 cặp, 35 trạm — RMSE nhiệt độ 1,02°C, mưa 10,98mm):
 
-| Biến | RMSE | MAE |
-|---|---|---|
-| `temp_c` | 1,02°C | 0,80°C |
-| `precip_mm` | 10,98mm | 5,07mm |
+| Biến | Số cặp | RMSE | MAE |
+|---|---|---|---|
+| `temp_c` | 108.542 | 1,14°C | 0,85°C |
+| `wind_speed_ms` | 47.139 | 1,05 m/s | 0,78 m/s |
+| `precip_mm` | 30.567 | 19,83mm | 7,75mm |
 
-Theo tercile độ cao: RMSE nhiệt độ **tăng dần theo độ cao** (0,88 → 1,19°C) — đúng kỳ vọng vật lý
-(lưới ERA5 0,25° không bắt được hiệu ứng địa hình chi tiết).
+Theo tercile độ cao: RMSE nhiệt độ 0,99 / 0,94 / **1,42**°C (thấp → cao) — nhóm trạm cao nhất sai số
+lớn nhất, đúng kỳ vọng vật lý (lưới ERA5 0,25° không bắt được hiệu ứng địa hình chi tiết).
 
 ## 3. Veracity — phát hiện outlier (TV1 #2)
 
@@ -45,7 +47,7 @@ phép đo Z-score. Đã chọn IQR làm chỉ số chính trong `warehouse/data_
 
 ## 4. PINN v2 — trường gió thật + so sánh baseline (TV3 #1-4)
 
-`model/pinn_wind_field_v2.py` — 113 trạm ERA5 thật, chia 91 train / 22 test, quét λ:
+`model/pinn_wind_field_v2.py` — 113 trạm ERA5 thật (gió trung bình 15–17/6/2021; script lọc đúng cửa sổ này nên tái lập được trên warehouse đầy đủ 5 năm), chia 91 train / 22 test, quét λ:
 
 | λ | Test RMSE | Test MAE |
 |---|---|---|
@@ -72,8 +74,10 @@ từng λ đổi so với bảng báo cáo trước đó — xem `docs/model.md`
 
 | | Baseline (không cache) | Sau tối ưu (cache) |
 |---|---|---|
-| Thời gian trung bình (3 lần chạy) | 0,990s | 0,523s |
-| **Cải thiện** | | **47,1%** (vượt ngưỡng 30% yêu cầu) |
+| Thời gian trung bình (3 lần chạy) | 0,362s | 0,111s |
+| **Cải thiện** | | **69,4%** (vượt ngưỡng 30% yêu cầu) |
+
+(Chạy lại 10/11/2026 trên warehouse 8.955.315 bản ghi; bản trước trên 1.076.473 bản ghi: 0,990s → 0,523s, 47,1%.)
 
 ## 6. Data skew — repartition thử nghiệm (TV2 #6, TV3 #7)
 
@@ -81,24 +85,28 @@ từng λ đổi so với bảng báo cáo trước đó — xem `docs/model.md`
 
 | Partition key | Số partition | Partition lớn nhất |
 |---|---|---|
-| `year/source` (hiện tại) | 88 | 33,28% |
-| `year/month/source` (thử nghiệm) | 1.043 | 3,04% |
+| `year/source` (hiện tại) | 109 | 11,08% (2020, ERA5) |
+| `year/month/source` (thử nghiệm) | 1.306 | 0,94% |
 
-**Trade-off trung thực**: skew giảm 90,9% nhưng số partition tăng 11,9 lần — làm nặng thêm vấn đề
-"small-file" đã ghi nhận ở `docs/10`. **Khuyến nghị: giữ nguyên** partition key hiện tại, chỉ đổi
-khi dữ liệu đạt quy mô đủ lớn (ERA5 full 5 năm) để lợi ích partition pruning vượt overhead.
+(Chạy lại 09/11/2026 trên warehouse đầy đủ; bản trước trên 1.076.473 dòng: 88 → 1.043 partition,
+33,28% → 3,04%.)
+
+**Trade-off trung thực**: skew giảm 91,5% nhưng số partition tăng 12 lần — làm nặng thêm vấn đề
+"small-file" đã ghi nhận ở `docs/10`. Đo lại công bằng trên 9,0 triệu dòng, partition hiện tại vẫn
+chậm hơn 1,5–2,5 lần so với không partition (Parquet tự bỏ qua row-group nhờ thống kê min/max).
+**Khuyến nghị: giữ nguyên** partition key hiện tại.
 
 ## 7. Data Quality Report (TV2 #8)
 
 `warehouse/data_quality_report.py` → `docs/13-data-quality-report.md` — tỷ lệ missing/outlier/độ
-phủ thật theo từng nguồn trên 1.076.473 dòng. Phát hiện đáng chú ý: GHCN 100% missing ở
+phủ thật theo từng nguồn trên 8.955.315 dòng (chạy lại 10/11/2026 trên warehouse đầy đủ). Phát hiện đáng chú ý: GHCN 100% missing ở
 `rh_pct`/`wind_speed_ms`/`pressure_msl_hpa` — giới hạn cấu trúc nguồn (GHCN-Daily chỉ báo cáo
 TMAX/TMIN/PRCP), không phải lỗi pipeline.
 
 ## 8. Dashboard — 3 panel mới (TV4 #2-4)
 
 `dashboard/app.py` — đã verify thật qua Chrome (chụp màn hình, 0 lỗi console):
-- **So sánh nguồn**: NASA_POWER vs OPEN_METEO, 6 điểm, năm 2024 (overlap thật) — RMSE hiển thị
+- **So sánh nguồn**: NASA_POWER vs OPEN_METEO, 6 điểm, 2020–2024 (overlap thật) — RMSE hiển thị
   trực tiếp (ví dụ Hà Nội: RMSE temp_c ≈ 1,78°C).
 - **Cảnh báo bất thường**: IQR trên dữ liệu thật, màu theo mức độ (🟢/🟡/🔴 theo % outlier).
 - **Output PINN**: bản đồ residual + bảng pred vs obs từng trạm, đọc trực tiếp

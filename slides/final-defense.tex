@@ -1,6 +1,6 @@
 \documentclass[t, aspectratio=169]{beamer}
 \usepackage{fontspec}
-\setmainfont{Times New Roman}
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
@@ -8,6 +8,8 @@
 \usepackage{xcolor}
 \usepackage{array}
 \usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usetikzlibrary{shapes.callouts, positioning, arrows.meta, fit, backgrounds}
 
 \definecolor{hustblue}{RGB}{0,60,113}
@@ -93,6 +95,7 @@ IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
 \begin{enumerate}
 \setcounter{enumi}{3}
 \item \hyperlink{sec4}{Spark, Streaming \& PINN -- TV3}
+\item \hyperlink{sec4b}{Phát hiện dị thường khí hậu}
 \item \hyperlink{sec5}{Dashboard -- TV4}
 \item \hyperlink{sec6}{Rủi ro, giới hạn \& kết luận}
 \end{enumerate}
@@ -113,15 +116,16 @@ IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
 
 \begin{frame}{Pipeline tích hợp 5 nguồn khí tượng đa dạng thành 1 kho dữ liệu thống nhất, có thể truy vấn được}
 \begin{center}
-\bignum{1.076.473}{bản ghi thật\\5 nguồn}{goodgreen}{3.6cm}
-\bignum{119}{vị trí\\(113 trạm + 6 điểm)}{goodgreen}{3.6cm}
-\bignum{9}{nước Đông Nam Á}{goodgreen}{3.6cm}
+\bignum{8.955.315}{bản ghi thật\\5 nguồn}{goodgreen}{4.6cm}
+\bignum{119}{vị trí\\(113 trạm + 6 điểm)}{goodgreen}{3.4cm}
+\bignum{9}{nước Đông Nam Á}{goodgreen}{3.4cm}
 \end{center}
 \vspace{0.3cm}
 \centering\small
 GHCN-Daily, NOAA ISD, ERA5 (ARCO), Open-Meteo, NASA POWER -- hội tụ qua Mediated Schema
 \texttt{WeatherObs}, giải quyết cả 2 loại dị biệt cốt lõi: cấu trúc/ngữ nghĩa (PIVOT/PARSE) và
-nhận dạng/toàn vẹn (Survivorship + Entity Resolution).
+nhận dạng/toàn vẹn (Survivorship + Entity Resolution). Dữ liệu đủ phạm vi đề cương: ERA5 5 năm
+(2020--2024, 9 biến, theo giờ), ISD 10 năm, GHCN toàn lịch sử 1943--2026 -- \textasciitilde 23\,GB dữ liệu thô.
 \end{frame}
 
 \begin{frame}{Mỗi trạng thái tác vụ được chấm theo đúng tiêu chí Kiểm thử đã đặt ra từ đề cương, không tự nhận suông}
@@ -130,11 +134,11 @@ nhận dạng/toàn vẹn (Survivorship + Entity Resolution).
 \toprule
 Tuần & \textcolor{goodgreen}{\textbf{Xong}} & \textcolor{warnorange}{\textbf{Một phần}} & \textcolor{badred}{\textbf{Chưa làm}} \\
 \midrule
-Tuần 1 (Đề cương) & 27/40 & 3/40 & 10/40 \\
-Tuần 2 (Tiến độ) & 25/40 & 7/40 & 8/40 \\
-Tuần 3 (Hội tụ) & 19/40 & 13/40 & 8/40 \\
+Tuần 1 (Đề cương) & 30/40 & 4/40 & 6/40 \\
+Tuần 2 (Tiến độ) & 30/40 & 5/40 & 5/40 \\
+Tuần 3 (Hội tụ) & 21/40 & 12/40 & 7/40 \\
 \midrule
-\textbf{Tổng 120 tác vụ đã rà soát} & \textbf{71} & \textbf{23} & \textbf{26} \\
+\textbf{Tổng 120 tác vụ đã rà soát} & \textbf{81} & \textbf{21} & \textbf{18} \\
 \bottomrule
 \end{tabular}
 \vspace{0.3cm}
@@ -175,6 +179,61 @@ rộng để bắt chính các outlier đó -- IQR (dựa trên tứ phân vị)
 chỉ số chính cho Data Quality Report.
 \end{frame}
 
+\begin{frame}{Đã tải đủ dữ liệu theo phạm vi đề cương: kho dữ liệu tăng 8,3 lần lên 9,0 triệu bản ghi}
+\centering\footnotesize
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+Nguồn & Trước & Hiện tại & Phạm vi hiện tại \\
+\midrule
+ERA5 (nội suy vào 113 trạm) & 8.136 & \textbf{4.954.824} & 2020--2024, 9 biến, theo giờ \\
+NOAA ISD & 358.273 & \textbf{3.071.275} & 26 trạm, 2015--2024 (đã gộp trùng) \\
+GHCN-Daily & 655.164 & 655.166 & 41 trạm, 1943--2026 \\
+Open-Meteo + NASA POWER & 54.900 & \textbf{274.050} & 6 điểm, 2020--2024 \\
+\midrule
+\textbf{Tổng} & 1.076.473 & \textbf{8.955.315} & 119 vị trí, 109 partition \\
+\bottomrule
+\end{tabular}
+\vspace{0.15cm}
+
+\footnotesize Kiểm thử ERA5 ``không thiếu tháng nào'': 540/540 file, đủ 43.848/43.848 giờ mỗi biến, 0\% NaN.
+Nút thắt là \textbf{băng thông}, không phải số luồng: mỗi chunk ARCO-ERA5 là 1 giờ \emph{toàn cầu}, nên
+lấy vùng ĐNA vẫn phải tải \textasciitilde 1\,TB (\textasciitilde 24 giờ) để giữ lại 22\,GB. Script tải theo tháng,
+chạy lại được sau khi bị ngắt.
+\end{frame}
+
+\begin{frame}{Kiểm tra lại trên dữ liệu đầy đủ phát hiện và sửa 4 lỗi số liệu thật trong pipeline}
+\centering\scriptsize
+\begin{tabular}{@{}p{3.4cm}p{4.9cm}p{4.9cm}@{}}
+\toprule
+Lỗi & Nguyên nhân & Hệ quả / sửa \\
+\midrule
+Gió Open-Meteo \textbf{phóng đại 3,6 lần} & API trả km/h (\texttt{hourly\_units}) nhưng ghi thẳng vào cột \texttt{wind\_speed\_ms} & Sai mọi so sánh gió đa nguồn -- parser đọc đơn vị và quy đổi, có test \\ \addlinespace[2pt]
+\textbf{Tương quan giả} (gió--độ ẩm +0,57) & Thay NaN bằng 0 trước khi tính; mỗi nguồn thiếu biến khác nhau & Tính từng cặp: lộ ra nhiệt độ--độ ẩm \textbf{$-$0,60}, nhiệt độ--áp suất \textbf{$-$0,61} (đúng vật lý) \\ \addlinespace[2pt]
+Benchmark partition so với \textbf{bản sao cũ} & Bản không partition chỉ ghi 1 lần; luôn in ``nhanh hơn'' & Đo lại công bằng: partition chậm hơn 1,5--2,5 lần ở 9,0 triệu dòng \\ \addlinespace[2pt]
+Bức xạ ERA5 \textbf{sai đại lượng} & Mapping dùng bức xạ đỉnh khí quyển (TOA) & Đổi sang bức xạ bề mặt, cùng đại lượng với NASA POWER / Open-Meteo \\ \addlinespace[2pt]
+\bottomrule
+\end{tabular}
+\end{frame}
+
+\begin{frame}{Kiểm soát chất lượng 4 tầng khi nạp: loại 3.661 giá trị chính NOAA đã đánh dấu sai}
+\centering\scriptsize
+\begin{tabular}{@{}p{3.1cm}p{5.3cm}p{4.2cm}@{}}
+\toprule
+Tầng / việc & Phát hiện trên dữ liệu thật & Xử lý \\
+\midrule
+1. Cờ QC của nguồn & GHCN 406 giá trị \texttt{Q\_FLAG}; ISD 3.255 giá trị mã 2/6 (gồm 2 bản tin gió 83\,m/s) & Bỏ giá trị, ghi \texttt{qc\_flag}, giữ dòng \\
+2. Giới hạn vật lý & 0 vi phạm còn lại sau tầng 1 & Giữ làm lưới an toàn \\
+3--4. Nhảy phi vật lý & 18 điểm nhiệt độ ($>$10\,°C/1\,giờ), 18 điểm áp suất ($>$10\,hPa/3\,giờ) & Gắn cờ \texttt{JUMP}, giữ giá trị \\
+Bản tin trùng ISD & 393.155 dòng: cùng quan trắc gửi cả METAR và SYNOP & Gộp 1 dòng/thời điểm \\
+Gió khác độ cao & NASA đo ở 2\,m: chỉ bằng \textbf{0,65} lần gió 10\,m & Tải \texttt{WS10M} \\
+Nhiệt độ 2 định nghĩa & TAVG thấp hơn (TMAX+TMIN)/2 trung bình 0,25\,°C & Cột \texttt{temp\_def} \\
+\bottomrule
+\end{tabular}
+
+\scriptsize Thêm áp suất trạm ISD (trước đó trống); sửa 1 lỗi parser cũ: thiếu nhiệt độ GHCN 4,1\,\% $\to$ 0,3\,\%.
+Kết luận chính không đổi sau khi làm sạch. Chi tiết: \texttt{docs/17}.
+\end{frame}
+
 %=============================================================
 \section{Schema \& Warehousing}
 %=============================================================
@@ -193,27 +252,28 @@ tại \textbf{0,000km} (cùng tọa độ WMO gốc) -- xác nhận đây đúng
 2 mã độc lập, không phải trùng hợp. 4 trạm ISD còn lại không có GHCN tương ứng trong ngưỡng.
 \end{frame}
 
-\begin{frame}{Cross-validation xác nhận ERA5 nội suy đáng tin cậy cho nhiệt độ nhưng KHÔNG cho lượng mưa}
+\begin{frame}{Đối chiếu 108 nghìn cặp trạm--ERA5 xác nhận ERA5 nội suy tin cậy cho nhiệt độ, gió nhưng KHÔNG cho mưa}
 \centering\small
 \begin{tabular}{@{}lrrl@{}}
 \toprule
 Biến & RMSE & MAE & Đánh giá \\
 \midrule
-\texttt{temp\_c} & 1,02°C & 0,80°C & \textcolor{goodgreen}{Chấp nhận được} \\
-\texttt{precip\_mm} & 10,98mm & 5,07mm & \textcolor{badred}{Kém -- không nên thay thế trạm thật} \\
+\texttt{temp\_c} & 1,14°C & 0,85°C & \textcolor{goodgreen}{Chấp nhận được} \\
+\texttt{wind\_speed\_ms} & 1,05 m/s & 0,78 m/s & \textcolor{goodgreen}{Chấp nhận được} \\
+\texttt{precip\_mm} & 19,83mm & 7,75mm & \textcolor{badred}{Kém -- không nên thay thế trạm thật} \\
 \bottomrule
 \end{tabular}
 \vspace{0.3cm}
 
-\small Leave-one-station-out thật: so ERA5-Bilinear-nội-suy-vào-tọa-độ-trạm với giá trị trạm thật
-đo được (104 cặp, 35 trạm). RMSE nhiệt độ tăng dần theo tercile độ cao (0,88$\to$1,19°C) -- đúng
-vật lý (lưới 0,25° không bắt được hiệu ứng địa hình chi tiết).
+\small So ERA5 nội suy Bilinear vào tọa độ trạm với giá trị trạm thật đo được, cùng ngày
+(108.542 cặp nhiệt độ, 61 trạm, 2020--2024). RMSE nhiệt độ theo tercile độ cao: 0,99 / 0,94 /
+\textbf{1,42}°C -- nhóm trạm cao nhất sai số lớn nhất, đúng vật lý (lưới 0,25° không bắt được địa hình).
 \end{frame}
 
-\begin{frame}{Cache giúp truy vấn Spark SQL nhanh hơn 47\,\% thật, vượt ngưỡng 30\,\% yêu cầu}
+\begin{frame}{Cache giúp truy vấn Spark SQL nhanh hơn 69\,\% thật trên 9,0 triệu bản ghi, vượt ngưỡng 30\,\% yêu cầu}
 \begin{center}
-\bignum{47,1\%}{cải thiện tốc độ\\truy vấn (cache)}{goodgreen}{5cm}
-\bignumS{0,99s $\to$ 0,52s}{thời gian trung bình\\3 lần chạy}{hustblue}{5cm}
+\bignum{69,4\%}{cải thiện tốc độ\\truy vấn (cache)}{goodgreen}{5cm}
+\bignumS{0,36s $\to$ 0,11s}{thời gian trung bình\\3 lần chạy}{hustblue}{5cm}
 \end{center}
 \vspace{0.2cm}
 \centering\small
@@ -221,21 +281,22 @@ vật lý (lưới 0,25° không bắt được hiệu ứng địa hình chi ti
 cho truy vấn tổng hợp nhiệt độ theo (trạm, tháng), nguồn GHCN.
 \end{frame}
 
-\begin{frame}{Giảm data skew từ 33\,\% xuống 3\,\% khả thi nhưng đánh đổi 11,9 lần số partition -- quyết định giữ nguyên}
+\begin{frame}{Giảm data skew từ 11,1\,\% xuống 0,9\,\% khả thi nhưng đánh đổi 12 lần số partition -- quyết định giữ nguyên}
 \centering\small
 \begin{tabular}{@{}lrr@{}}
 \toprule
  & \texttt{year/source} (hiện tại) & \texttt{year/month/source} (thử nghiệm) \\
 \midrule
-Số partition & 88 & 1.043 \\
-Partition lớn nhất & 33,28\% & \textcolor{goodgreen}{3,04\%} \\
+Số partition & 109 & 1.306 \\
+Partition lớn nhất & 11,08\% & \textcolor{goodgreen}{0,94\%} \\
 \bottomrule
 \end{tabular}
 \vspace{0.3cm}
 
-\small \textbf{Quyết định trung thực}: KHÔNG áp dụng ngay -- 1.043 partition làm nặng thêm vấn đề
-"small-file" đã phát hiện Tuần 2 (partition hiện tại đã chậm hơn 2,2 lần so với không partition).
-Chỉ đổi khi dữ liệu đạt quy mô đủ lớn để lợi ích partition pruning vượt overhead.
+\small \textbf{Quyết định trung thực}: KHÔNG áp dụng -- skew hiện tại (11,1\%) đã thấp, còn 1.306 partition
+làm nặng thêm vấn đề ``small-file'': đo lại công bằng trên 9,0 triệu dòng, partition hiện tại vẫn
+\textbf{chậm hơn 1,5--2,5 lần} so với không partition, vì Parquet đã tự bỏ qua dữ liệu không liên quan nhờ
+thống kê min/max theo row-group. Lợi ích partition pruning chỉ rõ ở quy mô lớn hơn hoặc trên S3/GCS.
 \end{frame}
 
 %=============================================================
@@ -259,7 +320,7 @@ $\lambda$ & Test RMSE & Test MAE & Physics loss cuối \\
 
 \vspace{0.6cm}
 \centering\small
-Dữ liệu: 113 trạm ERA5 thật, ràng buộc continuity Navier-Stokes 2D rút gọn. Nguyên nhân hợp lý:
+Dữ liệu: 113 trạm ERA5 thật (gió trung bình 15--17/6/2021), ràng buộc continuity Navier-Stokes 2D rút gọn. Nguyên nhân hợp lý:
 chỉ 1 snapshot không-thời-gian, ràng buộc vật lý cần nhiều điểm/chuỗi thời gian hơn để thể hiện
 lợi thế MSE. Số liệu cập nhật 10/11 sau khi sửa lỗi trung bình cộng hướng gió theo độ (đại lượng
 vòng tròn) thành trung bình vector $(u,v)$ đúng -- kết luận không đổi, đã verify tái lập được tới 4
@@ -281,30 +342,189 @@ Kafka connector ghim cứng version 4.0.0 không khớp PySpark cài thật 4.2.
 tự động.
 \end{frame}
 
+\begin{frame}{Phát hiện dị thường theo luồng: cảnh báo hiện ra dần qua từng micro-batch và khớp 100\,\% với batch}
+\begin{center}
+\bignumS{179}{cảnh báo trong\\10 micro-batch}{badred}{3.6cm}
+\bignumS{179/179}{khớp kết quả batch\\($z$ giống hệt)}{goodgreen}{3.6cm}
+\bignumS{1.407}{bản ghi phát lại\\1/4--15/5/2024}{hustblue}{3.6cm}
+\end{center}
+\vspace{0.15cm}
+\centering\small
+Producer phát lại đợt nắng nóng 2024 vào Kafka; Spark Structured Streaming lấy tối đa 150 bản ghi mỗi
+micro-batch, join tĩnh với bảng khí hậu nền đã tính bằng batch, tính $z$ và phát cảnh báo $|z| \ge 2$ ngay.
+Cảnh báo cực đoan nhất: 30/4/2024 trạm Thái Lan 38,6°C (nền 30,2°C, $z = +3{,}53$).
+\texttt{warehouse/spark\_streaming\_anomaly.py}, có test tích hợp với Kafka thật.
+\end{frame}
+
+%=============================================================
+\section{Phát hiện dị thường khí hậu}
+%=============================================================
+\hypertarget{sec4b}{}
+\hustsectionpage{Phát hiện dị thường\\khí hậu}
+
+\begin{frame}{Hệ thống phát hiện đúng cả 3 sự kiện khí hậu có thật -- nắng nóng 2024 nổi bật hẳn so với mọi năm}
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\centering\scriptsize
+Tỷ lệ ngày nóng bất thường ($z \ge 2$), tháng 4--5, 34 trạm GHCN\\[2pt]
+\vspace{-0.15cm}
+\begin{tikzpicture}[x=0.52cm, y=0.17cm]
+\foreach \yr/\v in {2016/3.5,2017/0.2,2018/0.5,2019/3.9,2020/2.4,2021/0.8,2022/0.4,2023/4.1,2025/0.8} {
+  \pgfmathsetmacro{\xx}{\yr-2016}
+  \fill[gray!55, rounded corners=0.6pt] (\xx+0.12,0) rectangle (\xx+0.88,\v);
+  \node[font=\tiny, rotate=90, anchor=east] at (\xx+0.5,-0.2) {\yr};
+}
+\fill[badred, rounded corners=0.6pt] (8.12,0) rectangle (8.88,11.2);
+\node[font=\tiny, rotate=90, anchor=east] at (8.5,-0.2) {\textbf{2024}};
+\node[font=\scriptsize, above, text=badred] at (8.5,11.2) {\textbf{11,2\%}};
+\draw[dashed, hustblue] (0,1.2) -- (10,1.2) node[right, font=\tiny, align=left] {nền\\1991--2020\\1,2\%};
+\draw[gray] (0,0) -- (10,0);
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.44\textwidth}
+\scriptsize
+\textbf{Nắng nóng 4--5/2024}: 12,3\% ngày $z \ge 2$, gấp \textbf{10 lần} cùng kỳ 1991--2020; 29/34 trạm có
+đợt nóng; Thái Lan 30 ngày liên tục, TP.HCM 27 ngày.\\[4pt]
+\textbf{Bão Yagi 7/9/2024}: ERA5 áp suất \textbf{978,8 hPa} tại Hải Phòng, $z = -7{,}2$ -- đúng nơi bão đổ bộ.\\[4pt]
+\textbf{Hạn Mekong 2019--2020}: SPI-3 trung bình $-0{,}59$, tháng hạn 22\% (bình thường 13\%) -- tín hiệu yếu
+do chỉ 2 trạm đủ số liệu mưa.\\[4pt]
+\textit{Phương pháp chuẩn WMO/ETCCDI}: khí hậu nền theo ngày-trong-năm $\pm$15 ngày (GHCN 1991--2020),
+đợt nóng TG90p, SPI khớp gamma -- tính bằng Spark trên 977 nghìn ngày-trạm.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Đối chứng bằng ERA5 và trạm lân cận tách được khí hậu thật khỏi cảm biến hỏng}
+\centering\small
+\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Kết luận & Chỉ đối chiếu ERA5 & ERA5 + trạm lân cận ($\le$ 200\,km) \\
+\midrule
+\textcolor{goodgreen}{Dị thường khí hậu thật} (đối chứng cùng chiều) & 5.380 & \textbf{20.357} \\
+Dị thường cục bộ (đối chứng ủng hộ yếu) & 507 & 3.725 \\
+\textcolor{badred}{Nghi lỗi dữ liệu} (trạm cực đoan, mọi đối chứng phản bác) & 23 & 343 \\
+Không có đối chứng & 34.453 & \textbf{15.938} \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+
+\small Trạm lân cận phủ giai đoạn trước 2020 (chưa có ERA5) và lật lại 3 ca từng bị nghi lỗi. Cặp trạm
+$<$ 5\,km bị loại: đó là cùng một trạm vật lý GHCN/ISD (Entity Resolution), cùng cảm biến. Ví dụ thật:
+ISD \textbf{Phnom Penh} 3/7/2023: áp suất dao động 995--1054\,hPa dù đã ``qua QC của NOAA, $z = -5{,}5$ khi ERA5 bình thường -- cảm biến lỗi, không phải bão.
+\end{frame}
+
+\begin{frame}{Bão Yagi: 7/9/2024 là ngày mưa lớn nhất 5 năm ERA5 tại 5 trạm miền Bắc, gấp 3 lần p99}
+\centering\small
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Vị trí (ERA5 nội suy) & Ngày & Mưa (mm) & Ngưỡng p99 & Hạng trong 2020--2024 \\
+\midrule
+Hà Đông (Hà Nội) & 7/9/2024 & \textbf{222,6} & 71,8 & \textbf{1} \\
+Nội Bài (Hà Nội) & 7/9/2024 & \textbf{203,5} & 67,3 & \textbf{1} \\
+Phù Liễn (Hải Phòng) & 7/9/2024 & \textbf{187,4} & 69,3 & \textbf{1} \\
+Cát Bi (Hải Phòng) & 7/9/2024 & 176,5 & 67,1 & \textbf{1} \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+
+\small Mưa không phân bố chuẩn nên dùng chỉ số ETCCDI: ngưỡng p95/p99 trên \emph{ngày ướt} ($\ge$ 1\,mm),
+Rx1day, R95p. 11/13 cặp trạm--nguồn vượt p99 trong 6--11/9/2024. Trạm GHCN Phù Liễn \textbf{mất số liệu
+đúng 7--8/9} khi bão đổ bộ, rồi ghi 214\,mm ngày 11/9.
+\end{frame}
+
+\begin{frame}{25/27 trạm ấm lên có ý nghĩa thống kê giai đoạn 1975--2024, trung vị +0,21\,°C mỗi thập kỷ}
+\begin{columns}[T]
+\begin{column}{0.58\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=7.6cm, height=3.9cm, ybar, bar width=4pt, ymin=0, ymax=0.45,
+  ylabel={\scriptsize °C / thập kỷ}, xtick=\empty, ytick={0,0.1,0.2,0.3,0.4},
+  yticklabel style={font=\tiny, /pgf/number format/use comma}, axis lines*=left,
+  ymajorgrids, grid style={gray!20}, enlarge x limits=0.03, bar shift=0pt,
+  xlabel={\scriptsize 27 trạm GHCN, sắp theo tốc độ ấm lên}]
+\addplot[fill=badred!80, draw=none] coordinates {(0,0.405) (1,0.354) (2,0.347) (3,0.343) (4,0.331) (5,0.317) (6,0.313) (7,0.275) (8,0.251) (9,0.244) (10,0.244) (11,0.238) (12,0.217) (13,0.213) (14,0.202) (15,0.199) (16,0.193) (17,0.169) (18,0.163) (19,0.162) (20,0.132) (21,0.128) (22,0.093) (24,0.075) (25,0.063)};
+\addplot[fill=gray!45, draw=none] coordinates {(23,0.093) (26,0.034)};
+\draw[dashed, hustblue] (axis cs:-1,0.213) -- (axis cs:27,0.213) node[pos=0.98, above, font=\tiny] {trung vị 0,21};
+\end{axis}
+\end{tikzpicture}\\
+{\tiny \textcolor{badred}{$\blacksquare$} có ý nghĩa ($p<0{,}05$) \quad \textcolor{gray}{$\blacksquare$} không có ý nghĩa}
+\end{column}
+\begin{column}{0.42\textwidth}
+\scriptsize
+\textbf{Phương pháp phi tham số chuẩn trong khí hậu học}: kiểm định Mann-Kendall (có hiệu chỉnh giá trị
+trùng) cho ý nghĩa thống kê, độ dốc Sen cho tốc độ -- bền với outlier, không giả định phân bố chuẩn.\\[4pt]
+\textbf{Nhanh nhất}: Jakarta +0,41; Penang +0,35; Bangkok +0,35; Cao Bằng +0,34\,°C/thập kỷ.\\[4pt]
+Tách \emph{biến đổi khí hậu dài hạn} khỏi \emph{dị thường ngắn hạn}: năm 2024 vẫn nổi bật sau khi đã
+tính tới xu hướng nền này.\\[4pt]
+\textit{Giới hạn}: xu hướng mưa chỉ 1--6 trạm đủ 30 năm số liệu -- chưa đủ kết luận.
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Chênh lệch trạm $-$ ERA5 lộ ra cảm biến áp suất Phnom Penh nhảy bậc $-$2,6\,hPa từ cuối 2022}
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\centering
+\begin{tikzpicture}
+\begin{axis}[width=7.4cm, height=4.4cm, xmin=2020.2, xmax=2025.1, ymin=-2.5, ymax=5.2,
+  xtick={2021,2022,2023,2024,2025}, xticklabel style={font=\tiny, /pgf/number format/1000 sep={}},
+  yticklabel style={font=\tiny}, ylabel={\scriptsize hPa}, axis lines*=left,
+  ymajorgrids, grid style={gray!20}]
+\addplot[hustblue, thick, mark=*, mark size=0.8pt] coordinates {(2020.375,3.12) (2020.458,2.84) (2020.542,2.82) (2020.625,2.51) (2020.708,2.43) (2020.792,2.32) (2020.875,2.84) (2020.958,3.21) (2021.042,3.93) (2021.125,4.04) (2021.208,4.79) (2021.458,2.18) (2021.542,2.28) (2021.625,2.52) (2021.708,2.73) (2021.792,2.87) (2021.958,3.12) (2022.125,3.77) (2022.292,3.28) (2022.375,3.79) (2022.458,4.38) (2022.542,3.91) (2022.625,3.38) (2022.708,3.72) (2022.792,1.54) (2022.875,-0.14) (2022.958,0.37) (2023.042,0.09) (2023.125,0.38) (2023.208,0.34) (2023.292,0.48) (2023.375,1.22) (2023.458,0.77) (2023.542,-1.75) (2023.625,-1.79) (2023.708,-0.53) (2023.792,0.29) (2023.875,0.11) (2023.958,0.51) (2024.042,0.34) (2024.125,0.79) (2024.208,0.61) (2024.292,0.95) (2024.375,0.44) (2024.458,0.94) (2024.625,0.87) (2024.708,0.91) (2024.792,1.13) (2024.875,0.63) (2024.958,0.79)};
+\draw[dashed, badred] (axis cs:2022.833,-2.5) -- (axis cs:2022.833,5.2) node[pos=0.93, right, font=\tiny, text=badred] {điểm gãy 11/2022};
+\end{axis}
+\end{tikzpicture}\\
+{\tiny Chênh lệch áp suất MSL trung bình tháng, ISD Phnom Penh $-$ ERA5 cùng vị trí}
+\end{column}
+\begin{column}{0.44\textwidth}
+\scriptsize
+Biến động khí hậu thật có ở cả trạm lẫn ERA5 nên \textbf{triệt tiêu} trong chênh lệch -- phần còn lại là
+lỗi cảm biến/điểm đo (kỹ thuật đồng nhất hoá chuỗi). Trôi dần: Mann-Kendall + Sen; nhảy bậc: kiểm định
+\textbf{Pettitt}.\\[3pt]
+\begin{tabular}{@{}lll@{}}
+\toprule
+Trạm & Biến & Kết luận \\
+\midrule
+Phnom Penh & áp suất & trôi $-$0,65\,hPa/năm \\
+Viêng Chăn & nhiệt độ & bước $-$0,52\,°C \\
+Cần Thơ & nhiệt độ & bước $-$0,52\,°C \\
+THW00041018 & nhiệt độ & bước $-$0,69\,°C \\
+\bottomrule
+\end{tabular}\\[3pt]
+\textbf{Mô phỏng} tiêm lỗi vào 76 chuỗi thật ổn định: phát hiện \textbf{100\%} trôi, \textbf{95--98\%} nhảy bậc.
+\end{column}
+\end{columns}
+\end{frame}
+
 %=============================================================
 \section{Dashboard}
 %=============================================================
 \hypertarget{sec5}{}
 \hustsectionpage{5. Dashboard\\(TV4)}
 
-\begin{frame}{Dashboard 6 panel đọc trực tiếp dữ liệu thật, đã verify qua trình duyệt thật (không chỉ chạy sạch)}
-\centering\footnotesize
-\begin{tabular}{@{}p{3.6cm}p{8.4cm}@{}}
+\begin{frame}{Dashboard 10 panel đọc trực tiếp 9,0 triệu bản ghi thật, đã verify qua trình duyệt thật}
+\centering\scriptsize
+\begin{tabular}{@{}p{3.4cm}p{9.2cm}@{}}
 \toprule
 Panel & Nội dung thật \\
 \midrule
 1. Chuỗi thời gian theo trạm & 119 trạm/điểm, 6 biến chọn được \\
 2. Tổng hợp theo nguồn & Bảng thống kê trực tiếp từ warehouse \\
 3. Bản đồ + time slider & 113 trạm, join Location, mặc định ngày đủ dữ liệu \\
-4. So sánh nguồn & NASA\_POWER vs OPEN\_METEO, RMSE thật \\
+4. So sánh nguồn & NASA\_POWER vs OPEN\_METEO 2020--2024, RMSE thật \\
 5. Cảnh báo bất thường & IQR thật, màu \textcolor{goodgreen}{xanh}/\textcolor{warnorange}{vàng}/\textcolor{badred}{đỏ} theo \% outlier \\
 6. Output PINN & Bản đồ residual + bảng pred vs obs từng trạm \\
+7. Dị thường khí hậu & Bản đồ $z$, đợt nóng, SPI-3, mưa cực đoan, xác nhận ERA5 + trạm lân cận \\
+8. Xu hướng dài hạn & Bản đồ độ dốc Sen, chuỗi năm kèm đường xu hướng \\
+9. Trôi cảm biến & Trạm gắn cờ, chuỗi chênh lệch trạm $-$ ERA5 \\
+10. Cảnh báo theo luồng & Cảnh báo từ Kafka theo ngày và theo micro-batch \\
 \bottomrule
 \end{tabular}
 
-\vspace{0.4cm}
+\vspace{0.15cm}
 \centering\small
-Đã verify thật bằng Chrome: chụp màn hình xác nhận cả 6 panel render đúng, 0 lỗi console (DevTools).
+Đã verify thật bằng trình duyệt: cả 10 panel render đúng, 0 lỗi. Có cache bảng theo ngày: đổi ngày/trạm \textasciitilde 0,6\,s.
 \end{frame}
 
 %=============================================================
@@ -313,25 +533,26 @@ Panel & Nội dung thật \\
 \hypertarget{sec6}{}
 \hustsectionpage{6. Rủi ro, giới hạn\\\& kết luận}
 
-\begin{frame}{Bốn giới hạn kỹ thuật còn tồn đọng đều đã ghi nhận rõ nguyên nhân, không che giấu}
+\begin{frame}{Các giới hạn kỹ thuật còn tồn đọng đều đã ghi nhận rõ nguyên nhân, không che giấu}
 \centering\scriptsize
 \begin{tabular}{@{}p{4.2cm}p{7.9cm}@{}}
 \toprule
 Giới hạn & Nguyên nhân / hướng xử lý \\
 \midrule
-ERA5 mới 3 ngày, không phải 5 năm đầy đủ & Quyết định phạm vi do thời gian/băng thông -- cần nhóm chốt (\texttt{docs/09}) \\
+Khí hậu nền ngắn với ERA5/ISD (5--10 năm) & Kết luận khí hậu chỉ dựa trên GHCN nền WMO 1991--2020; SPI mới có 12 trạm do GHCN thiếu số liệu mưa \\
+Mạng trạm thưa & 18/61 trạm không có láng giềng trong 200\,km; 15.938 dị thường vẫn chưa có đối chứng \\
 Pipeline inference (\texttt{infer.py}) chưa tách checkpoint & Script hiện train+eval trong 1 lần chạy -- đủ cho quy mô bài tập lớn, chưa tách để demo nhanh \\
 PINN chưa vượt baseline RMSE thuần & Thiếu chiều thời gian trong dữ liệu hiện tại -- physics loss vẫn có giá trị về tính hợp lý vật lý \\
-GitHub Issues/Projects chưa thiết lập & Thiếu quyền token (\texttt{gh auth refresh}) -- dùng bảng trạng thái \texttt{docs/03} thay thế \\
+GitHub Projects board chưa thiết lập & Đã dùng Issues/Pull Request trên GitHub; trạng thái tác vụ theo dõi ở \texttt{docs/03} \\
 \bottomrule
 \end{tabular}
 \end{frame}
 
 \begin{frame}{120/160 tác vụ đã rà soát với bằng chứng thật, pipeline đầy đủ từ ingest tới dashboard}
 \begin{center}
-\bignum{71/120}{tác vụ Xong đúng\\tiêu chí kiểm thử}{goodgreen}{4.2cm}
-\bignumS{1.076.473}{bản ghi thật\\5 nguồn, 9 nước}{goodgreen}{4.2cm}
-\bignum{44}{test tự động\\(38 nhanh + 4 slow + 2 Spark)}{goodgreen}{4.2cm}
+\bignum{81/120}{tác vụ Xong đúng\\tiêu chí kiểm thử}{goodgreen}{4.2cm}
+\bignumS{8.955.315}{bản ghi thật\\5 nguồn, 9 nước}{goodgreen}{4.2cm}
+\bignum{83}{test tự động\\(gồm Spark + Kafka thật)}{goodgreen}{4.2cm}
 \end{center}
 \vspace{0.4cm}
 \centering\small

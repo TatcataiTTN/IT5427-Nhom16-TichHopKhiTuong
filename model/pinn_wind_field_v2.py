@@ -54,6 +54,11 @@ def continuity_residual(model, xy):
 def load_real_wind_data():
     df = pd.read_parquet(WAREHOUSE)
     era5 = df[(df["source"] == "ERA5") & df["wind_speed_ms"].notna() & df["wind_dir_deg"].notna()].copy()
+    # Giu dung cua so thi nghiem 15-17/6/2021: warehouse day du co ERA5 ca 5 nam, neu lay het se
+    # thanh trung binh 5 nam (khac thi nghiem da bao cao, va trung binh cong huong gio theo do
+    # khong co nghia tren chuoi dai vi huong gio la dai luong vong tron)
+    ts = pd.to_datetime(era5["timestamp_utc"], utc=True)  # Spark ghi theo UTC, pandas doc ra kieu khong mui gio
+    era5 = era5[(ts >= pd.Timestamp("2021-06-15", tz="UTC")) & (ts < pd.Timestamp("2021-06-18", tz="UTC"))]
     loc = pd.read_parquet(LOCATION)[["location_id", "lat", "lon"]]
     era5 = era5.merge(loc, on="location_id", how="inner")
 
@@ -62,11 +67,12 @@ def load_real_wind_data():
     era5["u"] = -era5["wind_speed_ms"].to_numpy() * np.sin(theta)
     era5["v"] = -era5["wind_speed_ms"].to_numpy() * np.cos(theta)
 
-    # Trung binh VECTO (u,v) theo tram (giam 8136 ban ghi ve 1 vecto gio dai dien/tram cho bai toan
-    # noi suy khong gian tinh - dung thoi diem can them 1 chieu thoi gian, ngoai pham vi bai nay).
+    # Trung binh VECTO (u,v) theo tram (giam ve 1 vecto gio dai dien/tram cho bai toan noi suy
+    # khong gian tinh - dung thoi diem can them 1 chieu thoi gian, ngoai pham vi bai nay).
     # KHONG duoc trung binh cong truc tiep wind_dir_deg roi moi doi sang (u,v): huong gio la dai
     # luong vong tron, trung binh cong 350 do va 10 do ra 180 do (nguoc huong thuc te 100%). Phai
     # doi tung ban ghi sang (u,v) Decac truoc, trung binh vecto, roi moi dung lam target cho PINN.
+    # (Phat hien: Ngo Van Quang, Issue #1 - bug con lai sau khi sua cua so ngay thang o tren.)
     agg = era5.groupby(["location_id", "lat", "lon"])[["u", "v"]].mean().reset_index()
 
     xy = agg[["lon", "lat"]].to_numpy()

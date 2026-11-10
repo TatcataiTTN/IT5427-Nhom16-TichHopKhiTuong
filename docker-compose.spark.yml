@@ -2,16 +2,32 @@
 # Chay: docker compose -f docker-compose.spark.yml up -d
 # Spark Master UI: http://localhost:8080  |  Submit job: spark://localhost:7077
 # Dung: docker compose -f docker-compose.spark.yml down
-# Luu y (phat hien 20/10/2026): Bitnami rut tag "bitnami/spark:3.5" khoi Docker Hub (chinh sach
-# moi, cac tag thuong chuyen sang anh tra phi). Dang dung "bitnamilegacy/spark:4.0.0" (anh dong
-# bang cuoi cung con mien phi) thay the.
+#
+# Dung image chinh thuc apache/spark: Bitnami da go bitnami/spark khoi Docker Hub
+# (pull bao "manifest unknown"). Phien ban image phai trung voi pyspark tren may
+# chay driver (hien tai pyspark 4.2.0, Java 17).
+
+x-spark-image: &spark-image apache/spark:4.2.0-scala2.13-java17-python3-ubuntu
+
+x-spark-worker: &spark-worker
+  image: *spark-image
+  command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+  environment:
+    - SPARK_WORKER_MEMORY=2G
+    - SPARK_WORKER_CORES=2
+  volumes:
+    - ./warehouse/output:/data/warehouse
+  depends_on:
+    - spark-master
+  networks:
+    - spark-net
 
 services:
   spark-master:
-    image: bitnamilegacy/spark:4.0.0
+    image: *spark-image
     container_name: nhom16-spark-master
-    environment:
-      - SPARK_MODE=master
+    hostname: spark-master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master --host spark-master
     ports:
       - "8080:8080"   # Spark Master Web UI
       - "7077:7077"   # Spark Master RPC
@@ -19,30 +35,12 @@ services:
       - spark-net
 
   spark-worker-1:
-    image: bitnamilegacy/spark:4.0.0
+    <<: *spark-worker
     container_name: nhom16-spark-worker-1
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=2G
-      - SPARK_WORKER_CORES=2
-    depends_on:
-      - spark-master
-    networks:
-      - spark-net
 
   spark-worker-2:
-    image: bitnamilegacy/spark:4.0.0
+    <<: *spark-worker
     container_name: nhom16-spark-worker-2
-    environment:
-      - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark-master:7077
-      - SPARK_WORKER_MEMORY=2G
-      - SPARK_WORKER_CORES=2
-    depends_on:
-      - spark-master
-    networks:
-      - spark-net
 
 networks:
   spark-net:

@@ -17,11 +17,11 @@
 - ✅ **Xong** — đã làm thật, vượt qua đúng tiêu chí Kiểm thử đã định nghĩa.
 - 🟡 **Một phần** — có kết quả thật nhưng chưa khớp 100% tiêu chí gốc (vd quy mô nhỏ hơn, công cụ khác tương đương, hoặc thiếu 1 phần việc).
 - ⬜ **Chưa làm** — chưa có kết quả, hoặc là hành động của con người (họp nhóm, nộp bài, thuyết trình, đăng ký tài khoản) ngoài khả năng hỗ trợ tự động — xem `docs/09-viec-ban-can-tu-lam.md`.
-- **Tổng Tuần 1 (40 tác vụ): 27 ✅ / 3 🟡 / 10 ⬜**
-- **Tổng Tuần 2 (40 tác vụ): 26 ✅ / 7 🟡 / 7 ⬜**
-- **Tổng Tuần 3 (40 tác vụ): 19 ✅ / 13 🟡 / 8 ⬜** (chi tiết `docs/14-ket-qua-ky-thuat-tuan-3-4.md`)
-- **Tổng 120 tác vụ đã rà soát (Tuần 1-3): 72 ✅ / 23 🟡 / 25 ⬜** (so với lần rà soát trước 20/10/2026: 52 ✅ / 10 🟡 / 18 ⬜ trên 80 tác vụ — tăng thêm 40 tác vụ Tuần 3 vào phạm vi rà soát, cộng 09/11/2026: Spark Structured Streaming windowing test live thành công, TV3 Tuần 2 #2 chuyển ⬜→✅)
-- **10 tác vụ ⬜ còn lại chủ yếu là hành động con người** (họp nhóm, nộp bài, thuyết trình, thu thập tiến độ từ Quang/Lương) — xem `docs/09`. Phần kỹ thuật tự động hoá được gần như đã làm hết trong khả năng của môi trường hiện tại (bị chặn bởi Docker Desktop chưa khởi động cho 2 tác vụ Kafka/Spark-cluster).
+- **Tổng Tuần 1 (40 tác vụ): 30 ✅ / 4 🟡 / 6 ⬜**
+- **Tổng Tuần 2 (40 tác vụ): 30 ✅ / 5 🟡 / 5 ⬜**
+- **Tổng Tuần 3 (40 tác vụ): 21 ✅ / 12 🟡 / 7 ⬜** (chi tiết `docs/14-ket-qua-ky-thuat-tuan-3-4.md`)
+- **Tổng 120 tác vụ đã rà soát (Tuần 1-3): 81 ✅ / 21 🟡 / 18 ⬜** (cập nhật 10/11/2026: TV1 Tuần 3 #3 sensor drift và #8 pipeline end-to-end 5 năm chuyển ✅; đếm lại trực tiếp từ bảng khi merge nhánh `fix/docker-kafka-spark-linux` vào master ngày 09/11/2026: gộp các cập nhật 12–13/10/2026 của TV1 — nộp đề cương đã xác nhận, tải đủ ERA5 5 năm / ISD 10 năm / Open-Meteo khớp ERA5 — với các cập nhật Tuần 3 và Spark Structured Streaming 09/11/2026)
+- **Các tác vụ ⬜ còn lại chủ yếu là hành động con người** (họp nhóm, nộp bài, thuyết trình) — xem `docs/09`. Kafka broker + cụm Spark Docker đã chạy thật (Docker Desktop macOS 20/10, Docker Engine Linux 12/10).
 
 ---
 
@@ -41,7 +41,7 @@
 | 7 | Script gọi NASA POWER lấy dữ liệu mẫu JSON cho 1 toạ độ | 2/10 | JSON parse được thành DataFrame pandas | `pd.json_normalize()` không lỗi, có đủ các biến khí tượng yêu cầu | ✅ Xong — `ingestion/parsers.py::parse_nasa_power`, có unit test |
 | 8 | Bảng đối chiếu 3 nguồn: field, đơn vị, tần suất, độ phân giải | 3/10 | Bảng Markdown/Excel liệt kê đủ field trùng khớp giữa nguồn | TV2 review và xác nhận đủ dữ liệu để map sang schema trung gian | ✅ Xong, vượt yêu cầu — `docs/06` mục 1 có đủ 5 nguồn |
 | 9 | Soạn mục "Data Sources & Volume" cho đề cương | 4/10 | Đoạn văn mô tả nguồn + bảng ước lượng dung lượng (~1.5–2 TB) | TV4 review nội dung khớp định dạng đề cương | ✅ Xong — `report/main.tex` Chương 4, số liệu thật ~35GB |
-| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Đề cương hoàn chỉnh, đúng template, xuất PDF | Nộp thành công trên hệ thống của học phần trước 23:59 5/10 | ⬜ PDF đã sẵn sàng (`report/main.pdf`), chưa xác nhận đã nộp |
+| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Đề cương hoàn chỉnh, đúng template, xuất PDF | Nộp thành công trên hệ thống của học phần trước 23:59 5/10 | ✅ Đã nộp (nhóm xác nhận 12/10/2026) — `report/main.pdf` |
 
 ### TV2 — Schema Lead
 
@@ -56,7 +56,7 @@
 | 7 | So sánh Kriging vs Bilinear Interpolation, chọn thư viện | 2/10 | Bảng so sánh ưu/nhược, quyết định dùng `pykrige`/`scipy` | Cài thử thư viện, chạy ví dụ nội suy trên tập toy data thành công | ✅ Xong, vượt yêu cầu — `warehouse/interpolation.py`, chạy thật trên 113 trạm x 4 biến ERA5 (không chỉ toy data) |
 | 8 | Viết tài liệu "Data Model Design v0" (ERD + giải thích) | 3/10 | File `.md` mô tả đầy đủ schema, đính kèm ERD | TV3, TV4 review và không có câu hỏi mở về cấu trúc bảng | ✅ Xong — `docs/11-data-model-design.md`, có ERD Mermaid đính kèm |
 | 9 | Đóng góp mục "System Architecture" cho đề cương | 4/10 | Sơ đồ kiến trúc tổng thể pipeline (ingest → warehouse → model → dashboard) | TV4 review nội dung khớp định dạng đề cương | ✅ Xong — `report/main.tex` Chương 3, sơ đồ TikZ |
-| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Phần schema/kiến trúc trong đề cương chính xác, nhất quán | Nộp thành công cùng nhóm trước 23:59 5/10 | ⬜ Nội dung sẵn sàng, chưa xác nhận đã nộp |
+| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Phần schema/kiến trúc trong đề cương chính xác, nhất quán | Nộp thành công cùng nhóm trước 23:59 5/10 | ✅ Đã nộp (nhóm xác nhận 12/10/2026) |
 
 ### TV3 — Spark/PINN Lead
 
@@ -71,7 +71,7 @@
 | 7 | Ước lượng VRAM/RAM cần cho huấn luyện PINN theo kích thước dữ liệu dự kiến | 2/10 | Bảng ước lượng theo batch size, số điểm lưới | Con số hợp lý so với phần cứng thực tế của nhóm (không âm/vô lý) | ⬜ Chưa làm |
 | 8 | Thiết kế sơ bộ kiến trúc Replay Streaming (Kafka producer) | 3/10 | Sơ đồ luồng: file lịch sử → producer → topic → consumer | TV1 xác nhận khớp với dữ liệu sẽ sinh ra từ pipeline ingest | ⬜ Đã cài `kafka-python`, chưa thiết kế/code |
 | 9 | Đóng góp mục "Computing Infrastructure & Big Data Techniques" cho đề cương | 4/10 | Đoạn mô tả Spark, Kafka, PINN trong đề cương | TV4 review nội dung khớp định dạng đề cương | ✅ Xong — `report/main.tex` Mục 3.5 |
-| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Phần hạ tầng tính toán chính xác, khả thi | Nộp thành công cùng nhóm trước 23:59 5/10 | ⬜ Nội dung sẵn sàng, chưa xác nhận đã nộp |
+| 10 | Review & nộp đề cương đề tài cùng nhóm | 5/10 | Phần hạ tầng tính toán chính xác, khả thi | Nộp thành công cùng nhóm trước 23:59 5/10 | ✅ Đã nộp (nhóm xác nhận 12/10/2026) |
 
 ### TV4 — Dashboard/PM Lead
 
@@ -86,7 +86,7 @@
 | 7 | Vẽ bounding box khu vực nghiên cứu trên bản đồ | 2/10 | Toạ độ bounding box (lat/lon min-max) xác định rõ | TV1/TV3 dùng bounding box này tải dữ liệu thử không lỗi | ✅ Xong — lat -11→23, lon 92→141, dùng nhất quán trong code+docs |
 | 8 | Soạn checklist tiêu chí 5V đính kèm đề cương | 3/10 | Bảng 5V với số liệu ước lượng cụ thể (như bản nháp đã có) | TV1–3 xác nhận số liệu khớp với dữ liệu thực tế dự kiến | ✅ Xong — `report/main.tex` Mục 4.4 |
 | 9 | Rà soát, format đề cương theo yêu cầu nộp, xuất PDF | 4/10 | File PDF đúng font/margin theo quy định học phần | Mở file PDF không lỗi định dạng, đủ số trang quy định | ✅ Xong — đã verify từng trang bằng pdftoppm |
-| 10 | Nộp đề cương đúng hạn và thông báo cả nhóm | 5/10 | Biên nhận nộp bài (email/hệ thống) | Có xác nhận nộp thành công trước 23:59 5/10 | ⬜ Hành động của người dùng, chưa xác nhận |
+| 10 | Nộp đề cương đúng hạn và thông báo cả nhóm | 5/10 | Biên nhận nộp bài (email/hệ thống) | Có xác nhận nộp thành công trước 23:59 5/10 | ✅ Đã nộp (nhóm xác nhận 12/10/2026) |
 
 ---
 
@@ -97,15 +97,15 @@
 
 | # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
 |---|---|---|---|---|---|
-| 1 | Script batch tải ERA5 đầy đủ (bounding box, 5 năm, 6 biến) | 7/10 | Toàn bộ dữ liệu ERA5 theo phạm vi đã chốt tải về đủ | So khớp số file/số ngày với lịch 5 năm, không thiếu tháng nào | ⬜ Mới có subset 3 ngày × 4 biến (chứng minh pipeline chạy được), chưa tải full 5 năm |
-| 2 | Script tải toàn bộ NOAA ISD cho danh sách trạm mục tiêu | 8/10 | CSV đủ cho toàn bộ trạm trong danh sách, 10 năm | Đếm số trạm tải được / tổng số trạm mục tiêu ≥ 95% | 🟡 100% trạm mục tiêu (26/26) nhưng mới 1 năm (2024), chưa đủ 10 năm |
-| 3 | Script tải NASA POWER cho lưới điểm tương ứng khu vực | 9/10 | Dữ liệu POWER phủ đủ bounding box đã chọn | So sánh phạm vi toạ độ tải về với bounding box gốc | 🟡 Mới 6 điểm đại diện, chưa phủ dạng lưới đầy đủ bounding box |
-| 4 | Script tải Open-Meteo Historical làm nguồn đối chiếu chéo | 10/10 | Dữ liệu Open-Meteo cùng khoảng thời gian với ERA5 | Số ngày dữ liệu Open-Meteo = số ngày ERA5 tương ứng | ⬜ Open-Meteo có cả năm 2024, nhưng ERA5 mới có 3 ngày — chưa khớp khoảng thời gian |
+| 1 | Script batch tải ERA5 đầy đủ (bounding box, 5 năm, 6 biến) | 7/10 | Toàn bộ dữ liệu ERA5 theo phạm vi đã chốt tải về đủ | So khớp số file/số ngày với lịch 5 năm, không thiếu tháng nào | ✅ Xong (13/10/2026) — `scripts/download_era5_full.py`: 9 biến × 60 tháng (2020–2024) = 540/540 file, mỗi biến đủ 43.848/43.848 giờ, 0% NaN, 22 GB (ARCO-ERA5, chạy lại được sau khi ngắt) |
+| 2 | Script tải toàn bộ NOAA ISD cho danh sách trạm mục tiêu | 8/10 | CSV đủ cho toàn bộ trạm trong danh sách, 10 năm | Đếm số trạm tải được / tổng số trạm mục tiêu ≥ 95% | ✅ Xong (13/10/2026) — `scripts/download_full_points.py`: 26/26 trạm × 10 năm (2015–2024), 258/260 file = 99,2% (≥ 95%); 2 file thiếu là trạm Cát Bi 2015–2016 không có trên NOAA (404) |
+| 3 | Script tải NASA POWER cho lưới điểm tương ứng khu vực | 9/10 | Dữ liệu POWER phủ đủ bounding box đã chọn | So sánh phạm vi toạ độ tải về với bounding box gốc | 🟡 Mở rộng lên 5 năm (2020–2024) cho 6 điểm đại diện, nhưng vẫn là điểm, chưa phủ dạng lưới bounding box (vùng lưới đã được ERA5 phủ đầy đủ) |
+| 4 | Script tải Open-Meteo Historical làm nguồn đối chiếu chéo | 10/10 | Dữ liệu Open-Meteo cùng khoảng thời gian với ERA5 | Số ngày dữ liệu Open-Meteo = số ngày ERA5 tương ứng | ✅ Xong (13/10/2026) — Open-Meteo 6 điểm × 2020–2024 = 1.827 ngày, khớp đúng 1.827 ngày ERA5 |
 | 5 | Module parser NetCDF4/GRIB2 bằng `xarray` → DataFrame chuẩn | 12/10 | Hàm `parse_era5()` trả DataFrame đúng cột đã định nghĩa | Unit test: input file mẫu → output đúng shape & tên cột | ✅ Xong — `warehouse/interpolation.py::bilinear_interpolate_era5()` (đọc NetCDF bằng xarray + nội suy vào trạm), trả đúng schema WeatherObs, đã chạy thật 8.136 dòng |
 | 6 | Module parser CSV/Fixed-width NOAA ISD, xử lý mã lỗi -9999/NaN | 13/10 | Hàm `parse_isd()` loại bỏ/đánh dấu giá trị lỗi | Unit test: input chứa `-9999` → output là NaN, không crash | ✅ Xong — `ingestion/parsers.py::parse_isd`, có unit test tiêm mã lỗi thật |
 | 7 | Chuẩn hoá thời gian: mọi timestamp về UTC ISO8601 | 15/10 | Toàn bộ 3 nguồn có cột `timestamp_utc` thống nhất | Kiểm tra ngẫu nhiên 10 bản ghi mỗi nguồn, timezone đúng UTC | ✅ Xong, vượt yêu cầu — cả 4 nguồn điểm, có unit test tự động (không chỉ kiểm tra ngẫu nhiên) |
 | 8 | Chuẩn hoá đơn vị: T→K, P→Pa, gió→m/s | 16/10 | Giá trị sau chuẩn hoá nằm trong khoảng vật lý hợp lý | So sánh trước/sau: T ~ 250–320K, P ~ 90.000–105.000 Pa | 🟡 Đã chuẩn hoá nhất quán + test khoảng vật lý hợp lý, nhưng dùng °C/hPa (quyết định thiết kế ở docs/06) thay vì K/Pa |
-| 9 | Kafka producer đọc dữ liệu lịch sử, publish theo topic riêng | 18/10 | Producer chạy được, publish message vào đúng topic | `kafka-console-consumer` nhận được message đúng định dạng JSON | ✅ Xong — test thật với broker thật 20/10 (Docker Desktop đã lên): `docker-compose.kafka.yml` (image `bitnamilegacy/kafka:4.0.0`, tag `bitnami/kafka:3.7` cũ đã bị rút khỏi Docker Hub), producer publish 70 message vào topic `weatherobs.ghcn`, `kafka-console-consumer` đọc lại đúng JSON. Phát hiện + sửa 1 bug thật: producer ban đầu xuất `NaN` (không phải JSON hợp lệ) cho giá trị thiếu, đã sửa thành `null` |
+| 9 | Kafka producer đọc dữ liệu lịch sử, publish theo topic riêng | 18/10 | Producer chạy được, publish message vào đúng topic | `kafka-console-consumer` nhận được message đúng định dạng JSON | ✅ Xong — test thật với broker thật 20/10 (Docker Desktop đã lên): `docker-compose.kafka.yml` (image `bitnamilegacy/kafka:4.0.0`, tag `bitnami/kafka:3.7` cũ đã bị rút khỏi Docker Hub), producer publish 70 message vào topic `weatherobs.ghcn`, `kafka-console-consumer` đọc lại đúng JSON. Phát hiện + sửa 1 bug thật: producer ban đầu xuất `NaN` (không phải JSON hợp lệ) cho giá trị thiếu, đã sửa thành `null`. Cập nhật 12/10/2026: chạy lại với image chính thức `apache/kafka:3.7.0` trên Linux, 500/500 message JSON hợp lệ; producer tương thích kafka-python 3.x; compose hiện dùng image này |
 | 10 | Viết phần Ingestion cho báo cáo tiến độ | 19/10 | Slide/đoạn báo cáo: khối lượng đã tải, vướng mắc, số liệu | TV4 review nội dung sẵn sàng đưa vào slide chung | ✅ Xong — `docs/10-ket-qua-ky-thuat-tuan-2.md` mục 1 |
 
 ### TV2 — Schema Lead
@@ -127,7 +127,7 @@
 
 | # | Nhiệm vụ | Deadline | Yêu cầu cần đạt | Kiểm thử | Trạng thái |
 |---|---|---|---|---|---|
-| 1 | Dựng cụm Spark giả lập nhiều node bằng Docker Compose (driver + 2–3 worker) | 7/10 | Cluster khởi động đủ số node, UI Spark truy cập được | Spark Master UI hiển thị đủ số worker đã cấu hình | ✅ Xong — test thật 20/10 sau khi Docker Desktop lên: Master API (`/json/`) báo `aliveworkers: 2`, đã `spark-submit` 1 job thật (tổng 0..999999) chạy phân tán trên worker `172.23.0.3`, kết quả đúng `499999500000`. Image `bitnami/spark:3.5` cũ bị Bitnami rút, đã đổi `bitnamilegacy/spark:4.0.0` |
+| 1 | Dựng cụm Spark giả lập nhiều node bằng Docker Compose (driver + 2–3 worker) | 7/10 | Cluster khởi động đủ số node, UI Spark truy cập được | Spark Master UI hiển thị đủ số worker đã cấu hình | ✅ Xong — test thật 20/10 sau khi Docker Desktop lên: Master API (`/json/`) báo `aliveworkers: 2`, đã `spark-submit` 1 job thật (tổng 0..999999) chạy phân tán trên worker `172.23.0.3`, kết quả đúng `499999500000`. Image `bitnami/spark:3.5` cũ bị Bitnami rút, đã đổi `bitnamilegacy/spark:4.0.0`. Cập nhật 12/10/2026: chạy lại thật trên Docker Engine (Linux) với image chính thức `apache/spark:4.2.0` (cùng phiên bản PySpark 4.2.0 của driver) — Master UI ALIVE, 2/2 worker × 2 core, job gửi từ host chạy xong; compose hiện dùng image này |
 | 2 | Kết nối Spark Streaming với Kafka topic từ TV1, xử lý windowing cơ bản | 8/10 | Job Streaming chạy, tính được aggregate theo cửa sổ thời gian | Console output hiển thị kết quả window đúng chu kỳ đã set | ✅ Xong — test live thật 09/11/2026: `warehouse/spark_streaming_consumer.py` đọc topic Kafka thật, console hiển thị đúng `avg_temp_c` theo cửa sổ trượt 1 phút/30s cho từng trạm. Phát hiện + sửa 2 bug thật khi chạy live: (1) `SparkContext` lỗi do hostname tự phân giải ra IP LAN thay vì localhost (có thể do mạng ảo Docker Desktop) — sửa bằng `SPARK_LOCAL_IP=127.0.0.1`; (2) Kafka connector ghim cứng version 4.0.0 không khớp PySpark cài thật 4.2.0 (`NoSuchMethodError`) — sửa bằng lấy version tự động từ `pyspark.__version__`. Có test tự động (`tests/test_spark_jobs.py`) |
 | 3 | Spark transformation tính ma trận tương quan giữa các biến khí tượng | 9/10 | Ma trận correlation xuất ra đúng kích thước n×n | Giá trị đường chéo = 1.0, ma trận đối xứng | ✅ Xong — `warehouse/spark_analytics.py`, ma trận 5×5 thật trên 1.076.473 dòng, đường chéo=1.0, đối xứng đúng |
 | 4 | Pipeline tiền xử lý dữ liệu đầu vào cho PINN (chuẩn hoá, tensor hoá) | 10/10 | Hàm trả tensor đúng shape (batch, features) | Unit test: input DataFrame mẫu → output tensor đúng dtype/shape | ✅ Xong — `model/pinn_rh_from_dewpoint.py` (DataFrame ISD thật → tensor `(batch,2)`) |
@@ -167,12 +167,12 @@
 |---|---|---|---|---|---|
 | 1 | Mở rộng phạm vi ERA5 (thêm biến/tầng áp suất) theo phản hồi báo cáo tiến độ | 21/10 | Dữ liệu bổ sung tải về đủ theo yêu cầu mới | Đối chiếu danh sách biến mới với phản hồi giảng viên | ⬜ Chưa có phản hồi thật từ giảng viên để đối chiếu — phụ thuộc hành động con người |
 | 2 | Veracity: phát hiện & lọc outlier bằng z-score/IQR cho dữ liệu trạm | 22/10 | Hàm `detect_outliers()` gắn cờ bản ghi bất thường | Test với dữ liệu giả lập có outlier rõ ràng, hàm phát hiện đúng ≥ 90% | ✅ Xong — `ingestion/veracity.py`, IQR đạt 100% (5/5), phát hiện thêm Z-score bị "masking effect" chỉ đạt 20% — đã chọn IQR làm chỉ số chính, ghi rõ lý do |
-| 3 | Xây thuật toán phát hiện sensor drift theo thời gian | 23/10 | Biểu đồ/độ đo phát hiện trạm có xu hướng lệch dần | So sánh với ít nhất 1 trạm biết trước có vấn đề (nếu có) hoặc mô phỏng | ⬜ Chưa làm |
+| 3 | Xây thuật toán phát hiện sensor drift theo thời gian | 23/10 | Biểu đồ/độ đo phát hiện trạm có xu hướng lệch dần | So sánh với ít nhất 1 trạm biết trước có vấn đề (nếu có) hoặc mô phỏng | ✅ Xong (10/11/2026) — `warehouse/sensor_drift.py`: chuỗi bias tháng trạm − ERA5, Mann-Kendall + độ dốc Sen (trôi dần) và kiểm định Pettitt (nhảy bậc). Trạm biết trước có vấn đề: ISD Phnom Penh áp suất trôi −0,65 hPa/năm, điểm gãy 11/2022, bước −2,6 hPa. Mô phỏng tiêm lỗi vào 76 chuỗi thật: phát hiện 100% trôi, 95–98% nhảy bậc. `tests/test_sensor_drift.py` |
 | 4 | Hoàn thiện missing-value policy riêng từng biến (linear/spline vs zero-fill/Markov) | 24/10 | Hàm xử lý missing áp dụng đúng chiến lược theo loại biến | Unit test cho từng loại biến, kết quả không còn NaN không mong muốn | 🟡 Đã viết + lý giải chính sách rõ ràng (`docs/ingestion.md` mục 4) nhưng là quyết định CÓ CHỦ ĐÍCH giữ nguyên NaN (không nội suy mù) — ngược với tiêu chí gốc "không còn NaN không mong muốn", lý do kỹ thuật đã nêu rõ |
 | 5 | Đóng gói Docker cho toàn bộ pipeline thu thập | 26/10 | `Dockerfile` + `docker-compose.yml` build thành công | `docker compose up` chạy pipeline end-to-end không lỗi | ⬜ Chưa làm |
 | 6 | Tối ưu I/O: tải song song (multiprocessing/async) để giảm thời gian ingest | 27/10 | Thời gian tải giảm rõ rệt so với bản tuần tự | Benchmark thời gian trước/sau, ghi lại số liệu cụ thể | ⬜ Chưa làm |
 | 7 | Cơ chế retry & logging cho pipeline (lỗi mạng, timeout API) | 29/10 | Pipeline tự retry khi lỗi, log ghi đầy đủ | Giả lập lỗi mạng (ngắt kết nối), pipeline retry và ghi log đúng | ⬜ Chưa làm |
-| 8 | Kiểm tra pipeline chạy ổn định end-to-end trên toàn bộ 5 năm dữ liệu | 30/10 | Chạy full pipeline không crash, dữ liệu đầu ra đầy đủ | Log chạy hoàn tất, số bản ghi đầu ra khớp kỳ vọng | ⬜ Chặn bởi quyết định tải ERA5 full 5 năm chưa chốt (xem `docs/09`) |
+| 8 | Kiểm tra pipeline chạy ổn định end-to-end trên toàn bộ 5 năm dữ liệu | 30/10 | Chạy full pipeline không crash, dữ liệu đầu ra đầy đủ | Log chạy hoàn tất, số bản ghi đầu ra khớp kỳ vọng | ✅ Xong (13/10 và 09/11/2026) — `build_warehouse.py` chạy hết dữ liệu đầy đủ (ERA5 5 năm, ISD 10 năm) trong ~2,5 phút, 8.955.315 bản ghi (sau kiểm soát chất lượng ở Ingestion, `docs/17`), số dòng đọc lại khớp 100%; chạy lại toàn bộ phân tích phía sau không lỗi |
 | 9 | Đối chiếu chéo Open-Meteo với ERA5/NOAA để đánh giá độ tin cậy nguồn | 1/11 | Báo cáo sai lệch trung bình giữa các nguồn | RMSE/MAE tính được và nằm trong ngưỡng chấp nhận đã thống nhất | 🟡 Đã làm được phần NASA_POWER vs OPEN_METEO (RMSE thật, panel Dashboard mục 4); ERA5 vs Open-Meteo chưa đủ overlap thời gian (ERA5 mới 3 ngày) — đã ghi rõ giới hạn tại `docs/ingestion.md` mục 5 |
 | 10 | Cập nhật tài liệu kỹ thuật Ingestion (data dictionary, hướng dẫn chạy) | 2/11 | File `docs/ingestion.md` đầy đủ, có ví dụ chạy | Thành viên khác làm theo hướng dẫn chạy được pipeline không hỏi thêm | ✅ Xong — `docs/ingestion.md` + `data_dictionary.md` |
 

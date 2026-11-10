@@ -4,7 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{fontspec}
-\setmainfont{Times New Roman}
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
 
 % ===== VIETNAMESE CHAPTER/FIGURE/TABLE LABELS (manual, no polyglossia needed) =====
 \renewcommand{\contentsname}{MỤC LỤC}
@@ -375,7 +375,7 @@ ERA5 (ARCO), vùng ĐNA, 8 biến, 5 năm, tần suất giờ & Xấp xỉ 34,8 
 \end{tabular}
 \end{table}
 
-Con số 35--36 GB vượt khả năng xử lý thuận tiện bằng công cụ đơn máy thông thường (đúng tiêu chí \emph{Volume} của dữ liệu lớn, cần Spark), nhưng vẫn là một mục tiêu khả thi để tải và xử lý trong khung thời gian sáu tuần với nhóm ba thành viên -- thực tế hơn đáng kể so với ước tính sơ bộ ban đầu (1,5--2 TB) trước khi có số liệu kiểm chứng thực nghiệm.
+Con số 35--36 GB vượt khả năng xử lý thuận tiện bằng công cụ đơn máy thông thường (đúng tiêu chí \emph{Volume} của dữ liệu lớn, cần Spark), nhưng vẫn là một mục tiêu khả thi để tải và xử lý trong khung thời gian sáu tuần với nhóm ba thành viên -- thực tế hơn đáng kể so với ước tính sơ bộ ban đầu (1,5--2 TB) trước khi có số liệu kiểm chứng thực nghiệm. Khi tải thật (Mục~6.1), dữ liệu thô đạt khoảng 23,4~GB: ERA5 9 biến, 5 năm chiếm 22~GB nhờ nén zlib, còn các nguồn trạm/điểm tăng lên 1,4~GB do mở rộng ISD lên 10 năm.
 
 \section{Đánh giá theo tiêu chí 5V}
 
@@ -479,28 +479,38 @@ kho mã nguồn của nhóm.
 \section{Quy mô dữ liệu đã tích hợp}
 
 Bảng~\ref{tab:final-volume} tổng hợp số bản ghi thật theo từng nguồn, tính đến lần build cuối cùng
-của kho dữ liệu (\texttt{warehouse/output/weatherobs.parquet}, gắn tag \texttt{data-v1.0-final}).
+của kho dữ liệu (\texttt{warehouse/output/weatherobs.parquet}) trên bộ dữ liệu đầy đủ theo phạm vi đề cương.
 
 \begin{table}[H]
 \centering
-\caption{Số bản ghi thật theo nguồn (tổng 1.076.473 dòng)}
+\caption{Số bản ghi thật theo nguồn (tổng 8.955.315 dòng, sau kiểm soát chất lượng)}
 \label{tab:final-volume}
 \begin{tabular}{@{}L{4cm}R{2.4cm}L{6.8cm}@{}}
 \toprule
 \textbf{Nguồn} & \textbf{Số bản ghi} & \textbf{Phạm vi} \\
 \midrule
-GHCN-Daily & 655.164 & 41 trạm (VN + ĐNA), toàn lịch sử tới 2025 \\
-NOAA ISD/Global Hourly & 358.273 & 26 trạm, năm 2024 \\
-Open-Meteo Historical & 52.704 & 6 điểm đại diện, năm 2024 \\
-ERA5 (ARCO, nội suy Bilinear) & 8.136 & 113 trạm, 15--17/6/2021 \\
-NASA POWER & 2.196 & 6 điểm đại diện, năm 2024 \\
+ERA5 (ARCO, nội suy Bilinear) & 4.954.824 & 113 trạm $\times$ 43.848 giờ (2020--2024), 9 biến \\
+NOAA ISD/Global Hourly & 3.071.275 & 26 trạm, 10 năm 2015--2024, đã gộp bản tin trùng \\
+GHCN-Daily & 655.166 & 41 trạm (VN + ĐNA), toàn lịch sử 1943--2026 \\
+Open-Meteo Historical & 263.088 & 6 điểm đại diện, 2020--2024, theo giờ \\
+NASA POWER & 10.962 & 6 điểm đại diện, 2020--2024, theo ngày \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Kho dữ liệu phủ 119 vị trí (113 trạm quan trắc thật, định danh qua bảng \textit{Location}) trên 9
 quốc gia Đông Nam Á, đạt 100\% tính toàn vẹn tham chiếu (referential integrity) khi kiểm tra tự
-động bằng bộ 44 unit/integration test đi kèm mã nguồn.
+động bằng bộ 83 unit/integration test đi kèm mã nguồn. Kho được ghi qua Spark thành 109 partition
+(\texttt{year/source}), số dòng đọc lại khớp 100\% số dòng ghi vào; toàn bộ quá trình build mất
+khoảng 3 phút.
+
+Kiểm thử đầy đủ dữ liệu ERA5 theo tiêu chí ``không thiếu tháng nào'': 540/540 tệp (9 biến
+$\times$ 60 tháng), mỗi biến đủ 43.848/43.848 giờ (gồm cả hai năm nhuận), 0\% giá trị thiếu, khoảng
+giá trị hợp lý về vật lý (nhiệt độ $-0{,}4$ đến 46\textdegree{}C; áp suất mực nước biển thấp nhất
+932~hPa và gió khoảng 40~m/s tại tâm bão). Nút thắt khi tải là băng thông chứ không phải số luồng:
+mỗi khối (chunk) của ARCO-ERA5 chứa một giờ dữ liệu \emph{toàn cầu}, nên để giữ lại 22~GB của vùng
+Đông Nam Á vẫn phải tải về khoảng 1~TB (gần 24 giờ ở băng thông khoảng 10~MB/s). Script tải theo
+từng tháng, ghi qua tệp tạm và chạy tiếp được sau khi bị ngắt.
 
 \section{Giải quyết dị biệt định danh: Entity Resolution GHCN--ISD}
 
@@ -514,33 +524,36 @@ trạm khí tượng vật lý được hai cơ quan gán hai mã độc lập.
 
 \section{Kiểm chuẩn sai số nội suy không gian}
 
-Nhóm thực hiện kiểm chuẩn kiểu leave-one-station-out: so sánh giá trị ERA5 đã nội suy Bilinear vào
-toạ độ một trạm với giá trị trạm đó thực đo được, tại cùng thời điểm -- trạm kiểm chuẩn không được
-dùng làm đầu vào cho phép nội suy. Trên 104 cặp quan sát (35 trạm), RMSE nhiệt độ đạt 1,02\textdegree{}C
-(MAE 0,80\textdegree{}C) -- mức chấp nhận được cho một lưới tái phân tích phân giải 0,25\textdegree{}.
-Ngược lại, RMSE lượng mưa đạt 10,98mm (MAE 5,07mm) -- phản ánh đúng hạn chế đã biết của dữ liệu
-tái phân tích đối với biến mưa (đã trích dẫn trong khảo sát tài liệu, Chương~2). Phân tích theo
-tercile độ cao cho thấy sai số nhiệt độ tăng dần theo độ cao trạm (0,88 $\to$ 1,19\textdegree{}C),
+Nhóm thực hiện kiểm chuẩn bằng cách so sánh giá trị ERA5 đã nội suy Bilinear vào toạ độ một trạm
+với giá trị trạm đó thực đo được, cùng ngày -- trạm không được dùng làm đầu vào cho phép nội suy.
+Trên 108.542 cặp quan sát nhiệt độ (61 trạm, 2020--2024), RMSE nhiệt độ đạt 1,14\textdegree{}C
+(MAE 0,85\textdegree{}C) và RMSE tốc độ gió đạt 1,05~m/s (MAE 0,78~m/s) -- mức chấp nhận được cho
+một lưới tái phân tích phân giải 0,25\textdegree{}. Ngược lại, RMSE lượng mưa đạt 19,83mm (MAE
+7,75mm, 30.567 cặp) -- phản ánh đúng hạn chế đã biết của dữ liệu tái phân tích đối với biến mưa (đã
+trích dẫn trong khảo sát tài liệu, Chương~2). Phân tích theo tercile độ cao cho thấy nhóm trạm cao
+nhất có sai số nhiệt độ lớn nhất (0,99 / 0,94 / 1,42\textdegree{}C cho ba nhóm từ thấp đến cao),
 phù hợp về mặt vật lý với việc lưới thô không nắm bắt được hiệu ứng địa hình chi tiết.
 
 \section{Tối ưu hiệu năng Spark}
 
 Áp dụng \texttt{cache()} cho một truy vấn tổng hợp đại diện (nhiệt độ trung bình theo trạm/tháng,
-nguồn GHCN) giúp giảm thời gian thực thi trung bình từ 0,99s xuống 0,52s qua ba lần chạy lặp lại --
-cải thiện 47,1\%, vượt ngưỡng 30\% đặt ra. Về xử lý lệch tải (data skew), phân tích cho thấy việc
-thêm \texttt{month} vào khoá partition giảm tỷ lệ partition lớn nhất từ 33,28\% xuống 3,04\%,
-nhưng đánh đổi bằng việc tăng số partition 11,9 lần (88 $\to$ 1.043) -- làm trầm trọng thêm vấn đề
-tệp nhỏ (\textit{small-file problem}) đã ghi nhận trước đó, khi dữ liệu đã partition chậm hơn
-2,2 lần so với không partition ở quy mô hiện tại ($\sim$1 triệu dòng). Nhóm quyết định giữ nguyên
-chiến lược partition hiện tại và chỉ xem xét lại khi dữ liệu đạt quy mô đủ lớn để lợi ích
-\textit{partition pruning} vượt chi phí quản lý tệp nhỏ.
+nguồn GHCN) giúp giảm thời gian thực thi trung bình từ 0,36s xuống 0,11s qua ba lần chạy lặp lại
+trên kho 9,0 triệu bản ghi -- cải thiện 69,4\%, vượt ngưỡng 30\% đặt ra. Về xử lý lệch tải (data
+skew), phân tích cho thấy việc thêm \texttt{month} vào khoá partition giảm tỷ lệ partition lớn nhất
+từ 11,08\% xuống 0,94\%, nhưng đánh đổi bằng việc tăng số partition 12 lần (109 $\to$ 1.306) --
+làm trầm trọng thêm vấn đề tệp nhỏ (\textit{small-file problem}). Đo lại công bằng trên 9,0 triệu
+dòng (một lần làm nóng JVM, lấy trung vị năm lần chạy), dữ liệu đã partition vẫn chậm hơn 1,5--2,5
+lần so với không partition trên bốn loại truy vấn đại diện: bản không partition vẫn được Parquet lọc
+hiệu quả nhờ thống kê min/max theo row-group, trong khi 109 thư mục partition phát sinh chi phí liệt
+kê tệp. Nhóm quyết định giữ nguyên chiến lược partition hiện tại; lợi ích \textit{partition pruning}
+chỉ rõ rệt ở quy mô lớn hơn nhiều hoặc khi lưu trên object storage (S3/GCS).
 
 \section{Mô hình học máy ràng buộc vật lý (PINN)}
 
 Nhóm huấn luyện hai mô hình PINN trên dữ liệu thật: (i) dự báo độ ẩm tương đối từ nhiệt độ và điểm
 sương, dùng phương trình Clausius--Clapeyron làm ràng buộc vật lý, trên 5.000 bản ghi ISD thật
 (hàm mất mát giảm từ 1068 xuống 2,9, sai số tuyệt đối trung bình cuối cùng 1,07 điểm phần trăm);
-(ii) trường gió hai chiều trên 113 trạm ERA5, dùng phương trình liên tục (continuity, dạng rút gọn
+(ii) trường gió hai chiều trên 113 trạm ERA5 (gió trung bình 15--17/6/2021), dùng phương trình liên tục (continuity, dạng rút gọn
 của Navier--Stokes) làm ràng buộc, kết hợp với quét bốn giá trị hệ số cân bằng $\lambda \in
 \{0;\,0{,}01;\,0{,}1;\,1{,}0\}$.
 
@@ -571,7 +584,17 @@ tán cho kết quả chính xác; Kafka producer phát bản ghi JSON thật và
 lại đúng nội dung. Phần Spark Structured Streaming kết hợp cửa sổ thời gian (windowing) đọc trực
 tiếp từ Kafka (\texttt{warehouse/spark\_streaming\_consumer.py}) đã được kiểm thử trực tiếp thành
 công: hệ thống tính đúng nhiệt độ trung bình theo trạm trên cửa sổ trượt một phút, bước nhảy 30
-giây, hiển thị kết quả qua nhiều micro-batch liên tiếp trên console.
+giây, hiển thị kết quả qua nhiều micro-batch liên tiếp trên console. Toàn bộ hạ tầng cũng được
+dựng lại và kiểm chứng trên Linux (Docker Engine) bằng các image chính thức
+\texttt{apache/spark:4.2.0} (cùng phiên bản PySpark 4.2.0 của driver) và \texttt{apache/kafka:3.7.0},
+sau khi các image Bitnami cũ bị gỡ khỏi Docker Hub.
+
+Trên hạ tầng này, nhóm triển khai thêm \emph{phát hiện dị thường theo luồng}
+(\path{warehouse/spark_streaming_anomaly.py}): producer phát lại bản ghi trạm vào Kafka, Spark Structured
+Streaming lấy tối đa 150 bản ghi mỗi micro-batch, join tĩnh với bảng khí hậu nền đã tính bằng batch
+(Mục~6.8), tính dị thường chuẩn hoá $z$ và phát cảnh báo $|z| \ge 2$ ngay trong micro-batch. Phát lại đợt
+nắng nóng 1/4--15/5/2024 (1.407 bản ghi) cho 179 cảnh báo xuất hiện dần qua 10 micro-batch, khớp
+179/179 với kết quả batch và giá trị $z$ giống hệt -- vì hai đường xử lý dùng chung một logic tính toán.
 
 Quá trình kiểm thử trực tiếp phát hiện và khắc phục hai sự cố môi trường thực tế, không phải lỗi
 logic xử lý: \emph{thứ nhất}, phiên Spark cục bộ không khởi tạo được do hệ điều hành tự phân giải
@@ -586,13 +609,107 @@ thay vì chỉ trình bày thiết kế trên giấy.
 
 \section{Trực quan hoá và cảnh báo}
 
-Dashboard (Streamlit) đọc trực tiếp kho dữ liệu Parquet thật, cung cấp sáu thành phần: chuỗi thời
-gian theo trạm, bảng tổng hợp theo nguồn, bản đồ phân bố kèm thanh trượt thời gian, bảng so sánh
-giá trị giữa hai nguồn có đủ dữ liệu chồng lấp thời gian (NASA POWER và Open-Meteo, cả năm 2024),
-bảng cảnh báo bất thường tự động (dựa trên IQR, phân loại theo mức độ nghiêm trọng), và bảng kết
-quả đầu ra của mô hình PINN trường gió (giá trị dự đoán, giá trị quan trắc, sai số dư từng trạm).
-Toàn bộ sáu thành phần đã được xác minh bằng cách chạy ứng dụng thật và kiểm tra trực tiếp qua
-trình duyệt, không có lỗi runtime trong bảng điều khiển.
+Dashboard (Streamlit) đọc trực tiếp kho dữ liệu Parquet thật (9,0 triệu bản ghi), cung cấp mười
+thành phần: chuỗi thời gian theo trạm, bảng tổng hợp theo nguồn, bản đồ phân bố kèm thanh trượt thời
+gian, bảng so sánh giá trị giữa hai nguồn có đủ dữ liệu chồng lấp thời gian (NASA POWER và
+Open-Meteo, 2020--2024), bảng cảnh báo bất thường tự động (dựa trên IQR, phân loại theo mức độ
+nghiêm trọng), bảng kết quả đầu ra của mô hình PINN trường gió, và phần dị thường khí hậu (bản đồ
+dị thường chuẩn hoá theo thang phân kỳ, danh sách đợt nóng, chỉ số SPI-3, mưa cực đoan -- Mục~6.8),
+xu hướng khí hậu dài hạn (Mục~6.9), trôi cảm biến (Mục~6.10) và cảnh báo theo luồng. Bảng trung
+bình theo ngày được tính sẵn và lưu cache, nên đổi ngày hoặc đổi trạm chỉ mất khoảng 0,6 giây. Toàn
+bộ mười thành phần đã được xác minh bằng cách chạy ứng dụng thật và kiểm tra trực tiếp qua trình
+duyệt, không có lỗi runtime.
+
+\section{Phát hiện dị thường khí hậu}
+
+Phát hiện dị thường khí hậu -- mục tiêu chính trong tên đề tài -- được triển khai tại
+\path{warehouse/anomaly_detection.py} theo các chuẩn khí tượng quốc tế thay vì ngưỡng tự đặt.
+Spark tổng hợp 9,0 triệu bản ghi thành 977.239 ngày--vị trí--nguồn (ngày của nguồn đo theo giờ chỉ
+hợp lệ khi có quan trắc ở đủ bốn khối 6 giờ, tránh lệch theo chu kỳ ngày đêm), rồi tính \emph{khí
+hậu nền} theo ngày-trong-năm với cửa sổ trượt $\pm$15 ngày: trung bình, độ lệch chuẩn và bách phân vị
+90. Giai đoạn nền của GHCN là chuẩn khí hậu WMO 1991--2020. Trên nền đó, hệ thống tính dị thường
+chuẩn hoá $z$ ($|z| \ge 2$ bất thường, $|z| \ge 3$ cực đoan), đợt nóng theo chỉ số TG90p của ETCCDI
+(từ ba ngày liên tiếp vượt bách phân vị 90), và chỉ số hạn/ẩm SPI-1, SPI-3 (khớp phân bố gamma theo
+từng tháng, McKee 1993) -- vì lượng mưa không có phân bố chuẩn nên không dùng $z$-score cho mưa.
+
+Với lượng mưa, hệ thống dùng các chỉ số ETCCDI: ngưỡng bách phân vị 95 và 99 tính trên các \emph{ngày
+ướt} ($\ge 1$~mm) của giai đoạn nền, cùng các chỉ số năm Rx1day (lượng mưa ngày lớn nhất), R95p/R99p
+(tổng lượng mưa của các ngày vượt ngưỡng) và PRCPTOT. Hệ thống được kiểm chứng với các sự kiện khí hậu
+có thật (Bảng~\ref{tab:anomaly-events}).
+
+\begin{table}[H]
+\centering
+\caption{Kiểm chứng phát hiện dị thường với sự kiện có thật}
+\label{tab:anomaly-events}
+\begin{tabular}{@{}L{3.4cm}L{10cm}@{}}
+\toprule
+\textbf{Sự kiện} & \textbf{Kết quả của hệ thống} \\
+\midrule
+Nắng nóng 4--5/2024 (34 trạm GHCN) & 12,3\% số ngày có $z \ge 2$, gấp 10 lần cùng kỳ 1991--2020 (1,2\%);
+29/34 trạm có đợt nóng; dài nhất 30 ngày liên tục ở Thái Lan và 27 ngày ở TP.HCM. Năm 2024 (11,2\%)
+cao vượt mọi năm khác từ 2010 (các năm còn lại $\le$ 4,1\%), nên đây là sự kiện thật chứ không chỉ
+là xu hướng ấm lên dài hạn \\
+Bão Yagi, 6--8/9/2024 (ERA5, 8 trạm miền Bắc Việt Nam) & Áp suất mực nước biển thấp nhất 978,8~hPa
+tại Hải Phòng, $z = -7{,}2$ -- đúng khu vực bão đổ bộ; 88\% số trạm có $z \le -3$ \\
+Mưa do bão Yagi, 6--11/9/2024 (ERA5) & Ngày 7/9/2024 là ngày mưa lớn nhất cả chuỗi 2020--2024 tại 5
+trạm miền Bắc (tới 222,6~mm tại Hà Đông, gấp khoảng 3 lần ngưỡng p99); 11/13 cặp trạm--nguồn vượt p99;
+trạm GHCN Phù Liễn mất số liệu đúng 7--8/9 khi bão đổ bộ \\
+Hạn Mekong 2019--2020 (SPI-3) & SPI-3 trung bình $-0{,}59$; tỷ lệ tháng hạn 22\% so với 13\% của toàn
+chuỗi -- đúng chiều nhưng tín hiệu yếu vì chỉ hai trạm có đủ số liệu mưa \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Điểm gắn trực tiếp với nội dung tích hợp dữ liệu của học phần là bước \emph{xác nhận chéo đa
+nguồn}: mỗi dị thường tại trạm (GHCN/ISD) được đối chiếu với hai đối chứng độc lập -- ERA5 nội suy vào
+đúng \texttt{location\_id} của trạm, và các trạm GHCN/ISD khác trong bán kính 200~km (loại các cặp
+cách nhau dưới 5~km, vốn là cùng một trạm vật lý được hai cơ quan gán hai mã theo kết quả Entity
+Resolution). Dị thường được xác nhận là khí hậu thật khi ERA5 lệch cùng chiều ($|z| \ge 1$) hoặc ít
+nhất một nửa số trạm lân cận lệch cùng chiều (20.357 trường hợp); bị coi là nghi lỗi dữ liệu khi trạm ở
+mức cực đoan ($|z| \ge 3$) nhưng mọi đối chứng hiện có đều không ủng hộ (343 trường hợp). So với chỉ
+dùng ERA5, trạm lân cận giảm số dị thường không có đối chứng từ 34.453 xuống 15.938 -- chủ yếu ở giai
+đoạn trước 2020 khi chưa có ERA5 -- và lật lại 3 ca từng bị nghi lỗi thành dị thường khí hậu thật. Ví dụ thật: trạm ISD Phnom
+Penh ngày 3/7/2023. Giá trị thấp nhất 981,6~hPa đã bị chính NOAA gắn mã kiểm soát chất lượng ``nghi
+ngờ'' và bị loại ở tầng Ingestion (Mục~6.11), nhưng các giá trị \emph{đạt} kiểm soát của NOAA cùng ngày
+vẫn dao động 995,0--1053,6~hPa; áp suất thấp nhất ngày ($z = -5{,}5$) lệch hẳn khi ERA5 tại cùng vị trí
+hoàn toàn bình thường ($z = +1{,}6$). Trạm này có 13 ngày bị đánh giá nghi lỗi, dày đặc trong tháng
+6--9/2023 -- dấu hiệu cảm biến áp suất hỏng hoặc trôi, không phải bão. Một nguồn đơn lẻ không thể tự phân biệt ``khí hậu cực đoan thật'' với ``cảm
+biến hỏng''; khi tích hợp trạm điểm với lưới tái phân tích, hai trường hợp này tách được ra.
+
+\section{Xu hướng khí hậu dài hạn}
+
+Để tách biến đổi khí hậu dài hạn khỏi dị thường ngắn hạn, nhóm áp dụng hai phương pháp phi tham số
+chuẩn trong khí hậu học trên chuỗi nhiệt độ trung bình năm của các trạm GHCN (\path{warehouse/climate_trends.py}):
+kiểm định Mann--Kendall (có hiệu chỉnh nhóm giá trị trùng) để xác định xu hướng có ý nghĩa thống kê,
+và độ dốc Sen (trung vị độ dốc của mọi cặp năm) để đo tốc độ thay đổi. Cả hai đều không giả định phân
+bố chuẩn và bền với giá trị ngoại lai. Một năm chỉ hợp lệ khi có ít nhất 80\% số ngày có số liệu, và
+mỗi chuỗi cần tối thiểu 30 năm.
+
+Trong giai đoạn chung 1975--2024, \textbf{25/27 trạm ấm lên có ý nghĩa thống kê} ($p < 0{,}05$), với độ
+dốc Sen trung vị \textbf{+0,21\textdegree{}C mỗi thập kỷ}; nhanh nhất là Jakarta (+0,41), Penang (+0,35),
+Bangkok (+0,35) và Cao Bằng (+0,34\textdegree{}C/thập kỷ). Đối với lượng mưa, chỉ một đến sáu trạm có đủ
+30 năm số liệu, nên chưa đủ cơ sở để kết luận về xu hướng mưa. Hai hạn chế cần lưu ý: kiểm định
+Mann--Kendall giả định chuỗi không tự tương quan (chưa áp dụng hiệu chỉnh Hamed--Rao), và nhiệt độ
+GHCN là TAVG hoặc trung bình của TMAX và TMIN, nên nếu một trạm thay đổi cách tính giữa chừng có thể
+tạo ra xu hướng giả -- dạng lỗi mà Mục~6.10 phát hiện được khi có ERA5 làm chuỗi tham chiếu.
+
+\section{Phát hiện trôi cảm biến}
+
+Nhóm áp dụng kỹ thuật đồng nhất hoá chuỗi khí hậu (homogenization) với chuỗi tham chiếu
+(\path{warehouse/sensor_drift.py}): với mỗi trạm, tính chuỗi chênh lệch trung bình tháng giữa giá trị
+trạm và ERA5 nội suy tại cùng vị trí, cùng ngày. Biến động khí hậu thật xuất hiện ở cả trạm lẫn ERA5 nên
+bị triệt tiêu trong chênh lệch; phần còn lại phản ánh vấn đề của cảm biến hoặc điểm đo. Trôi dần được
+kiểm định bằng Mann--Kendall kết hợp độ dốc Sen; nhảy bậc đột ngột được kiểm định bằng phép kiểm định
+Pettitt. Một chuỗi chỉ bị gắn cờ khi vừa có ý nghĩa thống kê ($p < 0{,}05$) vừa vượt ngưỡng vật lý
+(nhiệt độ 0,3\textdegree{}C/năm hoặc bước 0,5\textdegree{}C; áp suất 0,5~hPa/năm hoặc bước 1~hPa).
+
+Trên 80 chuỗi trạm--biến, hệ thống gắn cờ 4 chuỗi. Rõ nhất là cảm biến áp suất của trạm ISD Phnom
+Penh: trôi $-0{,}65$~hPa/năm, điểm gãy tháng 11/2022 với bước nhảy $-2{,}6$~hPa -- khớp với ca nghi
+lỗi dữ liệu phát hiện độc lập ở Mục~6.8. Ba trạm nhiệt độ còn lại (Viêng Chăn, Cần Thơ và một trạm
+GHCN ở Thái Lan) có bước nhảy từ $-0{,}5$ đến $-0{,}7$\textdegree{}C quanh 2021--2022, nhiều khả năng do
+thay thiết bị hoặc dời vị trí đo; việc xác nhận nguyên nhân cần hồ sơ lịch sử trạm. Để kiểm chứng theo
+đúng tiêu chí kế hoạch, nhóm tiêm trôi và bước nhảy nhân tạo (gấp hai lần ngưỡng) vào 76 chuỗi thật
+đang ổn định: hệ thống phát hiện được 100\% trường hợp trôi và 95--98\% trường hợp nhảy bậc.
 
 \section{Đánh giá chất lượng dữ liệu}
 
@@ -604,6 +721,31 @@ nên quá rộng -- một hiệu ứng gọi là \textit{masking effect}. Phươ
 nên không bị ảnh hưởng theo cách tương tự, phát hiện đủ 5/5 (100\%). Nhóm do đó chọn IQR làm chỉ số
 chính trong báo cáo chất lượng dữ liệu tự động hoá, áp dụng trên toàn bộ kho dữ liệu thật và công
 bố tại \texttt{docs/13-data-quality-report.md}.
+
+Việc chạy lại toàn bộ phân tích trên bộ dữ liệu đầy đủ còn giúp phát hiện và sửa bốn lỗi số liệu
+trong chính pipeline: (i) Open-Meteo trả tốc độ gió theo km/h nhưng giá trị được ghi thẳng vào cột
+\texttt{wind\_speed\_ms}, khiến gió của nguồn này bị phóng đại 3,6 lần -- parser nay đọc đơn vị
+từ phần \texttt{hourly\_units} của phản hồi API và quy đổi; (ii) ma trận tương quan được tính sau
+khi thay giá trị thiếu bằng 0, trong khi mỗi nguồn thiếu biến khác nhau, tạo ra tương quan giả
+(gió--độ ẩm $+0{,}57$) -- tính lại theo từng cặp biến chỉ trên các dòng có đủ hai biến cho thấy các
+quan hệ vật lý thật: nhiệt độ--độ ẩm tương đối $-0{,}59$ và nhiệt độ--áp suất $-0{,}61$;
+(iii) phép đo hiệu năng partition so dữ liệu mới với một bản sao không partition cũ; (iv) ánh xạ
+bức xạ của ERA5 dùng bức xạ ở đỉnh khí quyển thay vì bức xạ tại bề mặt -- đại lượng mà NASA POWER và
+Open-Meteo cung cấp.
+
+Sau đó, nhóm đo trực tiếp các đặc trưng chất lượng của dữ liệu thô và bổ sung bốn tầng kiểm soát
+chất lượng ngay ở Ingestion (\texttt{docs/17}): giá trị lỗi được
+đặt rỗng và lý do được ghi vào cột \texttt{qc\_flag} mới, không xoá dòng. Tầng 1 đọc cờ kiểm soát chất
+lượng của chính NOAA -- trước đó pipeline vẫn dùng 406 giá trị GHCN và 3.255 giá trị ISD mà NOAA đã đánh
+dấu sai hoặc nghi ngờ (kể cả hai bản tin gió 83~m/s). Tầng 2 kiểm tra giới hạn vật lý (giữ làm lưới an
+toàn, không còn vi phạm sau tầng 1). Tầng 3--4 kiểm tra tính nhất quán nội bộ và gắn cờ các bước nhảy
+phi vật lý (18 điểm nhiệt độ, 18 điểm áp suất). Ngoài ra: gộp 393.155 bản tin ISD trùng (cùng một quan
+trắc được gửi cả dạng METAR và SYNOP), đọc áp suất trạm của ISD vào cột áp suất bề mặt (trước đó trống
+hoàn toàn), tải gió NASA POWER ở độ cao 10~m thay vì 2~m (gió 2~m chỉ bằng 0,65 lần gió 10~m), và ghi
+định nghĩa nhiệt độ ngày vào cột \texttt{temp\_def}. Việc ghi định nghĩa nhiệt độ còn lộ ra một lỗi của
+parser cũ: ở các trạm có cột TAVG, những ngày thiếu TAVG nhưng đủ nhiệt độ cao nhất và thấp nhất bị bỏ
+trống -- sửa lại giúp tỷ lệ thiếu nhiệt độ của GHCN giảm từ 4,1\% xuống 0,3\%. Các kết luận chính của
+chương này (nắng nóng 2024, bão Yagi, xu hướng ấm lên, trôi cảm biến) không thay đổi sau khi làm sạch.
 
 \section{Đối chiếu tiến độ với kế hoạch 160 tác vụ}
 
@@ -619,18 +761,18 @@ tiết, Bảng~\ref{tab:final-progress}), mỗi tác vụ được đối chiế
 \toprule
 \textbf{Giai đoạn} & \textbf{Xong} & \textbf{Một phần} & \textbf{Chưa làm} \\
 \midrule
-Tuần 1 -- Đề cương & 27/40 & 3/40 & 10/40 \\
-Tuần 2 -- Tiến độ & 25/40 & 7/40 & 8/40 \\
-Tuần 3 -- Hội tụ & 19/40 & 13/40 & 8/40 \\
+Tuần 1 -- Đề cương & 30/40 & 4/40 & 6/40 \\
+Tuần 2 -- Tiến độ & 30/40 & 5/40 & 5/40 \\
+Tuần 3 -- Hội tụ & 21/40 & 12/40 & 7/40 \\
 \midrule
-\textbf{Tổng} & \textbf{71} & \textbf{23} & \textbf{26} \\
+\textbf{Tổng} & \textbf{81} & \textbf{21} & \textbf{18} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Phần lớn các tác vụ ``Chưa làm'' thuộc nhóm hành động của con người (họp nhóm, diễn tập, trình bày)
-hoặc phụ thuộc quyết định của nhóm chưa chốt (phạm vi tải đầy đủ ERA5 năm năm) -- không phải do
-thiếu năng lực kỹ thuật để thực hiện.
+-- không phải do thiếu năng lực kỹ thuật để thực hiện. Dữ liệu ERA5 đầy đủ năm năm, ISD mười năm và
+Open-Meteo cùng giai đoạn với ERA5 đã được tải và tích hợp (các tác vụ TV1 Tuần~2 tương ứng đã hoàn thành).
 
 % ==========================================================
 \chapter{Đóng góp dự kiến}
@@ -668,6 +810,8 @@ Tràn bộ nhớ khi xử lý dữ liệu ERA5 đa chiều & Trung bình & Áp d
 Docker Desktop không tự khởi động lại trên môi trường triển khai (gặp 2 lần, đã khắc phục cả 2) & Trung bình & Khởi động lại thủ công; sau đó kiểm thử trực tiếp Spark Streaming thành công (Chương 6, Mục 6.6), không ảnh hưởng tới pipeline batch vẫn chạy ổn định ở chế độ \texttt{local[*]} trong suốt thời gian đó \\
 GHCN và ISD dùng hai hệ mã trạm độc lập, không khớp trực tiếp qua định danh & Trung bình & Đã giải quyết bằng liên kết theo khoảng cách toạ độ (Haversine), khớp 84,6\% số trạm trong ngưỡng 5km \\
 Tăng số partition để giảm data skew làm trầm trọng thêm vấn đề tệp nhỏ & Thấp (đã kiểm soát) & Giữ nguyên chiến lược partition hiện tại, chỉ áp dụng khi dữ liệu đạt quy mô đủ lớn để lợi ích vượt chi phí \\
+Tải đầy đủ ERA5 tốn khoảng 1~TB băng thông và gần 24 giờ & Trung bình & Script tải theo tháng, chạy tiếp được sau khi ngắt; chia sẻ kho Parquet đã build (303~MB) cho thành viên khác thay vì tải lại dữ liệu thô \\
+Image Docker Bitnami bị gỡ khỏi Docker Hub & Thấp (đã khắc phục) & Chuyển sang image chính thức \texttt{apache/spark}, \texttt{apache/kafka}, khớp phiên bản PySpark của driver \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -678,9 +822,15 @@ Tăng số partition để giảm data skew làm trầm trọng thêm vấn đ�
 
 Qua bốn tuần triển khai, đề tài đã chứng minh được ba đặc điểm đặt ra từ đầu không chỉ ở mức thiết
 kế mà bằng kết quả thực nghiệm cụ thể: \emph{thứ nhất}, toàn bộ nguồn dữ liệu lõi không chỉ được
-kiểm chứng mà đã được tích hợp thành một kho dữ liệu thống nhất 1.076.473 bản ghi thật, bao gồm cả
-việc phát hiện và xử lý các vấn đề nảy sinh ngoài dự tính (hai hệ mã trạm độc lập giữa GHCN và ISD,
-hiệu ứng masking của Z-score, chi phí thực tế của chiến lược partition); \emph{thứ hai}, hai kỹ
+kiểm chứng mà đã được tích hợp thành một kho dữ liệu thống nhất 8.955.315 bản ghi thật đúng phạm vi
+đề cương (ERA5 năm năm, ISD mười năm), bao gồm cả việc phát hiện và xử lý các vấn đề nảy sinh ngoài
+dự tính (hai hệ mã trạm độc lập giữa GHCN và ISD, hiệu ứng masking của Z-score, chi phí thực tế của
+chiến lược partition, bốn lỗi số liệu trong pipeline, các giá trị đã bị NOAA đánh dấu lỗi nhưng vẫn
+được dùng), và trên kho dữ liệu đó hệ thống phát hiện đúng
+các sự kiện khí hậu có thật (nắng nóng 2024, bão Yagi cả về áp suất lẫn lượng mưa), tách được xu hướng
+ấm lên dài hạn (+0,21\textdegree{}C mỗi thập kỷ, 25/27 trạm) khỏi dị thường ngắn hạn, phát hiện được
+cảm biến trôi bằng chuỗi tham chiếu ERA5, và phát cảnh báo theo luồng qua Kafka và Spark Structured
+Streaming; \emph{thứ hai}, hai kỹ
 thuật lý thuyết cốt lõi của học phần -- GAV schema mapping và Survivorship-based record linkage --
 không chỉ được áp dụng mà đã được kiểm chuẩn định lượng (referential integrity 100\%, RMSE nội suy
 không gian theo từng biến); \emph{thứ ba}, chiến lược giảm tải cho vai trò kiêm nhiệm đã phát huy
@@ -690,8 +840,10 @@ trước, các hạng mục nâng cao (PINN, Spark Streaming) được triển k
 
 Nhóm cũng xác định rõ các giới hạn còn tồn đọng tại thời điểm báo cáo: mô hình PINN trường gió
 chưa vượt trội một mô hình hồi quy thuần về sai số bình phương trung bình ở quy mô dữ liệu hiện
-tại; và việc mở rộng ERA5 lên đầy đủ
-năm năm dữ liệu vẫn phụ thuộc quyết định của nhóm về thời gian và băng thông. Các giới hạn này được
+tại; khí hậu nền của ERA5 và ISD còn ngắn (5--10 năm) nên kết luận về dị thường khí hậu chủ yếu dựa
+trên GHCN; chỉ số SPI và xu hướng mưa mới tính được cho rất ít trạm do GHCN thiếu nhiều số liệu mưa ở
+Đông Nam Á; mạng trạm thưa khiến 15.938 dị thường vẫn chưa có đối chứng; và luồng phát hiện dị thường
+mới xử lý bản ghi theo ngày, chưa gom nguồn theo giờ theo thời gian sự kiện. Các giới hạn này được
 ghi nhận trung thực kèm nguyên nhân kỹ thuật cụ thể (Chương~6 và~8), không che giấu nhằm tạo ấn
 tượng kết quả tốt hơn thực tế -- một nguyên tắc nhóm tuân thủ xuyên suốt quá trình thực hiện đề tài.
 

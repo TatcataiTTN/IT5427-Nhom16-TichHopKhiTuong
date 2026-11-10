@@ -62,8 +62,17 @@ Bài toán tích hợp cốt lõi là xử lý dị biệt không-thời gian (*
     ├── 09-viec-ban-can-tu-lam.md       — việc CHỈ người dùng mới làm được (đăng ký, quyết định, nộp bài,
     │                                     Docker Desktop) — lọc ra từ 160 tác vụ, phần còn lại đã tự động hoá
     ├── 10-ket-qua-ky-thuat-tuan-2.md   — số liệu thật từ ETL/warehouse/Spark analytics, dùng cho báo cáo tiến độ
-    └── 11-data-model-design.md         — ERD (Mermaid), naming convention, so sánh Kriging/Bilinear,
-                                          so sánh Streamlit/Grafana/Superset
+    ├── 11-data-model-design.md         — ERD (Mermaid), naming convention, so sánh Kriging/Bilinear,
+    │                                     so sánh Streamlit/Grafana/Superset
+    ├── 12-lich-su-he-sinh-thai-nguon-du-lieu.md — lịch sử, hệ sinh thái & nghiên cứu đã dùng từng nguồn
+    ├── 13-data-quality-report.md       — báo cáo chất lượng dữ liệu (missing, outlier, độ phủ)
+    ├── 14-ket-qua-ky-thuat-tuan-3-4.md — kết quả kỹ thuật Tuần 3-4 (Entity Resolution, PINN v2, Streaming)
+    ├── 15-qa-bao-ve.md                 — câu hỏi phản biện dự kiến + đáp án
+    ├── 16-phat-hien-di-thuong-khi-hau.md — phương pháp + kiểm chứng phát hiện dị thường (nắng nóng 4/2024,
+    │                                     bão Yagi, hạn Mekong), xác nhận chéo trạm–ERA5
+    ├── 17-dac-trung-va-yeu-cau-xu-ly-du-lieu.md — đặc trưng dữ liệu đo thật (thiếu, ngoài khoảng, cờ QC,
+    │                                     đơn vị, ngữ nghĩa, thời gian, không gian) và yêu cầu xử lý
+    └── ingestion.md, warehouse.md, model.md — tài liệu kỹ thuật từng tầng
 ```
 
 Script kiểm tra nguồn dữ liệu thật: `scripts/check_data_sources.py` (chạy `python3 scripts/check_data_sources.py`, kết quả lưu ở `data_samples/`).
@@ -112,24 +121,56 @@ Danh sách trạm quan trắc dùng thẳng trong code: `reference/*.csv` (xem `
     └── test_model_pinn.py         — 3 test tích hợp, chạy thật cả 3 script PINN (đánh dấu `slow`)
 ```
 
-**Chạy thử toàn bộ pipeline** (đã verify thật, 1.076.473 bản ghi, 119 vị trí, 5 nguồn gồm cả ERA5):
+**Chạy thử toàn bộ pipeline** (đã verify thật 10/11/2026 trên bộ dữ liệu đầy đủ: 8.955.315 bản ghi sau kiểm soát chất lượng, 119 vị trí, 5 nguồn):
 ```bash
-python3 -m pytest tests/ -v                                    # 25/25 test pass
-JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home \
-  python3 warehouse/build_warehouse.py                         # sinh warehouse/output/weatherobs.parquet
-JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home \
-  python3 warehouse/spark_analytics.py                         # correlation, data skew, benchmark
-python3 model/train_demo.py && python3 model/navier_stokes_autograd_check.py \
-  && python3 model/pinn_rh_from_dewpoint.py                    # 3 ví dụ PINN, đều chạy thật
-streamlit run dashboard/app.py                                 # xem dữ liệu thật trên trình duyệt
+# 0) Đặt JAVA_HOME trỏ tới JDK 17/21 (PySpark 4.x không chạy với Java 11):
+export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home   # macOS + Homebrew
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64                             # Ubuntu (apt install openjdk-17-jdk)
+export MKL_THREADING_LAYER=GNU    # chỉ cần nếu dùng Anaconda + torch cài từ pip (tránh lỗi MKL/libgomp)
 
-# Cần Docker Desktop đang chạy:
-docker compose -f docker-compose.spark.yml up -d                # cụm Spark nhiều node
-docker compose -f docker-compose.kafka.yml up -d                # Kafka broker
-python3 ingestion/kafka_producer.py --limit 100                 # replay dữ liệu vào Kafka
+# Cách nhanh: tải bộ dữ liệu đã build sẵn (warehouse 9,0 triệu bản ghi + dữ liệu thô các nguồn điểm, ~435 MB)
+gh release download data-v2.0-full && tar -xzf warehouse-full.tar.gz && tar -xzf raw-points.tar.gz
+# Hoặc tự tải từ nguồn gốc:
+python3 scripts/batch_download_week2.py full           # bộ mẫu Tuần 2 + GHCN toàn lịch sử (data_samples/ bị gitignore)
+python3 scripts/batch_download_week2.py sea-priority   # mở rộng GHCN/ISD ra 8 nước ĐNA còn lại
+python3 scripts/download_full_points.py                # ISD 10 năm + Open-Meteo/NASA POWER 5 năm (~1,4 GB, vài giờ)
+python3 scripts/download_era5_full.py                  # ERA5 9 biến × 5 năm (22 GB lưu, ~1 TB tải về, ~24 giờ;
+                                                       #   chạy lại được sau khi ngắt — tháng đã có sẽ bỏ qua)
+python3 warehouse/location.py                          # bảng Location -> warehouse/output/location.parquet (cần cho
+                                                       #   entity_resolution, validate_interpolation, PINN v2)
+python3 -m pytest tests/ -v                            # 83/83 test pass (cần Kafka broker cho test streaming)
+python3 warehouse/build_warehouse.py                   # 8.955.315 bản ghi -> warehouse/output/weatherobs.parquet
+                                                       #   (--dataset week2 để build bộ mẫu nhỏ nếu chưa tải đủ)
+python3 warehouse/spark_analytics.py                   # correlation, data skew, benchmark
+python3 warehouse/anomaly_detection.py                 # dị thường khí hậu: z-score, đợt nóng, SPI, mưa cực đoan,
+                                                       #   xác nhận chéo ERA5 + trạm lân cận (docs/16)
+python3 warehouse/climate_trends.py                    # xu hướng dài hạn: Mann-Kendall + độ dốc Sen
+python3 warehouse/sensor_drift.py                      # trôi cảm biến: bias trạm − ERA5, Pettitt
+python3 model/train_demo.py && python3 model/navier_stokes_autograd_check.py \
+  && python3 model/pinn_rh_from_dewpoint.py            # 3 ví dụ PINN, đều chạy thật
+streamlit run dashboard/app.py                         # xem dữ liệu thật trên trình duyệt
+
+# Cần Docker daemon đang chạy (Docker Engine trên Linux hoặc Docker Desktop trên macOS).
+# Cả 2 file dùng image chính thức apache/* (Bitnami đã gỡ bitnami/kafka, bitnami/spark khỏi Docker Hub).
+docker compose -f docker-compose.kafka.yml up -d       # Kafka broker (KRaft) tại localhost:9092
+python3 ingestion/kafka_producer.py --limit 100        # replay dữ liệu vào topic weatherobs.<source>
+python3 ingestion/kafka_producer.py --source GHCN --start 2024-04-01 --end 2024-05-15 --limit 0 \
+    --topic weatherobs.ghcn.replay                     # phát lại đợt nắng nóng 4–5/2024
+python3 warehouse/spark_streaming_anomaly.py --topic weatherobs.ghcn.replay --duration 60
+                                                       # phát hiện dị thường theo luồng -> cảnh báo
+docker compose -f docker-compose.spark.yml up -d       # Spark 4.2.0: 1 master + 2 worker, UI http://localhost:8080
 ```
 
-Chi tiết số liệu/phát hiện kỹ thuật: `docs/10-ket-qua-ky-thuat-tuan-2.md`. Việc cần bạn tự làm (đăng ký, quyết định, Docker Desktop): `docs/09-viec-ban-can-tu-lam.md`.
+Gửi job từ máy host vào cụm Spark Docker — worker phải gọi ngược được về driver, nên cần đặt
+`spark.driver.host` là gateway của mạng `spark-net` (đã test thật, job chạy trên 2 worker × 2 core):
+```python
+# GW=$(docker network inspect it5427-nhom16-tichhopkhituong_spark-net -f '{{(index .IPAM.Config 0).Gateway}}')
+SparkSession.builder.master("spark://localhost:7077") \
+    .config("spark.driver.host", GW).config("spark.driver.bindAddress", "0.0.0.0")
+```
+Lưu ý: phiên bản `pyspark` trên host phải trùng image (4.2.0). Thư mục `warehouse/output` được mount vào worker tại `/data/warehouse`.
+
+Chi tiết số liệu/phát hiện kỹ thuật: `docs/10-ket-qua-ky-thuat-tuan-2.md`. Việc cần bạn tự làm (đăng ký, quyết định): `docs/09-viec-ban-can-tu-lam.md`.
 
 ## 5. Nguồn dữ liệu lõi
 
@@ -158,7 +199,7 @@ Mỗi thành viên nên tự kiểm tra máy mình theo danh sách dưới (lệ
   # macOS + Homebrew — ĐÃ TEST THẬT, dùng lệnh này (không dùng java_home -v 17,
   # lệnh đó có thể âm thầm trả về Java 11 nếu openjdk@17 chưa symlink hệ thống):
   export JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home
-  # Linux: export JAVA_HOME tới thư mục cài JDK 17/21 (vd update-alternatives --config java)
+  # Ubuntu — ĐÃ TEST THẬT (12/10/2026): export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
   ```
   Kiểm tra nhanh: `JAVA_HOME=$(brew --prefix openjdk@17)/libexec/openjdk.jdk/Contents/Home python3 scripts/check_spark_env.py` — đã test thật, in ra "Môi trường Spark sẵn sàng."
 - Git ≥ 2.x
