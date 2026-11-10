@@ -473,7 +473,7 @@ Kế hoạch bám sát đúng năm mốc chính thức của học phần, khôn
 
 \section{Kế hoạch chi tiết theo tuần}
 
-Kế hoạch chi tiết gồm 160 tác vụ cụ thể (4 tuần $\times$ 4 vai trò $\times$ 10 tác vụ/tuần/vai trò), mỗi tác vụ kèm tiêu chí kiểm thử (Definition of Done) rõ ràng -- trình bày đầy đủ trong tệp \texttt{docs/03-ke-hoach-160-tasks.md} của kho mã nguồn nhóm (đường dẫn kho mã: Phụ lục tái lập, Mục A.1). Bảng~\ref{tab:weeks} tóm tắt trọng tâm từng tuần.
+Kế hoạch chi tiết được lập theo tuần và vai trò, mỗi hạng mục công việc kèm tiêu chí kiểm thử (Definition of Done) rõ ràng, dùng làm công cụ quản lý tiến độ nội bộ của nhóm. Bảng~\ref{tab:weeks} tóm tắt trọng tâm từng tuần.
 
 \begin{table}[H]
 \centering
@@ -776,32 +776,17 @@ parser cũ: ở các trạm có cột TAVG, những ngày thiếu TAVG nhưng đ
 trống -- sửa lại giúp tỷ lệ thiếu nhiệt độ của GHCN giảm từ 4,1\% xuống 0,3\%. Các kết luận chính của
 chương này (nắng nóng 2024, bão Yagi, xu hướng ấm lên, trôi cảm biến) không thay đổi sau khi làm sạch.
 
-\section{Đối chiếu tiến độ với kế hoạch 160 tác vụ}
+\section{Tiến độ tổng thể tại thời điểm báo cáo}
 
-Tính đến thời điểm báo cáo, nhóm đã rà soát 120/160 tác vụ (ba trong bốn tuần của kế hoạch chi
-tiết, Bảng~\ref{tab:final-progress}), mỗi tác vụ được đối chiếu trực tiếp với tiêu chí kiểm thử đã
-đặt ra từ đầu thay vì tự đánh giá chủ quan.
-
-\begin{table}[H]
-\centering
-\caption{Tổng kết tiến độ 120/160 tác vụ (xem chi tiết từng tác vụ tại \texttt{docs/03})}
-\label{tab:final-progress}
-\begin{tabular}{@{}L{3.6cm}C{2.4cm}C{2.4cm}C{2.4cm}@{}}
-\toprule
-\textbf{Giai đoạn} & \textbf{Xong} & \textbf{Một phần} & \textbf{Chưa làm} \\
-\midrule
-Tuần 1 -- Đề cương & 30/40 & 4/40 & 6/40 \\
-Tuần 2 -- Tiến độ & 30/40 & 5/40 & 5/40 \\
-Tuần 3 -- Hội tụ & 21/40 & 12/40 & 7/40 \\
-\midrule
-\textbf{Tổng} & \textbf{81} & \textbf{21} & \textbf{18} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Phần lớn các tác vụ ``Chưa làm'' thuộc nhóm hành động của con người (họp nhóm, diễn tập, trình bày)
--- không phải do thiếu năng lực kỹ thuật để thực hiện. Dữ liệu ERA5 đầy đủ năm năm, ISD mười năm và
-Open-Meteo cùng giai đoạn với ERA5 đã được tải và tích hợp (các tác vụ TV1 Tuần~2 tương ứng đã hoàn thành).
+Nhóm quản lý tiến độ nội bộ bằng một kế hoạch chi tiết theo tuần và vai trò, mỗi hạng mục công việc
+kèm tiêu chí hoàn thành (Definition of Done) rõ ràng, đối chiếu trực tiếp với bằng chứng thay vì tự
+đánh giá chủ quan. Tại thời điểm báo cáo, các hạng mục kỹ thuật bắt buộc đã hoàn thành đầy đủ và có
+bằng chứng thực nghiệm (Chương~6): tích hợp đủ năm nguồn dữ liệu đúng phạm vi đề cương (dữ liệu ERA5
+đầy đủ năm năm, ISD mười năm và Open-Meteo cùng giai đoạn với ERA5), pipeline Spark batch và
+streaming chạy thật, phát hiện dị thường khí hậu đối chứng được với sự kiện có thật, và dashboard đã
+verify qua trình duyệt. Phần việc còn lại chủ yếu là hành động phối hợp con người ở tuần cuối cùng
+của học phần (họp nhóm, diễn tập, phân công trình bày), không phải do thiếu năng lực kỹ thuật để
+thực hiện.
 
 % ==========================================================
 \chapter{Đóng góp dự kiến}

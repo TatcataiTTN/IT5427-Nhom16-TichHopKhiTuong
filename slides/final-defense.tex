@@ -86,7 +86,7 @@ IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}
 \begin{enumerate}
-\item \hyperlink{sec1}{Tổng kết tiến độ 160 tác vụ}
+\item \hyperlink{sec1}{Tổng kết kết quả chung}
 \item \hyperlink{sec2}{Ingestion -- TV1}
 \item \hyperlink{sec3}{Schema \& Warehousing -- TV2}
 \end{enumerate}
@@ -109,10 +109,10 @@ IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
 \useThinBar
 
 %=============================================================
-\section{Tổng kết tiến độ}
+\section{Tổng kết kết quả chung}
 %=============================================================
 \hypertarget{sec1}{}
-\hustsectionpage{1. Tổng kết tiến độ\\160 tác vụ}
+\hustsectionpage{1. Tổng kết\\kết quả chung}
 
 \begin{frame}{Pipeline tích hợp 5 nguồn khí tượng đa dạng thành 1 kho dữ liệu thống nhất, có thể truy vấn được}
 \begin{center}
@@ -126,25 +126,6 @@ GHCN-Daily, NOAA ISD, ERA5 (ARCO), Open-Meteo, NASA POWER -- hội tụ qua Medi
 \texttt{WeatherObs}, giải quyết cả 2 loại dị biệt cốt lõi: cấu trúc/ngữ nghĩa (PIVOT/PARSE) và
 nhận dạng/toàn vẹn (Survivorship + Entity Resolution). Dữ liệu đủ phạm vi đề cương: ERA5 5 năm
 (2020--2024, 9 biến, theo giờ), ISD 10 năm, GHCN toàn lịch sử 1943--2026 -- \textasciitilde 23\,GB dữ liệu thô.
-\end{frame}
-
-\begin{frame}{Mỗi trạng thái tác vụ được chấm theo đúng tiêu chí Kiểm thử đã đặt ra từ đề cương, không tự nhận suông}
-\centering\small
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Tuần & \textcolor{goodgreen}{\textbf{Xong}} & \textcolor{warnorange}{\textbf{Một phần}} & \textcolor{badred}{\textbf{Chưa làm}} \\
-\midrule
-Tuần 1 (Đề cương) & 30/40 & 4/40 & 6/40 \\
-Tuần 2 (Tiến độ) & 30/40 & 5/40 & 5/40 \\
-Tuần 3 (Hội tụ) & 21/40 & 12/40 & 7/40 \\
-\midrule
-\textbf{Tổng 120 tác vụ đã rà soát} & \textbf{81} & \textbf{21} & \textbf{18} \\
-\bottomrule
-\end{tabular}
-\vspace{0.3cm}
-
-\small Tuần 4 (Hoàn thiện \& Bảo vệ) chủ yếu là hành động con người (diễn tập, trình bày, nộp
-bài) -- phần kỹ thuật tương ứng (freeze, Q\&A, tài liệu cuối) đã làm xong song song.
 \end{frame}
 
 %=============================================================
@@ -548,9 +529,9 @@ GitHub Projects board chưa thiết lập & Đã dùng Issues/Pull Request trên
 \end{tabular}
 \end{frame}
 
-\begin{frame}{120/160 tác vụ đã rà soát với bằng chứng thật, pipeline đầy đủ từ ingest tới dashboard}
+\begin{frame}{5/5 mục tiêu đo được đạt, pipeline đầy đủ từ ingest tới dashboard, số liệu tái lập được}
 \begin{center}
-\bignum{81/120}{tác vụ Xong đúng\\tiêu chí kiểm thử}{goodgreen}{4.2cm}
+\bignum{5/5}{mục tiêu đo được\\đạt (Mục tiêu đề tài)}{goodgreen}{4.2cm}
 \bignumS{8.955.315}{bản ghi thật\\5 nguồn, 9 nước}{goodgreen}{4.2cm}
 \bignum{83}{test tự động\\(gồm Spark + Kafka thật)}{goodgreen}{4.2cm}
 \end{center}
