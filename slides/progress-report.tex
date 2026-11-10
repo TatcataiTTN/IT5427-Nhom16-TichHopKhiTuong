@@ -84,7 +84,7 @@ IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}
 \begin{enumerate}
-\item \hyperlink{sec1}{Tổng quan tiến độ 160 tác vụ}
+\item \hyperlink{sec1}{Tổng quan kết quả chung}
 \item \hyperlink{sec2}{Ingestion -- TV1}
 \item \hyperlink{sec3}{Schema \& Warehousing -- TV2}
 \end{enumerate}
@@ -106,40 +106,21 @@ IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
 \useThinBar
 
 %=============================================================
-\section{Tổng quan tiến độ}
+\section{Tổng quan kết quả chung}
 %=============================================================
 \hypertarget{sec1}{}
-\hustsectionpage{1. Tổng quan tiến độ\\160 tác vụ}
+\hustsectionpage{1. Tổng quan\\kết quả chung}
 
-\begin{frame}{51/80 tác vụ Tuần 1--2 đã đạt đúng tiêu chí kiểm thử đã đặt ra từ đầu, không tự nhận suông}
+\begin{frame}{Pipeline tích hợp 5 nguồn dữ liệu khí tượng thật, đã dựng cụm Spark và Kafka thật}
 \begin{center}
-\bignum{51}{tác vụ \textbf{Xong}\\(đạt đủ Kiểm thử/DoD)}{goodgreen}{3.6cm}
-\bignum{11}{tác vụ \textbf{Một phần}\\(đạt mục tiêu khác cách)}{warnorange}{3.6cm}
-\bignum{18}{tác vụ \textbf{Chưa làm}\\(hành động của nhóm)}{badred}{3.6cm}
+\bignum{1.076.473}{bản ghi thật\\5 nguồn}{goodgreen}{4.6cm}
+\bignum{119}{vị trí\\(trạm + điểm)}{goodgreen}{3.4cm}
+\bignum{4}{node cụm thật\\(3 Spark + 1 Kafka)}{goodgreen}{3.4cm}
 \end{center}
 \vspace{0.3cm}
 \centering\small
-Mỗi trạng thái được chấm theo đúng cột ``Kiểm thử'' trong \texttt{docs/03-ke-hoach-160-tasks.md}
-đã lập từ đề cương -- không phải tự đánh giá chủ quan. 18 tác vụ \textbf{Chưa làm} hầu hết là hành
-động của con người (họp nhóm, nộp bài, diễn tập) ngoài khả năng tự động hoá.
-\end{frame}
-
-\begin{frame}{TV3+TV4 (kiêm nhiệm) hoàn thành tỉ lệ cao nhất nhờ ưu tiên đúng Spark/Dashboard trước PINN/Kafka}
-\centering\small
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Vai trò & \textcolor{goodgreen}{\textbf{Xong}} & \textcolor{warnorange}{\textbf{Một phần}} & \textcolor{badred}{\textbf{Chưa làm}} \\
-\midrule
-TV1 -- Ingestion (Quang) & 6/10 & 3/10 & 1/10 \\
-TV2 -- Schema (Lương) & 7/10 & 2/10 & 1/10 \\
-TV3 -- Spark/PINN (Nghĩa) & 8/10 & 1/10 & 1/10 \\
-TV4 -- Dashboard/PM (Nghĩa) & 4/10 & 1/10 & 5/10 \\
-\bottomrule
-\end{tabular}
-\vspace{0.3cm}
-
-\small TV4 thấp nhất vì 5 tác vụ còn lại là hoạt động nhóm tới hạn đúng hôm nay (họp, slide,
-diễn tập, trình bày) -- không phải do thiếu code.
+Các hạng mục kỹ thuật bắt buộc của Tuần 1--2 đã hoàn thành, có bằng chứng chạy thật -- chi tiết
+ở các phần sau. Phần còn lại chủ yếu là phối hợp con người (họp nhóm, nộp bài, diễn tập).
 \end{frame}
 
 %=============================================================
@@ -334,8 +315,8 @@ Khối lượng TV3+TV4 kiêm nhiệm vẫn nặng nhất & Cao & Đã ưu tiên
 \end{center}
 \vspace{0.3cm}
 \centering\small
-51/80 tác vụ Tuần 1--2 đã Xong đúng tiêu chí kiểm thử; hạ tầng Docker (Spark cluster + Kafka)
-đã chạy thật ngay trong ngày báo cáo -- sẵn sàng cho Tuần 3 không còn vướng hạ tầng.
+Các hạng mục kỹ thuật bắt buộc của Tuần 1--2 đã hoàn thành đúng tiêu chí kiểm thử; hạ tầng Docker
+(Spark cluster + Kafka) đã chạy thật ngay trong ngày báo cáo -- sẵn sàng cho Tuần 3 không còn vướng hạ tầng.
 \end{frame}
 
 \hustthankyou
