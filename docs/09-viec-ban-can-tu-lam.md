@@ -71,9 +71,12 @@ qua tôi:
 **Tôi đã**: review diff (không chỉ tin mô tả PR), xác nhận lại 4 bug trên bằng mắt là sửa đúng; sửa
 tiếp bug #2 còn lại trong Issue #1 (trung bình vector (u,v) đúng, không trung bình cộng độ) ở cả
 `master` và nhánh PR; merge PR #2 vào `master` (3 conflict: file PINN đã merge sạch về logic, 2 file
-PDF build lại); chạy lại `pytest` (83 test, 76 nhanh pass, 4 PINN slow pass); dựng lại cụm Docker
-bằng image `apache/*` mới và chạy lại test Spark Streaming + Kafka thật để xác nhận không chỉ tin lời
-Quang. Chi tiết: `docs/14` mục cập nhật 10/11, comment trên Issue #1/PR #2.
+PDF build lại); dựng lại cụm Docker bằng image `apache/*` mới (xoá container cũ, `docker compose up`
+lại từ file đã merge) và chạy lại **toàn bộ** `pytest` trên cụm mới — **83/83 test pass** (76 nhanh +
+7 slow, gồm cả 3 test cần Spark+Kafka thật: cache Spark, Structured Streaming windowing, và dị thường
+theo luồng — test thứ 3 ban đầu bị skip vì thiếu file baseline khí hậu, đã tự chạy
+`warehouse/anomaly_detection.py` để sinh baseline rồi chạy lại, pass). Không chỉ tin lời Quang — tự
+verify lại bằng cụm thật sau merge. Chi tiết: `docs/14` mục cập nhật 10/11, comment trên Issue #1/PR #2.
 
 **Tôi KHÔNG tự verify được** (cần dữ liệu ERA5 5 năm ~23GB không có trên máy): số RMSE nội suy
 108.542 cặp, % cải thiện cache Spark, % giảm skew, và các số liệu dị thường khí hậu cụ thể — các số
