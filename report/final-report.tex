@@ -185,9 +185,38 @@ Bài toán này bộc lộ đầy đủ các mức độ dị biệt (heterogene
     \item Xây dựng một \textbf{kho dữ liệu khí tượng đã chuẩn hoá} (Mediated Schema) tích hợp đầy đủ năm nguồn dữ liệu đã nêu, có khả năng tái sử dụng cho nhiều bài toán phân tích khác nhau, không chỉ phục vụ một ứng dụng đơn lẻ.
     \item Áp dụng đúng và có kiểm chứng hai kỹ thuật lý thuyết cốt lõi của học phần -- \textbf{Global-as-View schema mapping} và \textbf{Survivorship-based Record Linkage} -- trên một bài toán thực tế có dữ liệu thật, không phải ví dụ minh hoạ.
     \item Xây dựng pipeline xử lý dữ liệu lớn hoàn chỉnh bằng \textbf{Apache Spark} (batch processing và Structured Streaming), đáp ứng đủ các tiêu chí 5V của dữ liệu lớn với số liệu định lượng cụ thể, không phải ước lượng định tính.
-    \item Triển khai \textbf{phát hiện dị thường khí hậu} theo khu vực và thời điểm trên kho dữ liệu đã tích hợp, làm nền cho ba nhóm ứng dụng thực tế: hỗ trợ nông nghiệp/năng lượng tái tạo, và hỗ trợ ra quyết định vận hành UAV an toàn.
+    \item Triển khai \textbf{phát hiện dị thường khí hậu} theo khu vực và thời điểm trên kho dữ liệu đã tích hợp -- bản thân là một ứng dụng phân tích, đồng thời làm nền cho hai ứng dụng khác: hỗ trợ nông nghiệp/năng lượng tái tạo, và hỗ trợ ra quyết định vận hành UAV an toàn (ba ứng dụng cụ thể, xem Chương~7).
     \item Xây dựng \textbf{dashboard trực quan hoá} hiển thị kết quả tích hợp và phân tích theo không gian/thời gian, hoàn thiện đúng yêu cầu Direction 1 của đề cương học phần.
 \end{enumerate}
+
+\section{Mục tiêu đo được}
+
+Để tránh mục tiêu định tính không thể chấm đạt/không đạt, năm mục tiêu trên được gắn với một chỉ số
+đo cụ thể. Bảng~\ref{tab:measurable-goals} ghi rõ ngưỡng được đặt trước khi có kết quả (từ đề cương
+hoặc từ kế hoạch quản lý rủi ro, Chương~8) hay chỉ xác định được sau khi đo -- không nhận một ngưỡng
+là ``đặt trước'' nếu thực tế chỉ biết sau khi chạy. Đối chiếu đầy đủ với kết quả đo thật nằm ở
+Bảng~\ref{tab:goals-vs-results}, Chương~9.
+
+\begin{table}[H]
+\centering
+\caption{Mục tiêu đo được và ngưỡng đặt ra}
+\label{tab:measurable-goals}
+\begin{tabular}{@{}L{0.8cm}L{4.4cm}L{4.2cm}L{3.4cm}@{}}
+\toprule
+\textbf{Mã} & \textbf{Mục tiêu (Mục 1.3)} & \textbf{Chỉ số đo} & \textbf{Ngưỡng / thời điểm đặt} \\
+\midrule
+M1 & Kho dữ liệu chuẩn hoá đủ 5 nguồn, đúng phạm vi đề cương & Số nguồn tích hợp, đúng phạm vi thời gian/không gian & Đủ 5/5, đúng phạm vi -- đặt trước (Mục~1.4) \\
+M2 & GAV schema mapping + Survivorship record linkage có kiểm chứng định lượng & Referential integrity (GAV); tỷ lệ khớp Entity Resolution GHCN--ISD & Phải kiểm chứng bằng số liệu thật, không chỉ minh hoạ -- đặt trước (Mục~1.3); tỷ lệ khớp \% chỉ biết sau khi đo \\
+M3 & Pipeline Spark tối ưu hoá có đo trước/sau, đạt 5V bằng số liệu & Tăng tốc khi \texttt{cache()} một truy vấn đại diện & $\geq 30\,\%$ -- đặt trước (Chương~8, quản lý rủi ro) \\
+M4 & Phát hiện dị thường khí hậu đối chứng được với sự kiện thật & Số sự kiện khí hậu đã biết được phát hiện đúng chiều & 3 sự kiện đối chứng chọn trước (nắng nóng 2024, bão Yagi, hạn Mekong); kết quả từng sự kiện chỉ biết sau khi đo \\
+M5 & Dashboard hiển thị đúng kết quả tích hợp, kiểm chứng qua trình duyệt thật & Số thành phần hoạt động đúng trên dữ liệu thật, không lỗi runtime & Đặt trước (đề cương học phần, Direction 1) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ngoài năm mục tiêu chính, mô hình PINN trường gió (Mục~2.3, hạng mục tuỳ chọn nâng cao có phương án
+lùi -- Mục~5.3) được đánh giá bằng so sánh RMSE với một mô hình hồi quy thuần trên tập kiểm tra giữ
+lại, không phải bằng một ngưỡng đạt/không đạt cố định.
 
 \section{Phạm vi và giới hạn}
 
@@ -444,7 +473,7 @@ Kế hoạch bám sát đúng năm mốc chính thức của học phần, khôn
 
 \section{Kế hoạch chi tiết theo tuần}
 
-Kế hoạch chi tiết gồm 160 tác vụ cụ thể (4 tuần $\times$ 4 vai trò $\times$ 10 tác vụ/tuần/vai trò), mỗi tác vụ kèm tiêu chí kiểm thử (Definition of Done) rõ ràng -- được trình bày đầy đủ trong Phụ lục và trong tệp \texttt{docs/03-ke-hoach-160-tasks.md} của kho mã nguồn nhóm. Bảng~\ref{tab:weeks} tóm tắt trọng tâm từng tuần.
+Kế hoạch chi tiết gồm 160 tác vụ cụ thể (4 tuần $\times$ 4 vai trò $\times$ 10 tác vụ/tuần/vai trò), mỗi tác vụ kèm tiêu chí kiểm thử (Definition of Done) rõ ràng -- trình bày đầy đủ trong tệp \texttt{docs/03-ke-hoach-160-tasks.md} của kho mã nguồn nhóm (đường dẫn kho mã: Phụ lục tái lập, Mục A.1). Bảng~\ref{tab:weeks} tóm tắt trọng tâm từng tuần.
 
 \begin{table}[H]
 \centering
@@ -820,6 +849,30 @@ Image Docker Bitnami bị gỡ khỏi Docker Hub & Thấp (đã khắc phục) &
 \chapter{Kết luận}
 % ==========================================================
 
+Bảng~\ref{tab:goals-vs-results} đối chiếu năm mục tiêu đo được (Mục~1.4, Bảng~\ref{tab:measurable-goals})
+với kết quả đo thật, lấy nguyên số liệu từ Chương~6.
+
+\begin{table}[H]
+\centering
+\caption{Đối chiếu mục tiêu đo được với kết quả thật}
+\label{tab:goals-vs-results}
+\begin{tabular}{@{}L{0.7cm}L{4.4cm}L{6.3cm}L{2.0cm}@{}}
+\toprule
+\textbf{Mã} & \textbf{Ngưỡng / tiêu chí} & \textbf{Kết quả đo được} & \textbf{Đạt?} \\
+\midrule
+M1 & Đủ 5/5 nguồn, đúng phạm vi đề cương & 5/5 nguồn, 8.955.315 bản ghi thật, đúng phạm vi (ERA5 5 năm, ISD 10 năm -- Mục~6.1) & Đạt \\
+M2 & Kiểm chứng định lượng GAV + Survivorship & Referential integrity 100\,\% (Mục~6.1); Entity Resolution 22/26 trạm (84,6\,\%) khớp trong 5km (Mục~6.2) & Đạt \\
+M3 & Tăng tốc \texttt{cache()} $\geq 30\,\%$ & 69,4\,\% (0,36s $\to$ 0,11s, trung vị 3 lần, Mục~6.4). Giảm skew thử riêng (11,08\,\%$\to$0,94\,\%) nhưng không áp dụng vì đổi lại chậm hơn 1,5--2,5 lần & Đạt \\
+M4 & Phát hiện đúng chiều 3 sự kiện đối chứng & Tín hiệu rõ ở nắng nóng 2024 và bão Yagi; đúng chiều nhưng tín hiệu yếu ở hạn Mekong (chỉ 2 trạm đủ số liệu mưa -- Mục~6.8) & Đạt \\
+M5 & Dashboard đọc đúng dữ liệu tích hợp, không lỗi runtime & 10 thành phần đã verify qua trình duyệt thật trên 8,96 triệu bản ghi (Mục~6.7) & Đạt \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Hạng mục tuỳ chọn nâng cao, không thuộc năm mục tiêu chính}} \\
+\midrule
+-- & PINN trường gió: RMSE thấp hơn baseline hồi quy thuần & Baseline RMSE 1,0473 thấp hơn PINN tốt nhất ($\lambda=0{,}1$) RMSE 1,0577 -- ghi nhận trung thực, nguyên nhân ở Mục~6.5 & Không đạt \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 Qua bốn tuần triển khai, đề tài đã chứng minh được ba đặc điểm đặt ra từ đầu không chỉ ở mức thiết
 kế mà bằng kết quả thực nghiệm cụ thể: \emph{thứ nhất}, toàn bộ nguồn dữ liệu lõi không chỉ được
 kiểm chứng mà đã được tích hợp thành một kho dữ liệu thống nhất 8.955.315 bản ghi thật đúng phạm vi
@@ -846,6 +899,91 @@ trên GHCN; chỉ số SPI và xu hướng mưa mới tính được cho rất �
 mới xử lý bản ghi theo ngày, chưa gom nguồn theo giờ theo thời gian sự kiện. Các giới hạn này được
 ghi nhận trung thực kèm nguyên nhân kỹ thuật cụ thể (Chương~6 và~8), không che giấu nhằm tạo ấn
 tượng kết quả tốt hơn thực tế -- một nguyên tắc nhóm tuân thủ xuyên suốt quá trình thực hiện đề tài.
+
+% ==========================================================
+\chapter*{PHỤ LỤC: TÁI LẬP KẾT QUẢ}
+\addcontentsline{toc}{chapter}{PHỤ LỤC: TÁI LẬP KẾT QUẢ}
+\markboth{PHỤ LỤC: TÁI LẬP KẾT QUẢ}{PHỤ LỤC: TÁI LẬP KẾT QUẢ}
+% ==========================================================
+
+\section*{A.1 Kho mã nguồn}
+
+Toàn bộ mã nguồn, tài liệu kỹ thuật và dữ liệu trung gian không vượt giới hạn dung lượng (dữ liệu
+thô loại trừ theo \texttt{.gitignore}) nằm tại:
+\url{https://github.com/TatcataiTTN/IT5427-Nhom16-TichHopKhiTuong} (nhánh \texttt{master}). Bản
+tương ứng với báo cáo này là commit gần nhất trên nhánh tại thời điểm nộp; lịch sử commit đầy đủ
+xem bằng \texttt{git log} trong kho.
+
+\section*{A.2 Môi trường chạy}
+
+Kết quả trong báo cáo đo trên máy phát triển chính của nhóm:
+\begin{itemize}
+    \item Máy: Apple M4 Max, 36~GB RAM, macOS 15.7.4 (Darwin 24.6.0, kiến trúc ARM64); Python 3.12.9.
+    \item PySpark 4.2.0 yêu cầu JDK 17 trở lên (OpenJDK, cài qua Homebrew \path{openjdk@17}) -- thiếu điều kiện này gây lỗi \texttt{UnsupportedClassVersionError} khi chạy trực tiếp ngoài bộ kiểm thử.
+    \item Cụm Spark và Kafka chạy bằng Docker Desktop, image chính thức \path{apache/spark:4.2.0-scala2.13-java17-python3-ubuntu} và \path{apache/kafka:3.7.0}.
+\end{itemize}
+
+\section*{A.3 Thư viện chính}
+
+Phiên bản đầy đủ nằm tại \texttt{requirements.txt} trong kho mã nguồn (sinh thật từ môi trường đã
+dùng để chạy toàn bộ pipeline, không liệt kê tay). Các thư viện chính:
+\begin{itemize}
+    \item \texttt{numpy} 2.2.6, \texttt{pandas} 2.3.3, \texttt{pyarrow} 24.0.0
+    \item \texttt{torch} 2.9.1, \texttt{pyspark} 4.2.0, \texttt{kafka-python} 3.0.11
+    \item \texttt{streamlit} 1.51.0, \texttt{xarray} 2026.7.0, \texttt{zarr} 3.4.1, \texttt{pytest} 9.0.2
+\end{itemize}
+
+\section*{A.4 Hạt giống ngẫu nhiên}
+
+\begin{itemize}
+    \item \texttt{torch.manual\_seed(0)} và \texttt{np.random.seed(0)} trong bốn script PINN ở thư mục \path{model/}: \path{pinn_wind_field_v2.py}, \path{train_demo.py}, \path{pinn_rh_from_dewpoint.py}, \path{navier_stokes_autograd_check.py}.
+    \item \texttt{np.random.RandomState(42)} khi chia tập train/test của PINN trường gió.
+    \item \texttt{np.random.RandomState(0)} trong \path{ingestion/veracity.py} (minh hoạ phát hiện outlier).
+\end{itemize}
+
+Kết quả PINN trường gió đã được xác minh tái lập được: cài lại môi trường hoàn toàn mới từ
+\texttt{requirements.txt} và chạy lại cho RMSE giống hệt tới bốn chữ số thập phân (Mục~6.5).
+
+\section*{A.5 Lệnh chạy lại}
+
+\begin{itemize}
+    \item Cài đặt: \texttt{pip install -r requirements.txt}
+    \item Dựng cụm Spark và Kafka: \texttt{docker compose -f docker-compose.spark.yml -f docker-compose.kafka.yml up -d}
+    \item Build kho dữ liệu đầy đủ: \texttt{python3 warehouse/build\_warehouse.py --dataset full}
+    \item Sinh khí hậu nền cho phát hiện dị thường theo luồng (cần \texttt{JAVA\_HOME} trỏ JDK 17 trở lên): \texttt{python3 warehouse/anomaly\_detection.py}
+    \item Huấn luyện PINN trường gió: \texttt{python3 model/pinn\_wind\_field\_v2.py}
+    \item Chạy toàn bộ kiểm thử: \texttt{pytest tests/ -q}
+\end{itemize}
+
+Lần chạy đo thật gần nhất: 83 kiểm thử (76 nhanh và 7 chậm, gồm 3 kiểm thử cần Spark và Kafka thật)
+pass toàn bộ trong 92,26 giây trên môi trường ở Mục~A.2; build kho dữ liệu đầy đủ mất khoảng 3 phút
+(Mục~6.1).
+
+\section*{A.6 Nguồn dữ liệu, dung lượng và giấy phép}
+
+Bảng~\ref{tab:data-appendix} tổng hợp từng nguồn dữ liệu: giấy phép và ràng buộc sử dụng (chi tiết
+đầy đủ tại \texttt{docs/ingestion.md}, Mục~6), số bản ghi thật trong kho đã tích hợp
+(Bảng~\ref{tab:final-volume}), và dung lượng thô đã tải thật (Mục~4.3, Mục~6.1).
+
+\begin{table}[H]
+\centering
+\caption{Nguồn dữ liệu: giấy phép, số bản ghi và dung lượng thô thật}
+\label{tab:data-appendix}
+\begin{tabular}{@{}L{3.4cm}L{4.4cm}R{2.0cm}L{2.6cm}@{}}
+\toprule
+\textbf{Nguồn} & \textbf{Giấy phép / ràng buộc} & \textbf{Số bản ghi} & \textbf{Dung lượng thô} \\
+\midrule
+ERA5 (ARCO, Copernicus) & Copernicus License (tương đương CC BY 4.0), phải ghi nguồn & 4.954.824 & $\approx$22\,GB \\
+NOAA ISD/Global Hourly & Public Domain (US Government work) & 3.071.275 & \multirow{4}{2.6cm}{$\approx$1,4\,GB (bốn nguồn này cộng gộp, không tách riêng được từ log tải)} \\
+GHCN-Daily & Public Domain (US Government work) & 655.166 & \\
+Open-Meteo Historical & CC BY 4.0 (dữ liệu), AGPLv3 (mã nguồn API), phải ghi nguồn & 263.088 & \\
+NASA POWER & Public Domain & 10.962 & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Không nguồn nào trong năm nguồn trên có điều khoản cấm dùng cho mục đích nghiên cứu/học thuật phi
+thương mại.
 
 % ==========================================================
 \begin{thebibliography}{99}
