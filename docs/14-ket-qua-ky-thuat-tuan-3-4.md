@@ -49,14 +49,21 @@ phép đo Z-score. Đã chọn IQR làm chỉ số chính trong `warehouse/data_
 
 | λ | Test RMSE | Test MAE |
 |---|---|---|
-| 0,0 (baseline) | **1,0447** | 0,7429 |
-| 0,01 | 1,0889 | 0,7648 |
-| 0,1 | 1,0826 | 0,7661 |
-| 1,0 | 1,1227 | 0,7927 |
+| 0,0 (baseline) | **1,0473** | 0,7772 |
+| 0,01 | 1,0636 | 0,7753 |
+| 0,1 | 1,0577 | 0,7706 |
+| 1,0 | 1,1057 | 0,7921 |
 
 **Kết quả trung thực**: baseline hồi quy thuần thắng về RMSE ở quy mô dữ liệu này (1 snapshot
 không-thời-gian, 113 điểm) — PINN không vượt trội. Đã verify tái lập được: venv hoàn toàn mới,
 cài lại từ `requirements.txt`, chạy lại cho RMSE giống hệt tới 4 chữ số thập phân.
+
+**Cập nhật 10/11/2026**: số liệu trên đã sửa sau khi phát hiện lỗi trung bình cộng trực tiếp hướng
+gió (`wind_dir_deg`) theo trạm trước khi đổi sang vector (u,v) — sai vì hướng gió là đại lượng vòng
+tròn (350° và 10° trung bình cộng ra 180°, ngược hướng thật). Phát hiện bởi Ngô Văn Quang (PR #2,
+GitHub Issue #1), sửa trong `model/pinn_wind_field_v2.py::load_real_wind_data()`: đổi từng bản ghi
+sang (u,v) trước, lấy trung bình vectơ sau. Kết luận không đổi (baseline vẫn thắng), chỉ số RMSE/MAE
+từng λ đổi so với bảng báo cáo trước đó — xem `docs/model.md` mục 5 để biết chi tiết.
 
 ## 5. Spark SQL query optimization (TV2 #1)
 

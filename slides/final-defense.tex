@@ -250,10 +250,10 @@ Chỉ đổi khi dữ liệu đạt quy mô đủ lớn để lợi ích partiti
 \toprule
 $\lambda$ & Test RMSE & Test MAE & Physics loss cuối \\
 \midrule
-0,0 (baseline) & \textbf{1,0447} & 0,7429 & 0 \\
-0,01 & 1,0889 & 0,7648 & 0,5303 \\
-0,1 & 1,0826 & 0,7661 & 0,1192 \\
-1,0 & 1,1227 & 0,7927 & 0,0119 \\
+0,0 (baseline) & \textbf{1,0473} & 0,7772 & 0 \\
+0,01 & 1,0636 & 0,7753 & 0,5347 \\
+0,1 & 1,0577 & 0,7706 & 0,1665 \\
+1,0 & 1,1057 & 0,7921 & 0,0112 \\
 \bottomrule
 \end{tabular}
 
@@ -261,7 +261,9 @@ $\lambda$ & Test RMSE & Test MAE & Physics loss cuối \\
 \centering\small
 Dữ liệu: 113 trạm ERA5 thật, ràng buộc continuity Navier-Stokes 2D rút gọn. Nguyên nhân hợp lý:
 chỉ 1 snapshot không-thời-gian, ràng buộc vật lý cần nhiều điểm/chuỗi thời gian hơn để thể hiện
-lợi thế MSE. Đã verify tái lập được tới 4 chữ số thập phân trên venv hoàn toàn sạch.
+lợi thế MSE. Số liệu cập nhật 10/11 sau khi sửa lỗi trung bình cộng hướng gió theo độ (đại lượng
+vòng tròn) thành trung bình vector $(u,v)$ đúng -- kết luận không đổi, đã verify tái lập được tới 4
+chữ số thập phân.
 \end{frame}
 
 \begin{frame}{Spark Structured Streaming đọc Kafka thật và tính đúng cửa sổ trượt 1 phút, phát hiện thêm 2 bug môi trường}

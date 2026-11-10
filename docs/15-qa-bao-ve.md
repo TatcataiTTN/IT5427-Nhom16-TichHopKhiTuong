@@ -52,7 +52,7 @@ liệu đạt quy mô đủ lớn (ERA5 full 5 năm, ~35GB) để lợi ích par
 
 **Q7. PINN có tốt hơn mô hình hồi quy thường không? Nếu không thì PINN có ý nghĩa gì?**
 A: Đã so sánh trung thực: trên bài toán trường gió thật (113 trạm ERA5), PINN (λ=0,1) có test
-RMSE=1,0826, baseline hồi quy thuần (λ=0) có RMSE=1,0447 — **baseline thắng về MSE thuần** ở quy mô
+RMSE=1,0577, baseline hồi quy thuần (λ=0) có RMSE=1,0473 — **baseline thắng về MSE thuần** ở quy mô
 dữ liệu này. Nguyên nhân: bài toán chỉ có 1 snapshot không-thời-gian (không có chiều thời gian),
 ràng buộc continuity (Navier-Stokes rút gọn) cần nhiều điểm lưới dày đặc/chuỗi thời gian mới thể
 hiện lợi thế rõ. Giá trị thực của physics loss ở quy mô này là đảm bảo TÍNH HỢP LÝ VẬT LÝ (bảo toàn

@@ -30,10 +30,10 @@ MAE cuối 1,07 điểm % so với nhãn giả lập Clausius-Clapeyron.
 
 | λ | Test RMSE | Test MAE | Physics loss cuối |
 |---|---|---|---|
-| 0,0 (baseline, không ràng buộc vật lý) | **1,0447** | 0,7429 | 0 |
-| 0,01 | 1,0889 | 0,7648 | 0,5303 |
-| 0,1 | 1,0826 | 0,7661 | 0,1192 |
-| 1,0 | 1,1227 | 0,7927 | 0,0119 |
+| 0,0 (baseline, không ràng buộc vật lý) | **1,0473** | 0,7772 | 0 |
+| 0,01 | 1,0636 | 0,7753 | 0,5347 |
+| 0,1 | 1,0577 | 0,7706 | 0,1665 |
+| 1,0 | 1,1057 | 0,7921 | 0,0112 |
 
 **Phát hiện trung thực (không che giấu)**: baseline hồi quy thuần (λ=0) có RMSE thấp nhất trên tập
 test giữ lại — PINN KHÔNG vượt trội về MSE thuần ở quy mô dữ liệu này. Nguyên nhân hợp lý: bài toán
@@ -64,9 +64,17 @@ Cả 2 script seed cố định (`torch.manual_seed(0)`), chạy lại cho kết
 
 **Đã verify thật trên máy sạch** (9/11/2026): tạo `venv` hoàn toàn mới, `pip install numpy pandas
 pyarrow torch` (không dùng môi trường anaconda sẵn có), chạy `model/pinn_wind_field_v2.py` — kết
-quả RMSE từng λ **giống hệt tới 4 chữ số thập phân** so với lần chạy trong môi trường gốc
-(λ=0: 1,0447; λ=0,01: 1,0889; λ=0,1: 1,0826; λ=1,0: 1,1227) — xác nhận `requirements.txt` đủ để
-tái lập đúng, không thiếu dependency ẩn.
+quả RMSE từng λ **giống hệt tới 4 chữ số thập phân** so với lần chạy trong môi trường gốc, xác nhận
+`requirements.txt` đủ để tái lập đúng, không thiếu dependency ẩn.
+
+**Cập nhật 10/11/2026 — sửa lỗi trung bình hướng gió**: phát hiện (nhóm, PR #2, Ngô Văn Quang) lỗi
+trong `load_real_wind_data()`: script cũ lấy trung bình cộng trực tiếp `wind_speed_ms`/`wind_dir_deg`
+theo trạm rồi mới đổi sang vector (u,v) — sai vì hướng gió là đại lượng vòng tròn (trung bình cộng
+350° và 10° ra 180°, ngược hướng thật 100%). Đã sửa: đổi từng bản ghi sang (u,v) Decac trước, rồi
+mới lấy trung bình vectơ theo trạm. Chạy lại 2 lần liên tiếp cho kết quả giống hệt tới 4 chữ số thập
+phân (λ=0: 1,0473; λ=0,01: 1,0636; λ=0,1: 1,0577; λ=1,0: 1,1057) — kết luận không đổi: baseline vẫn
+thắng về RMSE thuần ở quy mô dữ liệu này, nhưng giá trị RMSE/MAE từng λ đã đổi so với bản báo cáo
+trước đó (bảng mục 3 ở trên đã cập nhật số đúng).
 
 ## 6. Pipeline inference
 

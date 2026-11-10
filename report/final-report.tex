@@ -545,8 +545,8 @@ của Navier--Stokes) làm ràng buộc, kết hợp với quét bốn giá tr�
 \{0;\,0{,}01;\,0{,}1;\,1{,}0\}$.
 
 Với mô hình (ii), kết quả so sánh trên tập kiểm tra giữ lại (22/113 trạm) cho thấy mô hình hồi quy
-thuần không ràng buộc vật lý ($\lambda=0$) đạt RMSE 1,0447 -- thấp hơn mô hình PINN tốt nhất
-($\lambda=0{,}1$, RMSE 1,0826). Nhóm báo cáo trung thực kết quả này thay vì chỉ chọn trình bày
+thuần không ràng buộc vật lý ($\lambda=0$) đạt RMSE 1,0473 -- thấp hơn mô hình PINN tốt nhất
+($\lambda=0{,}1$, RMSE 1,0577). Nhóm báo cáo trung thực kết quả này thay vì chỉ chọn trình bày
 trường hợp PINN thắng: ở quy mô dữ liệu hiện tại, bài toán chỉ có một lát cắt khômg-thời gian duy
 nhất (không có chuỗi thời gian), trong khi ràng buộc liên tục phát huy lợi thế rõ rệt hơn khi có
 nhiều điểm lưới dày đặc hoặc chuỗi quan sát theo thời gian. Giá trị của physics loss ở quy mô này
@@ -554,6 +554,13 @@ nằm ở việc đảm bảo tính hợp lý vật lý (gần đúng bảo toà
 phải ở việc tối ưu sai số bình phương trung bình. Kết quả huấn luyện đã được xác minh khả năng tái
 lập: cài đặt lại môi trường hoàn toàn mới từ \texttt{requirements.txt} và chạy lại cho kết quả RMSE
 giống hệt tới bốn chữ số thập phân.
+
+\textit{Cập nhật 10/11/2026:} một thành viên nhóm (Ngô Văn Quang) phát hiện lỗi thống kê trong bước
+tiền xử lý: bản trước lấy trung bình cộng trực tiếp hướng gió (độ) theo trạm trước khi đổi sang
+vector $(u,v)$ -- sai với đại lượng vòng tròn (trung bình cộng $350^\circ$ và $10^\circ$ cho ra
+$180^\circ$, ngược hướng thật). Đã sửa bằng cách đổi từng bản ghi sang $(u,v)$ Decac trước, rồi mới
+lấy trung bình vector theo trạm. Số liệu RMSE/MAE trong đoạn trên đã được cập nhật theo kết quả sau
+khi sửa; kết luận (baseline thắng về RMSE thuần) không đổi.
 
 \section{Hạ tầng tính toán phân tán}
 

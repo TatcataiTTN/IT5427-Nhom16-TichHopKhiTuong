@@ -57,20 +57,21 @@ def load_real_wind_data():
     loc = pd.read_parquet(LOCATION)[["location_id", "lat", "lon"]]
     era5 = era5.merge(loc, on="location_id", how="inner")
 
-    # Trung binh theo tram (giam 8136 ban ghi ve 1 vecto gio dai dien/tram cho bai toan
-    # noi suy khong gian tinh - dung thoi diem can them 1 chieu thoi gian, ngoai pham vi bai nay)
-    agg = era5.groupby(["location_id", "lat", "lon"]).agg(
-        wind_speed_ms=("wind_speed_ms", "mean"),
-        wind_dir_deg=("wind_dir_deg", "mean"),
-    ).reset_index()
-
-    theta = np.radians(agg["wind_dir_deg"].to_numpy())
     # Quy uoc khi tuong: wind_dir = huong gio THOI TU (vd 90 = gio Dong, thoi ve huong Tay)
-    u = -agg["wind_speed_ms"].to_numpy() * np.sin(theta)
-    v = -agg["wind_speed_ms"].to_numpy() * np.cos(theta)
+    theta = np.radians(era5["wind_dir_deg"].to_numpy())
+    era5["u"] = -era5["wind_speed_ms"].to_numpy() * np.sin(theta)
+    era5["v"] = -era5["wind_speed_ms"].to_numpy() * np.cos(theta)
+
+    # Trung binh VECTO (u,v) theo tram (giam 8136 ban ghi ve 1 vecto gio dai dien/tram cho bai toan
+    # noi suy khong gian tinh - dung thoi diem can them 1 chieu thoi gian, ngoai pham vi bai nay).
+    # KHONG duoc trung binh cong truc tiep wind_dir_deg roi moi doi sang (u,v): huong gio la dai
+    # luong vong tron, trung binh cong 350 do va 10 do ra 180 do (nguoc huong thuc te 100%). Phai
+    # doi tung ban ghi sang (u,v) Decac truoc, trung binh vecto, roi moi dung lam target cho PINN.
+    agg = era5.groupby(["location_id", "lat", "lon"])[["u", "v"]].mean().reset_index()
 
     xy = agg[["lon", "lat"]].to_numpy()
-    uv = np.stack([u, v], axis=1)
+    uv = agg[["u", "v"]].to_numpy()
+    agg = agg.drop(columns=["u", "v"])
     return xy.astype(np.float32), uv.astype(np.float32), agg
 
 
