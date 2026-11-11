@@ -134,6 +134,29 @@ nhận dạng/toàn vẹn (Survivorship + Entity Resolution). Dữ liệu đủ 
 \hypertarget{sec2}{}
 \hustsectionpage{2. Ingestion\\(TV1)}
 
+\begin{frame}{Dữ liệu thô 3 nguồn trước chuẩn hoá: thiếu, đơn vị khác, định nghĩa khác -- 3 bản ghi thật}
+\centering\scriptsize
+\begin{tabular}{@{}p{1.5cm}p{3.6cm}p{3.1cm}p{3.6cm}@{}}
+\toprule
+Nguồn & Bản ghi thô (trước) & Vấn đề & Sau chuẩn hoá \\
+\midrule
+ISD & \texttt{SLP="99999,9"}\newline trạm 48097099999, 1/1/2024 &
+\textcolor{badred}{\textbf{Thiếu}}: 99999 = mã ``không đo'' của NOAA, không phải 9999,9\,hPa &
+\texttt{pressure\_msl\_hpa}\newline\texttt{= NULL} \\ \addlinespace[2pt]
+Open-\allowbreak Meteo & \texttt{wind\_speed\_10m}\newline\texttt{= 4,9} (đơn vị \textbf{km/h}, Hà Nội) &
+\textcolor{badred}{\textbf{Đơn vị}}: parser cũ ghi thẳng 4,9 vào cột m/s -- phóng đại \textbf{3,6 lần} &
+\texttt{wind\_speed\_ms}\newline\texttt{= 4,9/3,6 = 1,36} \\ \addlinespace[2pt]
+GHCN & \texttt{TMAX=31,7 TMIN=11,1}\newline\texttt{TAVG=21,8°C} (trạm BMM00048042, 1950) &
+\textcolor{warnorange}{\textbf{Định nghĩa}}: TAVG thật $\neq$ (TMAX+TMIN)/2=21,4°C, lệch 0,4°C &
+Giữ TAVG thật, cột\newline\texttt{temp\_def} riêng \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.1cm}
+\scriptsize Trích trực tiếp từ \texttt{data\_samples/} (dữ liệu thô tải thật) -- không phải ví dụ dựng.
+Đầy đủ: \texttt{docs/17-dac-trung-va-yeu-cau-xu-ly-du-lieu.md}.
+\end{frame}
+
 \begin{frame}{IQR phát hiện đủ 5/5 outlier cực đoan trong khi Z-score chỉ bắt được 1/5 -- một phát hiện thống kê thật}
 \begin{center}
 \resizebox{!}{3.4cm}{%
