@@ -54,13 +54,25 @@ TEMPLATE = """<title>Bão Yagi — Gió &amp; Mưa</title>
   .controls { max-width: 760px; margin: 8px auto 0; display: flex; gap: 8px; }
   button { background: var(--panel); color: var(--fg); border: 1px solid var(--border); border-radius: 6px;
            padding: 5px 10px; font-size: 0.78rem; cursor: pointer; }
+  table.infobar { border-collapse: collapse; margin: 0 auto 12px; max-width: 760px; width: 100%; font-size: 0.78rem; }
+  table.infobar td { border: 1px solid var(--border); padding: 5px 10px; }
+  table.infobar td:first-child { color: var(--muted); width: 1%; white-space: nowrap; }
+  .tooltip.zone { min-width: 220px; }
+  .tooltip .hd { font-weight: 600; color: var(--accent); margin-bottom: 3px; display: block; }
+  .tooltip .bound { color: var(--muted); font-size: 0.72rem; }
 </style>
 
 <h1>Bão Yagi đổ bộ — 7/9/2024</h1>
-<p class="sub">Gió, mưa, ẩm thật tại 32 trạm/điểm Đông Nam Á (warehouse WeatherObs, Nhóm 16 IT5427). Hạt gió và lớp mây là hiệu ứng dựng để nhìn xu hướng; số liệu nền là số đo thật.</p>
+<p class="sub">Gió, mưa, nhiệt độ, nắng/mây thật tại 32 trạm/điểm Đông Nam Á (warehouse WeatherObs, Nhóm 16 IT5427). Hạt gió và lớp mây là hiệu ứng dựng để nhìn xu hướng; số liệu nền là số đo thật. Di chuột vào khung nét đứt (khu vực đang mưa) hoặc vào từng điểm trạm để xem chi tiết.</p>
+
+<table class="infobar">
+  <tr><td>Ngày dữ liệu</td><td>07/09/2024 (thật, không phải live) — bão Yagi đổ bộ miền Bắc Việt Nam</td></tr>
+  <tr><td>Tốc độ hiển thị gió</td><td>Hạt gió di chuyển nhanh hơn thực tế khoảng <b>90 lần</b> (nén thời gian để thấy hướng/độ mạnh — không dùng để đọc tốc độ di chuyển thật)</td></tr>
+</table>
 
 <div class="stage" id="stage">
   <img src="sea_basemap.png" alt="Bản đồ nền Đông Nam Á (Natural Earth qua cartopy)">
+  <canvas id="zones"></canvas>
   <canvas id="cloud"></canvas>
   <canvas id="wind"></canvas>
   <canvas id="fx"></canvas>
@@ -78,11 +90,12 @@ TEMPLATE = """<title>Bão Yagi — Gió &amp; Mưa</title>
   </div>
   <div class="row"><span style="color:#9ec6ff">●</span> hạt mưa (precip &gt; 5mm/ngày tại trạm)</div>
   <div class="row"><span style="color:#cfd8e3">◍</span> lớp mây (proxy độ ẩm RH%)</div>
+  <div class="row"><span style="color:#9ec6ff">▭</span> khung nét đứt = khu vực đang mưa, di chuột vào để xem chi tiết</div>
 </div>
 
 <p class="note">
-<b>Real</b>: toạ độ 32 trạm/điểm, tốc độ/hướng gió trung bình ngày, tổng lượng mưa ngày, %RH trung bình — đều lấy từ warehouse WeatherObs thật (ISD/GHCN/NASA_POWER/OPEN_METEO), ngày 7/9/2024 (Yagi đổ bộ).
-<b>Derived</b>: trường vector gió nội suy IDW giữa các trạm; lớp "mây" là bán kính/độ mờ tỉ lệ với %RH (proxy độ ẩm, KHÔNG phải ảnh mây vệ tinh thật — dữ liệu cloud_cover_pct không có trong warehouse hiện tại).
+<b>Real</b>: toạ độ 32 trạm/điểm, tốc độ/hướng gió, tổng lượng mưa, nhiệt độ (TB + khoảng min–max trong ngày), %RH, và bức xạ mặt trời thật tại 6 điểm có đo — đều lấy từ warehouse WeatherObs thật (ISD/GHCN/NASA_POWER/OPEN_METEO), ngày 7/9/2024 (Yagi đổ bộ).
+<b>Derived</b>: trường vector gió nội suy IDW giữa các trạm; lớp "mây" và trạng thái "trời" ở trạm không có số đo bức xạ suy ra từ %RH (proxy, KHÔNG phải ảnh mây vệ tinh thật — warehouse hiện không có cloud_cover_pct); khung boundary khu vực mưa là hình chữ nhật ±0,8° quanh trạm, không phải ranh giới mưa đo trực tiếp.
 <b>Schematic</b>: tốc độ hạt gió trên màn hình đã phóng to nhiều lần so với thời gian thực để thấy rõ hướng/độ mạnh tương đối giữa các vùng, không dùng để đọc ra tốc độ di chuyển thật.
 </p>
 
@@ -97,6 +110,7 @@ function project(lon, lat, w, h) {
 }
 
 const stage = document.getElementById('stage');
+const zonesCv = document.getElementById('zones');
 const cloudCv = document.getElementById('cloud');
 const windCv = document.getElementById('wind');
 const fxCv = document.getElementById('fx');
@@ -106,10 +120,60 @@ let W = 0, H = 0, DPR = Math.min(window.devicePixelRatio || 1, 2);
 function sizeCanvases() {
   const rect = stage.getBoundingClientRect();
   W = rect.width; H = rect.height;
-  for (const cv of [cloudCv, windCv, fxCv]) {
+  for (const cv of [zonesCv, cloudCv, windCv, fxCv]) {
     cv.width = W * DPR; cv.height = H * DPR;
     cv.getContext('2d').setTransform(DPR, 0, 0, DPR, 0, 0);
   }
+}
+
+// --- Khung boundary cho khu vực đang mưa (precip > 5mm/ngày tại trạm) ---
+const ZONE_MARGIN_DEG = 0.8; // nua chieu rong/cao khung quanh tram, don vi do
+function zoneBounds(s) {
+  return {
+    lonMin: s.lon - ZONE_MARGIN_DEG, lonMax: s.lon + ZONE_MARGIN_DEG,
+    latMin: s.lat - ZONE_MARGIN_DEG, latMax: s.lat + ZONE_MARGIN_DEG,
+  };
+}
+function zonePixelRect(s) {
+  const b = zoneBounds(s);
+  const [x0, y0] = project(b.lonMin, b.latMax, W, H); // goc tren-trai (lat lon nhat -> y nho nhat)
+  const [x1, y1] = project(b.lonMax, b.latMin, W, H); // goc duoi-phai
+  return { x0, y0, x1, y1, b };
+}
+function drawZones() {
+  const ctx = zonesCv.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  ctx.setLineDash([5, 4]);
+  ctx.lineWidth = 1.3;
+  ctx.strokeStyle = 'rgba(158,198,255,0.8)';
+  ctx.font = '11px -apple-system, sans-serif';
+  ctx.fillStyle = 'rgba(158,198,255,0.9)';
+  for (const s of rainStations) {
+    const r = zonePixelRect(s);
+    ctx.strokeRect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
+    ctx.fillText(`${s.id} · mưa ${s.precip.toFixed(0)}mm`, r.x0 + 4, r.y0 + 12);
+  }
+  ctx.setLineDash([]);
+}
+function sunStatus(s) {
+  if (s.solar != null) {
+    if (s.solar >= 500) return `Nắng mạnh (bức xạ thật ${s.solar} W/m²)`;
+    if (s.solar >= 150) return `Có nắng (bức xạ thật ${s.solar} W/m²)`;
+    return `Nhiều mây / mưa (bức xạ thật ${s.solar} W/m²)`;
+  }
+  if (s.rh != null) {
+    if (s.rh >= 85) return `Nhiều mây, ẩm cao (suy từ RH ${s.rh}% — không có số đo bức xạ)`;
+    if (s.rh >= 65) return `Có mây (suy từ RH ${s.rh}% — không có số đo bức xạ)`;
+    return `Khá quang (suy từ RH ${s.rh}% — không có số đo bức xạ)`;
+  }
+  return 'chưa có dữ liệu';
+}
+function tempLine(s) {
+  if (s.temp == null) return 'Nhiệt độ: n/a';
+  if (s.temp_min != null && s.temp_max != null && s.temp_max > s.temp_min) {
+    return `Nhiệt độ: ${s.temp.toFixed(1)}°C (${s.temp_min.toFixed(1)}–${s.temp_max.toFixed(1)}°C trong ngày)`;
+  }
+  return `Nhiệt độ: ${s.temp.toFixed(1)}°C`;
 }
 
 // --- IDW wind-field grid (Derived), precomputed once from real per-station u,v ---
@@ -273,9 +337,36 @@ function step() {
   requestAnimationFrame(step);
 }
 
+function showTooltip(mx, my, html, isZone) {
+  tooltip.style.display = 'block';
+  tooltip.classList.toggle('zone', !!isZone);
+  tooltip.style.left = Math.min(mx + 14, W - 230) + 'px';
+  tooltip.style.top = Math.max(my - 10, 4) + 'px';
+  tooltip.innerHTML = html;
+}
+
 function onMove(evt) {
   const rect = stage.getBoundingClientRect();
   const mx = evt.clientX - rect.left, my = evt.clientY - rect.top;
+
+  // 1) Uu tien khung boundary khu vuc dang mua -- mo ta day du: bien toa do, mua, nhiet do, nang/may
+  for (const s of rainStations) {
+    const r = zonePixelRect(s);
+    if (mx >= r.x0 && mx <= r.x1 && my >= r.y0 && my <= r.y1) {
+      showTooltip(mx, my,
+        `<span class="hd">Khu vực đang mưa — ${s.id} (${s.country})</span>`
+        + `<span class="bound">Biên: ${r.b.latMin.toFixed(2)}–${r.b.latMax.toFixed(2)}°N, `
+        + `${r.b.lonMin.toFixed(2)}–${r.b.lonMax.toFixed(2)}°E</span><br>`
+        + `Mưa (tổng ngày): <b>${s.precip.toFixed(1)} mm</b><br>`
+        + `${tempLine(s)}<br>`
+        + `Trời: ${sunStatus(s)}<br>`
+        + `Gió: ${s.speed.toFixed(1)} m/s`,
+        true);
+      return;
+    }
+  }
+
+  // 2) Khong trong khung mua -> tim tram gan nhat (the ke don gian)
   let best = null, bestD = 16;
   for (const s of STATIONS) {
     const [x, y] = project(s.lon, s.lat, W, H);
@@ -283,19 +374,19 @@ function onMove(evt) {
     if (d < bestD) { bestD = d; best = s; }
   }
   if (best) {
-    tooltip.style.display = 'block';
-    tooltip.style.left = Math.min(mx + 14, W - 180) + 'px';
-    tooltip.style.top = Math.max(my - 10, 4) + 'px';
-    tooltip.innerHTML = `<b>${best.id}</b> (${best.country})<br>`
+    showTooltip(mx, my,
+      `<span class="hd">${best.id}</span> (${best.country})<br>`
       + `Gió: ${best.speed.toFixed(1)} m/s<br>`
       + `Mưa (ngày): ${best.precip.toFixed(1)} mm<br>`
-      + `Độ ẩm TB: ${best.rh ? best.rh.toFixed(0) + '%' : 'n/a'}`;
+      + `${tempLine(best)}<br>`
+      + `Trời: ${sunStatus(best)}`,
+      false);
   } else {
     tooltip.style.display = 'none';
   }
 }
 
-window.addEventListener('resize', () => { sizeCanvases(); });
+window.addEventListener('resize', () => { sizeCanvases(); drawClouds(); drawZones(); });
 stage.addEventListener('mousemove', onMove);
 stage.addEventListener('mouseleave', () => tooltip.style.display = 'none');
 document.getElementById('toggle').addEventListener('click', (e) => {
@@ -308,6 +399,7 @@ buildWindGrid();
 initParticles();
 initRain();
 drawClouds();
+drawZones();
 step();
 </script>
 """

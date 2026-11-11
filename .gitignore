@@ -16,6 +16,7 @@ data/
 !reference/**/*.csv
 !slides/images/**/*.png
 !report/figures/**/*.png
+!viz/output/*.png
 
 # Raw boundary/raster data (CHIRPS GeoTIFF, Natural Earth shapefile) - qua batch_download_week2.py
 *.tif
