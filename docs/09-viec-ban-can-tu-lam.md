@@ -1,17 +1,17 @@
 # Việc chỉ bạn (hoặc nhóm) mới làm được — không tự động hoá được
 
-Cập nhật: 10/11/2026 (đã merge PR #2 của Ngô Văn Quang — xem mục 2b). Lọc từ kế hoạch 160 tác vụ
-(`03-ke-hoach-160-tasks.md`) — mọi việc tự động hoá được (code, test, tải dữ liệu, viết tài liệu kỹ
-thuật, soạn slide/báo cáo) đã làm xong trong repo. Danh sách dưới đây là phần còn lại: cần tài khoản
-cá nhân, quyết định của nhóm, hoặc hành động con người (họp, nộp bài, thuyết trình) mà không ai làm
-thay được.
+Cập nhật: 11/11/2026 (đã bỏ khung "160 tác vụ nội bộ" khỏi mọi bản báo cáo/slide — xem mục 2c; đã
+chạy lại toàn bộ test — xem mục 2d). Lọc từ kế hoạch 160 tác vụ (`03-ke-hoach-160-tasks.md`) — mọi
+việc tự động hoá được (code, test, tải dữ liệu, viết tài liệu kỹ thuật, soạn slide/báo cáo) đã làm
+xong trong repo. Danh sách dưới đây là phần còn lại: cần tài khoản cá nhân, quyết định của nhóm,
+hoặc hành động con người (họp, nộp bài, thuyết trình) mà không ai làm thay được.
 
 ---
 
 ## 0. KHẨN CẤP NHẤT — xác nhận trạng thái nộp bài thật với giảng viên
 
-**Hôm nay đã là 09/11/2026 — nghĩa là đã qua CẢ BA mốc chính thức của học phần**: nộp đề cương
-(5/10), báo cáo tiến độ (20/10), và báo cáo cuối kỳ (8/11, qua 1 ngày). Tôi không có cách nào xác
+**Hôm nay đã là 11/11/2026 — nghĩa là đã qua CẢ BA mốc chính thức của học phần**: nộp đề cương
+(5/10), báo cáo tiến độ (20/10), và báo cáo cuối kỳ (8/11, qua 3 ngày). Tôi không có cách nào xác
 nhận được liệu nhóm đã thực sự nộp bài/trình bày ở 3 mốc này hay chưa — đây là việc **chỉ bạn biết
 và chỉ bạn (hoặc nhóm) làm được**.
 
@@ -27,15 +27,18 @@ và chỉ bạn (hoặc nhóm) làm được**.
 
 | File | Nội dung |
 |---|---|
-| `report/final-report.pdf` | Báo cáo cuối kỳ đầy đủ (35 trang sau merge PR #2), có chương "Kết quả thực nghiệm" và "Phát hiện dị thường khí hậu" mới với toàn bộ số liệu thật trên 9,3 triệu bản ghi |
-| `slides/final-defense.pdf` | Slide bảo vệ cuối kỳ (31 trang sau merge PR #2), Action Title + số liệu thật |
+| `report/final-report.pdf` | Báo cáo cuối kỳ đầy đủ (**41 trang**, cập nhật 11/11), có chương "Kết quả thực nghiệm" + "Phát hiện dị thường khí hậu", mục tiêu đo được (M1–M5), bảng đối chiếu mục tiêu/kết quả, và phụ lục tái lập kết quả — số liệu thật trên **8.955.315 bản ghi** (sau kiểm soát chất lượng) |
+| `slides/final-defense.pdf` | Slide bảo vệ cuối kỳ (**30 trang**, cập nhật 11/11), Action Title + số liệu thật, không còn khung "160 tác vụ" |
 | `docs/14-ket-qua-ky-thuat-tuan-3-4.md` | Tổng hợp kỹ thuật Tuần 3-4 (nguồn cho báo cáo/slide) |
 | `docs/15-qa-bao-ve.md` | 8 câu hỏi phản biện dự kiến + đáp án có số liệu dẫn chứng |
 | `docs/16-phat-hien-di-thuong-khi-hau.md` | Mới (từ PR #2): phát hiện dị thường khí hậu — z-score theo khí hậu nền, đợt nóng, SPI, trôi cảm biến |
 
-**Lưu ý**: trang 31/slide và 35/report là số sau khi merge PR #2 (10/11) — KHÔNG phải số bạn đã xem
-nếu đã xem bản PDF trước đó. Nếu đã nộp/trình bày bản cũ (30 trang/21 slide) cho giảng viên trước khi
-merge, cần tự quyết định có gửi lại bản mới hay không (xem mục 0).
+**Lưu ý**: trang 41/report và 30/slide là số **sau** hai vòng chỉnh sửa gần nhất (10–11/11): (1) thêm
+mục tiêu đo được + phụ lục tái lập kết quả theo chuẩn trình bày học thuật, và (2) bỏ hẳn khung "160
+tác vụ" nội bộ khỏi mọi bản báo cáo/slide — bao gồm cả `report/main.tex`, `slides/main.tex`,
+`slides/progress-report.tex` (bản đề cương/tiến độ cũ từng có bảng chấm điểm tác vụ theo TÊN từng
+thành viên, đã bỏ). Nếu đã nộp/trình bày bản cũ cho giảng viên trước các mốc này, cần tự quyết định
+có gửi lại bản mới hay không (xem mục 0).
 
 **Đây đều là bản nháp tự động, chưa qua mắt người** — bạn cần tự đọc lại, đặc biệt kiểm tra: số liệu
 có khớp với những gì Quang/Lương thực sự làm không (xem mục 3), thời lượng trình bày có hợp lý
@@ -85,6 +88,33 @@ nhưng **chưa tự chạy lại để xác nhận bằng số**. Nếu cần đ
 chạy lại `warehouse/build_warehouse.py --dataset full` (cần tải ~23GB, vài giờ) hoặc hỏi Quang demo
 trực tiếp.
 
+## 2c. ĐÃ XONG (10–11/11) — bỏ khung "160 tác vụ nội bộ" khỏi mọi bản nộp, thêm mục tiêu đo được
+
+Theo yêu cầu của bạn ("160 Tasks chỉ là inner management, đừng tung ra như vậy"): đã rà soát và sửa
+toàn bộ `report/`, `slides/` (cả bản final và các bản đề cương/tiến độ cũ `main.tex`,
+`progress-report.tex`) để không còn đếm/trình bày số "160 tác vụ" hay % hoàn thành theo tác vụ ra bên
+ngoài. Đáng chú ý nhất: `slides/progress-report.tex` từng có 1 frame ghi điểm tác vụ theo **tên thật
+từng thành viên** (Quang/Lương/Nghĩa, dạng "6/10, 7/10, 8/10...") — đã bỏ, thay bằng số liệu kết quả
+thật (1.076.473 bản ghi, 119 vị trí, 4 node cụm — số tại thời điểm báo cáo tiến độ 20/10, chưa gồm dữ
+liệu PR #2). File `docs/03-ke-hoach-160-tasks.md` vẫn giữ nguyên trong repo (dùng nội bộ), chỉ không
+còn bị trích dẫn ra báo cáo/slide. `scripts/*.py` đã rà soát — chỉ có comment code nội bộ, không cần sửa.
+
+Đồng thời thêm vào `report/final-report.tex`: mục tiêu đo được M1–M5 (Chương 1), bảng đối chiếu mục
+tiêu/kết quả "Đạt/Không đạt" (Chương 9), và phụ lục tái lập kết quả (repo, môi trường chạy, thư viện,
+seed, lệnh chạy lại, giấy phép dữ liệu) — theo khung chất lượng tham khảo từ mẫu `Slide-nhom-PDF`
+(khoá khác, chỉ lấy cấu trúc, không lấy nội dung). Toàn bộ số liệu trong các phần mới này lấy từ dữ
+liệu thật trong repo, không có số bịa.
+
+Đã commit & push: `0ac36a5`, `04fdea9`, `3078f83`.
+
+## 2d. ĐÃ XONG (11/11) — chạy lại toàn bộ test suite (kể cả test chậm), xác nhận không lỗi
+
+Chạy `pytest tests/ -q` đầy đủ (không lọc `-m "not slow"`) trên cụm Docker thật (1 master + 2 worker
+Spark + 1 Kafka, đã lên sẵn từ trước) — **83/83 test pass** trong 97,27s, gồm cả 3 test cần
+Spark+Kafka thật (cache Spark, Structured Streaming windowing, dị thường theo luồng). Chỉ có 4
+warning không ảnh hưởng (pandas `FutureWarning` về `concat`). Repo sạch, đã đồng bộ đủ với
+`origin/master` tại commit `3078f83`.
+
 ## 3. Việc nhóm — vẫn cần xác nhận thật từ Quang & Lương
 
 | # | Việc | Vì sao không tự động hoá được |
@@ -104,13 +134,14 @@ trực tiếp.
 
 ## Những gì đã tự động hoá đầy đủ (không cần bạn làm gì thêm)
 
-Toàn bộ pipeline kỹ thuật: kiểm chứng + tải dữ liệu đầy đủ 9 nước ĐNA (9,3 triệu bản ghi, 5 năm ERA5),
-ETL (`ingestion/`, `warehouse/`), kiểm soát chất lượng theo tầng, Entity Resolution GHCN↔ISD,
-cross-validation nội suy, Spark SQL optimization, phát hiện dị thường khí hậu (z-score/ETCCDI/SPI/
-trôi cảm biến/streaming), 2 mô hình PINN thật, Dashboard (đã verify qua browser), Data Quality
-Report, Spark cluster 3 node + Kafka broker (image `apache/*`) và Structured Streaming windowing
-(verify live thật), 83 test tự động (76 nhanh + 7 slow), toàn bộ tài liệu kỹ thuật
-(`docs/ingestion.md`, `docs/warehouse.md`, `docs/model.md`, `docs/16`, `docs/17`,
-`data_dictionary.md`, `CHANGELOG.md`, `requirements.txt`), báo cáo cuối kỳ (35 trang) và slide bảo vệ
-(31 trang). Xem chi tiết tại `docs/03-ke-hoach-160-tasks.md` (cột "Trạng thái") và
-`docs/14-ket-qua-ky-thuat-tuan-3-4.md`.
+Toàn bộ pipeline kỹ thuật: kiểm chứng + tải dữ liệu đầy đủ 9 nước ĐNA (8.955.315 bản ghi sau kiểm
+soát chất lượng, 5 năm ERA5), ETL (`ingestion/`, `warehouse/`), kiểm soát chất lượng theo tầng, Entity
+Resolution GHCN↔ISD, cross-validation nội suy, Spark SQL optimization, phát hiện dị thường khí hậu
+(z-score/ETCCDI/SPI/trôi cảm biến/streaming), 2 mô hình PINN thật, Dashboard (đã verify qua browser),
+Data Quality Report, Spark cluster 3 node + Kafka broker (image `apache/*`) và Structured Streaming
+windowing (verify live thật), 83 test tự động (76 nhanh + 7 slow, xác nhận lại 11/11 — xem mục 2d),
+toàn bộ tài liệu kỹ thuật (`docs/ingestion.md`, `docs/warehouse.md`, `docs/model.md`, `docs/16`,
+`docs/17`, `data_dictionary.md`, `CHANGELOG.md`, `requirements.txt`), báo cáo cuối kỳ (**41 trang**,
+có mục tiêu đo được + phụ lục tái lập kết quả) và slide bảo vệ (**30 trang**) — cả hai đã bỏ khung
+"160 tác vụ" nội bộ (xem mục 2c). Xem chi tiết tại `docs/03-ke-hoach-160-tasks.md` (cột "Trạng thái",
+dùng nội bộ, không trích ra báo cáo) và `docs/14-ket-qua-ky-thuat-tuan-3-4.md`.
