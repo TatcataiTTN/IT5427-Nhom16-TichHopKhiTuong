@@ -185,7 +185,7 @@ Bài toán này bộc lộ đầy đủ các mức độ dị biệt (heterogene
     \item Xây dựng một \textbf{kho dữ liệu khí tượng đã chuẩn hoá} (Mediated Schema) tích hợp đầy đủ năm nguồn dữ liệu đã nêu, có khả năng tái sử dụng cho nhiều bài toán phân tích khác nhau, không chỉ phục vụ một ứng dụng đơn lẻ.
     \item Áp dụng đúng và có kiểm chứng hai kỹ thuật lý thuyết cốt lõi của học phần -- \textbf{Global-as-View schema mapping} và \textbf{Survivorship-based Record Linkage} -- trên một bài toán thực tế có dữ liệu thật, không phải ví dụ minh hoạ.
     \item Xây dựng pipeline xử lý dữ liệu lớn hoàn chỉnh bằng \textbf{Apache Spark} (batch processing và Structured Streaming), đáp ứng đủ các tiêu chí 5V của dữ liệu lớn với số liệu định lượng cụ thể, không phải ước lượng định tính.
-    \item Triển khai \textbf{phát hiện dị thường khí hậu} theo khu vực và thời điểm trên kho dữ liệu đã tích hợp -- bản thân là một ứng dụng phân tích, đồng thời làm nền cho hai ứng dụng khác: hỗ trợ nông nghiệp/năng lượng tái tạo, và hỗ trợ ra quyết định vận hành UAV an toàn (ba ứng dụng cụ thể, xem Chương~7).
+    \item Triển khai \textbf{phát hiện dị thường khí hậu} theo khu vực và thời điểm trên kho dữ liệu đã tích hợp -- ứng dụng phân tích đã cài đặt và đối chứng với sự kiện thật (Mục~6.8--6.10). Hỗ trợ nông nghiệp/năng lượng tái tạo và khuyến nghị khung giờ bay UAV an toàn là hai ứng dụng khác cùng dùng được kho dữ liệu này, nhưng chưa cài đặt trong phạm vi đồ án -- xem hướng phát triển ở Chương~9.
     \item Xây dựng \textbf{dashboard trực quan hoá} hiển thị kết quả tích hợp và phân tích theo không gian/thời gian, hoàn thiện đúng yêu cầu Direction 1 của đề cương học phần.
 \end{enumerate}
 
@@ -207,7 +207,7 @@ Bảng~\ref{tab:goals-vs-results}, Chương~9.
 \midrule
 M1 & Kho dữ liệu chuẩn hoá đủ 5 nguồn, đúng phạm vi đề cương & Số nguồn tích hợp, đúng phạm vi thời gian/không gian & Đủ 5/5, đúng phạm vi -- đặt trước (Mục~1.4) \\
 M2 & GAV schema mapping + Survivorship record linkage có kiểm chứng định lượng & Referential integrity (GAV); tỷ lệ khớp Entity Resolution GHCN--ISD & Phải kiểm chứng bằng số liệu thật, không chỉ minh hoạ -- đặt trước (Mục~1.3); tỷ lệ khớp \% chỉ biết sau khi đo \\
-M3 & Pipeline Spark tối ưu hoá có đo trước/sau, đạt 5V bằng số liệu & Tăng tốc khi \texttt{cache()} một truy vấn đại diện & $\geq 30\,\%$ -- đặt trước (Chương~8, quản lý rủi ro) \\
+M3 & Pipeline Spark tối ưu hoá có đo trước/sau, đạt 5V bằng số liệu & Tăng tốc khi \texttt{cache()} một truy vấn đại diện & $\geq 30\,\%$ -- đặt trước (Mục~1.4, cùng thời điểm với M1, M2) \\
 M4 & Phát hiện dị thường khí hậu đối chứng được với sự kiện thật & Số sự kiện khí hậu đã biết được phát hiện đúng chiều & 3 sự kiện đối chứng chọn trước (nắng nóng 2024, bão Yagi, hạn Mekong); kết quả từng sự kiện chỉ biết sau khi đo \\
 M5 & Dashboard hiển thị đúng kết quả tích hợp, kiểm chứng qua trình duyệt thật & Số thành phần hoạt động đúng trên dữ liệu thật, không lỗi runtime & Đặt trước (đề cương học phần, Direction 1) \\
 \bottomrule
@@ -232,15 +232,15 @@ Chương này trình bày cơ sở lý thuyết mà đề tài dựa vào, tổ 
 
 Bài toán đối sánh lược đồ tự động đã được hệ thống hoá toàn diện bởi Rahm và Bernstein~\cite{rahm2001survey}, người phân loại các phương pháp đối sánh theo cấp độ (schema-level và instance-level) và theo kỹ thuật (dựa trên ngôn ngữ và dựa trên ràng buộc) -- khung phân loại này là cơ sở để nhóm lựa chọn chiến lược ánh xạ trường dữ liệu giữa năm nguồn không đồng nhất (Chương 3, Mục 3.2).
 
-Về mặt hình thức hoá, ba ngôn ngữ ánh xạ schema -- Global-as-View (GAV), Local-as-View (LAV), và GLAV -- có nguồn gốc trực tiếp từ công trình nền tảng của Ullman~\cite{ullman1997logical}, người lần đầu hình thức hoá khái niệm \emph{certain answers} khi trả lời truy vấn thông qua các view biểu diễn nguồn dữ liệu. Levy~\cite{levy2001survey} và Lenzerini~\cite{lenzerini2002theoretical} sau đó tổng hợp thành các bài khảo sát lý thuyết toàn diện, đặt nền móng lý thuyết cho toàn bộ lĩnh vực tích hợp dữ liệu hiện đại. Đề tài áp dụng trực tiếp GAV (Mục 3.2) do tính đơn giản trong reformulation (Query Unfolding) và sự phù hợp với kiến trúc kho dữ liệu tập trung.
+Về mặt hình thức hoá, ba ngôn ngữ ánh xạ schema -- Global-as-View (GAV), Local-as-View (LAV), và GLAV -- được dùng phổ biến trong tích hợp dữ liệu từ các công trình nền tảng như Ullman~\cite{ullman1997logical}, người tổng quan cách trả lời truy vấn thông qua các view biểu diễn nguồn dữ liệu trong hệ tích hợp; độ phức tạp tính toán của bài toán \emph{certain answers} liên quan được Abiteboul và Duschka~\cite{abiteboul1998complexity} phân tích hình thức năm 1998. Levy~\cite{levy2001survey} và Lenzerini~\cite{lenzerini2002theoretical} sau đó tổng hợp thành các bài khảo sát lý thuyết. Đề tài chọn GAV (Mục 3.2) vì số nguồn cố định (năm nguồn) và mỗi nguồn ánh xạ vào lược đồ chung bằng một truy vấn/view duy nhất -- đơn giản hơn LAV khi không cần suy luận ngược (query reformulation) qua nhiều view.
 
-Ở quy mô lớn hơn, khi số lượng nguồn dữ liệu vượt xa khả năng thiết kế mediated schema thủ công, Halevy, Franklin và Maier~\cite{halevy2006dataspace} đề xuất mô hình \emph{Dataspace}, còn Das Sarma, Dong và Halevy~\cite{dassarma2008payasyougo} đề xuất triết lý \emph{pay-as-you-go}, chấp nhận mapping không hoàn hảo ban đầu và cải thiện dần theo thời gian. Cafarella và cộng sự~\cite{cafarella2008webtables} (giải thưởng VLDB 10-Year Best Paper 2018) và Talukdar và cộng sự~\cite{talukdar2008learning} mở rộng hướng tích hợp không cần mediated schema tường minh, dựa trên tìm kiếm/xếp hạng bảng dữ liệu. Các công trình này khẳng định rằng lựa chọn GAV tường minh của đề tài -- thay vì các hướng \emph{pay-as-you-go} phức tạp hơn -- là phù hợp với quy mô năm nguồn dữ liệu đã xác định trước, không cần đến độ linh hoạt của Dataspace.
+Ở quy mô lớn hơn, khi số lượng nguồn dữ liệu vượt xa khả năng thiết kế mediated schema thủ công, Halevy, Franklin và Maier~\cite{halevy2006dataspace} đề xuất mô hình \emph{Dataspace}, còn Das Sarma, Dong và Halevy~\cite{dassarma2008payasyougo} đề xuất triết lý \emph{pay-as-you-go}, chấp nhận mapping không hoàn hảo ban đầu và cải thiện dần theo thời gian. Cafarella và cộng sự~\cite{cafarella2008webtables} (giải thưởng VLDB 10-Year Best Paper 2018) và Talukdar và cộng sự~\cite{talukdar2008learning} mở rộng hướng tích hợp không cần mediated schema tường minh, dựa trên tìm kiếm/xếp hạng bảng dữ liệu. Các hướng này giải quyết bài toán có số nguồn lớn và thay đổi liên tục; đề tài có đúng năm nguồn cố định trong suốt thời gian thực hiện nên không cần đến độ linh hoạt bổ sung của Dataspace hay pay-as-you-go.
 
 \section{Liên kết bản ghi và giải quyết thực thể (Record Linkage \& Entity Resolution)}
 
-Nền tảng lý thuyết của toàn bộ lĩnh vực Record Linkage bắt nguồn từ mô hình xác suất của Fellegi và Sunter~\cite{fellegi1969theory}, người lần đầu hình thức hoá ba kết luận \emph{match/non-match/possible-match} khi so khớp một cặp bản ghi -- khung khái niệm này được đề tài kế thừa trực tiếp khi thiết kế quy tắc Survivorship có gắn cờ xung đột (Mục 3.3).
+Nền tảng lý thuyết của lĩnh vực Record Linkage là mô hình xác suất của Fellegi và Sunter~\cite{fellegi1969theory}, hình thức hoá ba kết luận \emph{match/non-match/possible-match} khi quyết định hai bản ghi có cùng một thực thể hay không. Đề tài dùng Entity Resolution theo khoảng cách toạ độ (Mục 3.3, 6.2) để quyết định hai mã trạm GHCN/ISD có phải cùng một trạm vật lý -- đúng bài toán Fellegi--Sunter đặt ra. Khi đã xác định cùng một trạm, quy tắc Survivorship chọn giá trị đo giữa các nguồn trùng lặp (Bảng~\ref{tab:survivorship}) là một bài toán khác -- hợp giải giá trị (\emph{data fusion}), không phải phân loại cặp bản ghi -- nên không kế thừa trực tiếp khung Fellegi--Sunter.
 
-Về mặt kỹ thuật, pipeline Entity Resolution bốn bước (Prepare -- Block -- Match -- Cluster) mà đề tài áp dụng dựa trên các nghiên cứu thực nghiệm quy mô lớn của Köpcke, Thor và Rahm~\cite{kopcke2010evaluation}, người đánh giá có hệ thống nhiều phương pháp đối sánh thực thể trên các bài toán thực tế. Bước Blocking sử dụng kỹ thuật Locality-Sensitive Hashing có nguồn gốc từ công trình tiên phong của Gionis, Indyk và Motwani~\cite{gionis1999similarity} về tìm kiếm tương tự trong không gian nhiều chiều. Bước Clustering có thể áp dụng Correlation Clustering theo hình thức hoá của Bansal, Blum và Chawla~\cite{bansal2004correlation}, hoặc phương pháp connected-components đơn giản hơn đã đánh giá bởi Hassanzadeh và cộng sự~\cite{hassanzadeh2009framework}.
+Về mặt kỹ thuật, Entity Resolution nói chung thường gồm bốn bước (Prepare -- Block -- Match -- Cluster), được Köpcke, Thor và Rahm~\cite{kopcke2010evaluation} đánh giá có hệ thống trên nhiều bài toán thực tế. Với quy mô của đề tài (26 trạm ISD $\times$ 41 trạm GHCN $=$ 1.066 cặp, Mục 6.2), nhóm so khớp toàn bộ các cặp theo khoảng cách Haversine thay vì dùng bước Blocking: kỹ thuật giảm số cặp cần so như Locality-Sensitive Hashing của Gionis, Indyk và Motwani~\cite{gionis1999similarity} chỉ mang lại lợi ích khi số bản ghi mỗi phía lớn hơn nhiều bậc độ lớn. Vì mỗi trạm GHCN chỉ khớp tối đa một trạm ISD (ràng buộc 1--1, Mục 6.2), bước Clustering cũng không cần thiết; Correlation Clustering của Bansal, Blum và Chawla~\cite{bansal2004correlation} và phương pháp connected-components đánh giá bởi Hassanzadeh và cộng sự~\cite{hassanzadeh2009framework} phù hợp hơn với bài toán có nhiều hơn hai thực thể trùng lặp lẫn nhau.
 
 Với các trường hợp cần Matching dựa trên học sâu, đề tài tham khảo hai hướng tiếp cận đại diện: DeepER của Ebraheem và cộng sự~\cite{ebraheem2018deeper}, biểu diễn mỗi bộ dữ liệu (tuple) thành vector phân tán bằng mạng nơ-ron hồi quy; và Magellan/DeepMatcher của Mudgal và cộng sự~\cite{mudgal2018deep}, khảo sát không gian thiết kế của các kiến trúc học sâu cho entity matching. Trong bối cảnh dữ liệu gán nhãn khan hiếm -- vấn đề thực tế mà đề tài cũng gặp phải khi không có ground-truth trùng lặp giữa các nguồn khí tượng -- Kasai và cộng sự~\cite{kasai2019lowresource} đề xuất kết hợp transfer learning và active learning để giảm chi phí gán nhãn. Cuối cùng, khung lý thuyết tổng quát nhất cho bài toán liên kết thực thể được hệ thống hoá bởi Burdick và cộng sự~\cite{burdick2017expressive}, người định nghĩa hình thức khái niệm \emph{entity-linking framework} bao trùm cả Record Linkage lẫn các bài toán liên kết rộng hơn. Khi dữ liệu cập nhật liên tục (đúng đặc điểm streaming của đề tài), Gruenheid, Dong và Srivastava~\cite{gruenheid2014incremental} đề xuất thuật toán cập nhật gia tăng (incremental) hiệu quả hơn tính lại toàn bộ.
 
@@ -343,7 +343,7 @@ Hệ thống được triển khai bằng Python (\texttt{cdsapi}, \texttt{xarra
 
 \section{Bốn nguồn dữ liệu lõi -- đã kiểm chứng thực nghiệm}
 
-Khác với phần lớn đề xuất dự án chỉ tra cứu tài liệu, toàn bộ bốn nguồn dữ liệu lõi của đề tài đã được \textbf{kiểm tra thực nghiệm} bằng cách gọi API thật và tải mẫu dữ liệu thật (script \texttt{scripts/check\_data\_sources.py} trong kho mã nguồn của nhóm), thay vì chỉ dựa trên tài liệu API. Bảng~\ref{tab:sources} tổng hợp kết quả.
+Nhóm đã gọi API và tải mẫu của bốn nguồn dữ liệu lõi -- NASA POWER~\cite{nasapower}, Open-Meteo~\cite{openmeteo}, NOAA GHCN-Daily~\cite{menne2012ghcnd}, NOAA ISD~\cite{smith2011isd}, và ERA5 qua kho ARCO-ERA5~\cite{arcoera5,hersbach2020era5} -- bằng script \texttt{scripts/check\_data\_sources.py} trong kho mã nguồn của nhóm, ngày 30/9/2026. Bảng~\ref{tab:sources} tổng hợp kết quả.
 
 \begin{table}[H]
 \centering
@@ -404,17 +404,100 @@ ERA5 (ARCO), vùng ĐNA, 8 biến, 5 năm, tần suất giờ & Xấp xỉ 34,8 
 \end{tabular}
 \end{table}
 
-Con số 35--36 GB vượt khả năng xử lý thuận tiện bằng công cụ đơn máy thông thường (đúng tiêu chí \emph{Volume} của dữ liệu lớn, cần Spark), nhưng vẫn là một mục tiêu khả thi để tải và xử lý trong khung thời gian sáu tuần với nhóm ba thành viên -- thực tế hơn đáng kể so với ước tính sơ bộ ban đầu (1,5--2 TB) trước khi có số liệu kiểm chứng thực nghiệm. Khi tải thật (Mục~6.1), dữ liệu thô đạt khoảng 23,4~GB: ERA5 9 biến, 5 năm chiếm 22~GB nhờ nén zlib, còn các nguồn trạm/điểm tăng lên 1,4~GB do mở rộng ISD lên 10 năm.
+Bảng trên là ước tính lập ở giai đoạn đề cương, thực tế hơn đáng kể so với ước tính sơ bộ ban đầu (1,5--2 TB) trước khi có số liệu kiểm chứng thực nghiệm. Khi tải thật (Mục~6.1), dữ liệu thô đạt khoảng 23,4~GB: ERA5 9 biến, 5 năm chiếm 22~GB nhờ nén zlib, còn các nguồn trạm/điểm tăng lên 1,4~GB do mở rộng ISD lên 10 năm. Sau khi nội suy ERA5 vào 113 điểm và tích hợp, kho \texttt{WeatherObs} chỉ còn 303~MB Parquet (Bảng~\ref{tab:data-appendix}, Phụ lục A.6) -- vừa bộ nhớ của một máy thông thường (máy phát triển chính có 36~GB RAM, Phụ lục A.2). Vì vậy, lập luận ``vượt khả năng đơn máy'' không áp dụng cho kho \emph{đã tích hợp}: lý do nhóm vẫn dùng Spark là bài toán ở \emph{thời điểm nạp} dữ liệu thô (22~GB ERA5 lấy từ các chunk Zarr toàn cầu, Mục~6.1) và mục tiêu học tập/chuẩn bị mở rộng cho toàn bộ lưới ERA5 thay vì chỉ 113 điểm đã nội suy -- không phải vì kho tích hợp cuối cùng vượt RAM một máy. Mục~6.4 đối chiếu trực tiếp thời gian truy vấn giữa Spark và một công cụ đơn máy (DuckDB) trên cùng kho để làm rõ điểm hoà vốn này.
 
 \section{Đánh giá theo tiêu chí 5V}
 
 \begin{itemize}
-    \item \textbf{Volume}: xấp xỉ 35--36 GB (Mục 4.3), vượt ngưỡng xử lý bằng công cụ truyền thống đơn máy.
+    \item \textbf{Volume}: dữ liệu thô 23,4 GB (ERA5 22 GB + trạm/điểm 1,4 GB, Mục~6.1); kho đã tích hợp 303 MB, vừa RAM một máy -- xem thảo luận ở Mục~4.3.
     \item \textbf{Variety}: năm nguồn với ba dạng cấu trúc khác nhau -- lưới đa chiều nhị phân (ERA5), bảng "long" (GHCN), bảng có trường nén (ISD) -- và ba dạng cú pháp (NetCDF/GRIB2, CSV, JSON).
     \item \textbf{Velocity}: dữ liệu lịch sử tĩnh, mô phỏng tính chất luồng qua kiến trúc Replay Streaming Pipeline (Kafka + Spark Structured Streaming).
-    \item \textbf{Veracity}: độ phủ trạm quan trắc lệch mạnh giữa các nước (Mục 4.2) và xung đột giá trị giữa nguồn trạm/mô hình (Mục 3.3) đòi hỏi quy tắc Survivorship và báo cáo giới hạn tường minh.
-    \item \textbf{Value}: phát hiện dị thường khí hậu, hỗ trợ nông nghiệp/năng lượng tái tạo, hỗ trợ vận hành UAV an toàn (Mục 1.3).
+    \item \textbf{Veracity}: độ phủ trạm quan trắc lệch mạnh giữa các nước (Mục 4.2) và xung đột giá trị giữa nguồn trạm/mô hình (Mục 3.3) đòi hỏi quy tắc Survivorship và báo cáo giới hạn tường minh; đặc trưng và yêu cầu xử lý chi tiết ở Mục~4.5.
+    \item \textbf{Value}: phát hiện dị thường khí hậu đã cài đặt và đối chứng với sự kiện thật (Mục~6.8--6.10); thống kê hỗ trợ nông nghiệp/năng lượng và khuyến nghị khung giờ bay UAV là hướng phát triển, chưa cài đặt (Mục~9).
 \end{itemize}
+
+\section{Đặc trưng dữ liệu và yêu cầu xử lý}
+\label{sec:data-characteristics}
+
+Dữ liệu năm nguồn có ba nhóm vấn đề cần xử lý trước khi tích hợp: dữ liệu thiếu (\emph{missing}),
+giá trị ngoài khoảng hợp lệ (\emph{out of range}), và đo lường không đồng nhất giữa các nguồn.
+Bảng~\ref{tab:missing-rate} đo quy mô thiếu theo từng biến và từng nguồn trên dữ liệu đã tải;
+Bảng~\ref{tab:sample-records} đưa một bản ghi gốc và giá trị sau xử lý cho mỗi nhóm, trích trực
+tiếp từ \texttt{data\_samples/} (dữ liệu thô) và \texttt{warehouse/output/weatherobs.parquet}
+(dữ liệu đã tích hợp) bằng truy vấn DuckDB, không dựng tay.
+
+\subsection{Dữ liệu thiếu theo biến và theo nguồn}
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Tỷ lệ thiếu (\%) theo biến $\times$ nguồn, đo trên bản warehouse hiện có trên máy
+(1.076.473 dòng: GHCN 655.164, ISD 358.273, Open-Meteo 52.704, ERA5 8.136, NASA POWER 2.196).
+Dấu ``--'' nghĩa là nguồn không đo biến này (thiếu do cấu trúc nguồn), không phải thiếu theo thời gian.}
+\label{tab:missing-rate}
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Nguồn & $n$ & Nhiệt độ & Mưa & Gió (tốc độ) & Áp suất MNB & Độ ẩm \\
+\midrule
+GHCN & 655.164 & 4,1 & 41,3 & -- & -- & -- \\
+ISD & 358.273 & 0,0 & -- & 0,0 & 81,8 & 0,4 \\
+ERA5 & 8.136 & 0,0 & 0,0 & 0,0 & -- & -- \\
+Open-Meteo & 52.704 & 0,0 & 0,0 & 0,0 & -- & 0,0 \\
+NASA POWER & 2.196 & 0,0 & 0,0 & 0,0 & -- & 0,0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Riêng ERA5: do đây là bản warehouse chưa nạp lại toàn bộ 5 năm (Mục~6.1 ghi rõ việc tải lại ERA5 đầy
+đủ tốn khoảng 1~TB băng thông và gần 24 giờ), $n = 8.136$ ở đây là tập con 3 ngày mẫu, không phải 4.954.824 dòng của
+kho đầy đủ nêu ở Bảng~\ref{tab:final-volume} (Mục~6.1); tỷ lệ 0\% thiếu của ERA5 không đổi giữa hai
+bản vì ERA5 vốn không có \texttt{NaN} (đã kiểm 540/540 tệp, Mục~6.1). Áp suất mực nước biển ISD
+thiếu 81,8\% vì phần lớn bản tin METAR không mang trường này (chỉ SYNOP có, Mục~6.11); áp suất bề
+mặt ISD (không hiển thị ở bảng trên, thiếu 100\% trước khi nhóm thêm trường \texttt{MA1}) đã được bổ
+sung trong lần xử lý 10/11. Mưa GHCN thiếu 41,3\% không có nghĩa 41,3\% số ngày không mưa -- xem
+Bảng~\ref{tab:sample-records}, hàng 1.
+
+\subsection{Bản ghi mẫu trước và sau xử lý}
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Bản ghi thật trước và sau xử lý cho ba nhóm vấn đề}
+\label{tab:sample-records}
+\begin{tabular}{@{}p{1.5cm}p{3.3cm}p{3.3cm}p{3.1cm}p{2.1cm}@{}}
+\toprule
+Nhóm & Nguồn, vị trí, thời điểm & Bản ghi gốc (nguyên văn) & Sau xử lý trong \texttt{WeatherObs} & Quy mô \\
+\midrule
+Missing &
+ISD, trạm 48097099999 (Yangon), 1/1/2024 00:30 &
+\texttt{SLP="99999,9"} &
+\texttt{pressure\_msl\_hpa}\newline\texttt{= NULL} &
+81,8\% dòng ISD (Bảng~\ref{tab:missing-rate}) \\ \addlinespace[3pt]
+Out of range &
+GHCN, trạm RPW00041229, 29/1/1991 &
+\texttt{TMAX="398"}, \texttt{Q\_FLAG="O"} (NOAA tự gắn cờ outlier) &
+\texttt{temp\_c = NULL},\newline\texttt{qc\_flag=}\newline\texttt{'GHCN\_Q:TMAX=O'} &
+406 giá trị GHCN bị loại (Mục~6.11) \\ \addlinespace[3pt]
+Không đồng nhất (đơn vị) &
+Open-Meteo, Hà Nội, 1/1/2024 00:00 &
+\texttt{"wind\_speed\_10m": 4,9}, \texttt{"hourly\_units": \{"wind\_speed\_10m": "km/h"\}} &
+\texttt{wind\_speed\_ms = 4,9 / 3,6 = 1,36} &
+Toàn bộ 52.704 dòng Open-Meteo trong bản này \\ \addlinespace[3pt]
+Không đồng nhất (định nghĩa) &
+GHCN, trạm BMM00048042, 16/2/1950 &
+\texttt{TMAX="317"}, \texttt{TMIN="111"}, \texttt{TAVG="218"} (M\_FLAG=H) &
+\texttt{temp\_c = 21,8}, \texttt{temp\_def='TAVG'} (≠ (31,7+11,1)/2 = 21,4) &
+Lệch trung bình 0,25\,°C toàn kho (Mục~6.11) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ba hàng đầu của Bảng~\ref{tab:sample-records} ứng với ba nhóm vấn đề nêu ở đầu mục này; hàng thứ tư
+là một dạng khác của nhóm thứ ba (không đồng nhất về \emph{ngữ nghĩa} thay vì đơn vị): GHCN định
+nghĩa nhiệt độ ngày theo hai cách tuỳ trạm và tuỳ ngày -- \texttt{TAVG} đo trực tiếp (M\_FLAG=H) khi
+có, nếu không mới dùng $(TMAX+TMIN)/2$ -- và hai cách này cho kết quả khác nhau một lượng không ngẫu
+nhiên (trung bình 0,25\,°C trên toàn kho), nên trộn lẫn mà không ghi nhận sẽ làm sai các phân tích xu
+hướng dài hạn (Mục~6.9) nếu tỷ trọng hai định nghĩa đổi theo thời gian. Nhóm không hiệu chỉnh độ
+lệch này (xem giới hạn còn tồn đọng, Mục~9), chỉ ghi lại bằng cột \texttt{temp\_def} để các phân tích
+sau có thể tự quyết định có cần hiệu chỉnh hay không.
 
 % ==========================================================
 \chapter{Kế hoạch thực hiện}
@@ -441,7 +524,11 @@ Trương Tuấn Nghĩa & Spark/PINN Lead + Dashboard/PM Lead (kiêm nhiệm) & X
 
 \section{Tiến độ tổng thể}
 
-Kế hoạch bám sát đúng năm mốc chính thức của học phần, không có mốc tự đặt thêm. Hình~\ref{fig:gantt} trình bày biểu đồ Gantt tổng thể.
+Ba mốc chính thức của học phần là nộp đề cương (5/10), báo cáo tiến độ (20/10), và báo cáo cuối kỳ
+(15/11). Nhóm đặt thêm ba mốc nội bộ không chính thức (chốt nhóm 26/9, hội tụ hệ thống 2/11, kiểm
+thử 27/10) để chia nhỏ công việc giữa hai mốc chính thức xa nhau nhất (20/10 $\to$ 15/11).
+Hình~\ref{fig:gantt} trình bày biểu đồ Gantt tổng thể; mốc chính thức tô đỏ đậm, mốc nội bộ tô nhạt
+hơn.
 
 \begin{figure}[H]
 \centering
@@ -453,21 +540,23 @@ Kế hoạch bám sát đúng năm mốc chính thức của học phần, khôn
     bar/.append style={fill=hustblue!60},
     bar height=0.6,
     milestone/.append style={fill=badred},
+    milestone label font=\scriptsize,
     title height=1,
     time slot format=isodate
-    ]{2026-09-26}{2026-11-08}
-    \gantttitlecalendar{month=name} \\
-    \ganttbar{TV1 -- Ingestion}{2026-09-26}{2026-11-08} \\
-    \ganttbar{TV2 -- Schema}{2026-09-26}{2026-11-08} \\
-    \ganttbar{TV3+4 -- Spark/PINN/Dashboard}{2026-09-26}{2026-11-08} \\
-    \ganttmilestone{Chốt nhóm 26/9}{2026-09-26} \\
-    \ganttmilestone{Nộp đề cương 5/10}{2026-10-05} \\
-    \ganttmilestone{Báo cáo tiến độ 20/10}{2026-10-20} \\
-    \ganttmilestone{Test 27/10}{2026-10-27} \\
-    \ganttmilestone{Báo cáo cuối kỳ 8/11}{2026-11-08}
+    ]{2026-09-26}{2026-11-15}
+    \gantttitlecalendar{year, month=shortname} \\
+    \ganttbar{TV1 -- Ingestion}{2026-09-26}{2026-11-15} \\
+    \ganttbar{TV2 -- Schema}{2026-09-26}{2026-11-15} \\
+    \ganttbar{TV3+4 -- Spark/PINN/Dashboard}{2026-09-26}{2026-11-15} \\
+    \ganttmilestone{Chốt nhóm (nội bộ) 26/9}{2026-09-26} \\
+    \ganttmilestone{Nộp đề cương (chính thức) 5/10}{2026-10-05} \\
+    \ganttmilestone{Báo cáo tiến độ (chính thức) 20/10}{2026-10-20} \\
+    \ganttmilestone{Kiểm thử (nội bộ) 27/10}{2026-10-27} \\
+    \ganttmilestone{Hội tụ hệ thống (nội bộ) 2/11}{2026-11-02} \\
+    \ganttmilestone{Báo cáo cuối kỳ (chính thức) 15/11}{2026-11-15}
 \end{ganttchart}%
 }
-\caption{Biểu đồ Gantt tổng thể theo các mốc chính thức của học phần}
+\caption{Biểu đồ Gantt tổng thể: ba mốc chính thức của học phần và ba mốc nội bộ nhóm tự đặt}
 \label{fig:gantt}
 \end{figure}
 
@@ -486,7 +575,7 @@ Kế hoạch chi tiết được lập theo tuần và vai trò, mỗi hạng m�
 1 & Nộp đề cương (5/10) & Đăng ký API/tài khoản, script tải mẫu, thiết kế schema nháp, dựng môi trường Spark \\
 2 & Báo cáo tiến độ (20/10) & Tải batch đầy đủ, Mediated Schema chính thức, cụm Spark, streaming cơ bản, dashboard khung \\
 3 & Hội tụ hệ thống (2/11) & Xử lý outlier, Record Linkage đầy đủ, huấn luyện PINN (nếu khả thi), tối ưu data skew \\
-4 & Báo cáo cuối kỳ (8/11) & Data freeze, demo trực tiếp, hoàn thiện báo cáo và bảo vệ \\
+4 & Báo cáo cuối kỳ (15/11, mốc chính thức của học phần) & Data freeze, hoàn thiện báo cáo và slide, chuẩn bị môi trường demo nếu được yêu cầu (không bắt buộc demo trực tiếp) \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -550,6 +639,24 @@ khớp định danh -- đúng kỹ thuật \textit{Record Linkage} dựa trên t
 Chương~2. Kết quả: 22/26 trạm ISD (84,6\%) khớp được với một trạm GHCN tương ứng, khoảng cách
 trung bình 0,53km; nhiều cặp khớp tại khoảng cách 0,000km, xác nhận hai bản ghi cùng trỏ về một
 trạm khí tượng vật lý được hai cơ quan gán hai mã độc lập.
+
+\textbf{Precision/recall theo nhãn số WMO.} 22 trạm GHCN và ISD đều có thể thuộc mạng lưới trạm
+khí tượng toàn cầu WMO: GHCN mã hoá số WMO ở 5 chữ số cuối (vd \texttt{VMM00048820} $\to$ WMO
+\texttt{48820}), ISD mã hoá ở 5 chữ số đầu của mã USAF khi USAF kết thúc bằng 0 (vd
+\texttt{48820099999} $\to$ USAF \texttt{488200} $\to$ WMO \texttt{48820}). Ghép theo số WMO (không
+dùng toạ độ) cho 15 cặp trạm cùng số WMO, khoảng cách thật giữa hai mã trong mỗi cặp từ 0 đến
+2,76km -- đây là tập nhãn độc lập với thuật toán Haversine (không dùng toạ độ để tạo nhãn), tuy có
+giới hạn: cả hai mã có thể cùng tra từ một danh bạ WMO gốc nên không hoàn toàn độc lập về nguồn, và
+chỉ 23/26 trạm ISD có mã USAF theo đúng quy ước WMO+0 để gán nhãn được. Đối chiếu 15 cặp nhãn này
+với 22 cặp do thuật toán Haversine tìm được (ngưỡng 5km): cả 15/15 cặp nhãn đều nằm trong 22 cặp đã
+tìm (recall $= 100\,\%$ trên tập có nhãn); không cặp nhãn nào bị ghép sai sang trạm khác (precision
+$= 100\,\%$ trên tập có nhãn). 4 trạm ISD không khớp được (\texttt{48825199999},
+\texttt{48459099999}, \texttt{98429099999}, \texttt{48600199999}) không trùng số WMO với trạm GHCN
+nào trong danh sách -- không có bằng chứng đây là các trường hợp bị bỏ sót (false negative); riêng
+\texttt{48825199999} có 5 chữ số đầu trùng ngẫu nhiên với một mã GHCN nhưng cách nhau 100,9km, xác
+nhận đây là hai trạm vật lý khác nhau, không phải một cặp bị bỏ sót. 7/22 cặp do thuật toán tìm được
+không có mã WMO để đối chiếu độc lập (khoảng cách 0,047--1,857km, nhất quán về mặt hình học nhưng
+\emph{chưa kiểm chứng được} bằng nhãn ngoài).
 
 \section{Kiểm chuẩn sai số nội suy không gian}
 
@@ -657,9 +764,10 @@ Spark tổng hợp 9,0 triệu bản ghi thành 977.239 ngày--vị trí--nguồ
 hợp lệ khi có quan trắc ở đủ bốn khối 6 giờ, tránh lệch theo chu kỳ ngày đêm), rồi tính \emph{khí
 hậu nền} theo ngày-trong-năm với cửa sổ trượt $\pm$15 ngày: trung bình, độ lệch chuẩn và bách phân vị
 90. Giai đoạn nền của GHCN là chuẩn khí hậu WMO 1991--2020. Trên nền đó, hệ thống tính dị thường
-chuẩn hoá $z$ ($|z| \ge 2$ bất thường, $|z| \ge 3$ cực đoan), đợt nóng theo chỉ số TG90p của ETCCDI
-(từ ba ngày liên tiếp vượt bách phân vị 90), và chỉ số hạn/ẩm SPI-1, SPI-3 (khớp phân bố gamma theo
-từng tháng, McKee 1993) -- vì lượng mưa không có phân bố chuẩn nên không dùng $z$-score cho mưa.
+chuẩn hoá $z$ ($|z| \ge 2$ bất thường, $|z| \ge 3$ cực đoan), đợt nóng theo chỉ số TG90p theo chuẩn
+ETCCDI (từ ba ngày liên tiếp vượt bách phân vị 90), và chỉ số hạn/ẩm SPI-1, SPI-3 (khớp phân bố gamma
+theo từng tháng, McKee và cộng sự~\cite{mckee1993spi}) -- vì lượng mưa không có phân bố chuẩn nên
+không dùng $z$-score cho mưa.
 
 Với lượng mưa, hệ thống dùng các chỉ số ETCCDI: ngưỡng bách phân vị 95 và 99 tính trên các \emph{ngày
 ướt} ($\ge 1$~mm) của giai đoạn nền, cùng các chỉ số năm Rx1day (lượng mưa ngày lớn nhất), R95p/R99p
@@ -709,8 +817,9 @@ biến hỏng''; khi tích hợp trạm điểm với lưới tái phân tích, 
 
 Để tách biến đổi khí hậu dài hạn khỏi dị thường ngắn hạn, nhóm áp dụng hai phương pháp phi tham số
 chuẩn trong khí hậu học trên chuỗi nhiệt độ trung bình năm của các trạm GHCN (\path{warehouse/climate_trends.py}):
-kiểm định Mann--Kendall (có hiệu chỉnh nhóm giá trị trùng) để xác định xu hướng có ý nghĩa thống kê,
-và độ dốc Sen (trung vị độ dốc của mọi cặp năm) để đo tốc độ thay đổi. Cả hai đều không giả định phân
+kiểm định Mann--Kendall~\cite{mann1945nonparametric,kendall1975rank} (có hiệu chỉnh nhóm giá trị
+trùng) để xác định xu hướng có ý nghĩa thống kê, và độ dốc Sen~\cite{sen1968estimates} (trung vị độ
+dốc của mọi cặp năm) để đo tốc độ thay đổi. Cả hai đều không giả định phân
 bố chuẩn và bền với giá trị ngoại lai. Một năm chỉ hợp lệ khi có ít nhất 80\% số ngày có số liệu, và
 mỗi chuỗi cần tối thiểu 30 năm.
 
@@ -718,7 +827,8 @@ Trong giai đoạn chung 1975--2024, \textbf{25/27 trạm ấm lên có ý nghĩ
 dốc Sen trung vị \textbf{+0,21\textdegree{}C mỗi thập kỷ}; nhanh nhất là Jakarta (+0,41), Penang (+0,35),
 Bangkok (+0,35) và Cao Bằng (+0,34\textdegree{}C/thập kỷ). Đối với lượng mưa, chỉ một đến sáu trạm có đủ
 30 năm số liệu, nên chưa đủ cơ sở để kết luận về xu hướng mưa. Hai hạn chế cần lưu ý: kiểm định
-Mann--Kendall giả định chuỗi không tự tương quan (chưa áp dụng hiệu chỉnh Hamed--Rao), và nhiệt độ
+Mann--Kendall giả định chuỗi không tự tương quan (chưa áp dụng hiệu chỉnh
+Hamed--Rao~\cite{hamed1998modified}), và nhiệt độ
 GHCN là TAVG hoặc trung bình của TMAX và TMIN, nên nếu một trạm thay đổi cách tính giữa chừng có thể
 tạo ra xu hướng giả -- dạng lỗi mà Mục~6.10 phát hiện được khi có ERA5 làm chuỗi tham chiếu.
 
@@ -729,7 +839,8 @@ Nhóm áp dụng kỹ thuật đồng nhất hoá chuỗi khí hậu (homogeniza
 trạm và ERA5 nội suy tại cùng vị trí, cùng ngày. Biến động khí hậu thật xuất hiện ở cả trạm lẫn ERA5 nên
 bị triệt tiêu trong chênh lệch; phần còn lại phản ánh vấn đề của cảm biến hoặc điểm đo. Trôi dần được
 kiểm định bằng Mann--Kendall kết hợp độ dốc Sen; nhảy bậc đột ngột được kiểm định bằng phép kiểm định
-Pettitt. Một chuỗi chỉ bị gắn cờ khi vừa có ý nghĩa thống kê ($p < 0{,}05$) vừa vượt ngưỡng vật lý
+Pettitt~\cite{pettitt1979nonparametric}. Một chuỗi chỉ bị gắn cờ khi vừa có ý nghĩa thống kê
+($p < 0{,}05$) vừa vượt ngưỡng vật lý
 (nhiệt độ 0,3\textdegree{}C/năm hoặc bước 0,5\textdegree{}C; áp suất 0,5~hPa/năm hoặc bước 1~hPa).
 
 Trên 80 chuỗi trạm--biến, hệ thống gắn cờ 4 chuỗi. Rõ nhất là cảm biến áp suất của trạm ISD Phnom
@@ -794,11 +905,11 @@ thực hiện.
 
 \section{Đóng góp về sản phẩm}
 
-Sản phẩm cuối cùng của đề tài là một kho dữ liệu khí tượng đã chuẩn hoá cho khu vực Đông Nam Á, có thể tái sử dụng cho nhiều bài toán phân tích khác nhau thay vì chỉ phục vụ một ứng dụng đơn lẻ -- một đặc điểm thiết kế có chủ đích, phân biệt đề tài với các dự án chỉ xây dựng pipeline một chiều cho một mục đích cụ thể. Trên nền kho dữ liệu này, ba ứng dụng cụ thể được triển khai: phát hiện dị thường khí hậu theo khu vực/thời điểm, thống kê hỗ trợ nông nghiệp và năng lượng tái tạo, và khuyến nghị khung giờ bay UAV an toàn dựa trên dự báo gió/mưa.
+Sản phẩm cuối cùng của đề tài là một kho dữ liệu khí tượng đã chuẩn hoá cho khu vực Đông Nam Á, có thể tái sử dụng cho nhiều bài toán phân tích khác nhau thay vì chỉ phục vụ một ứng dụng đơn lẻ. Trên nền kho dữ liệu này, nhóm đã cài đặt phát hiện dị thường khí hậu theo khu vực/thời điểm, đối chứng với ba sự kiện thật (Mục~6.8--6.10). Thống kê hỗ trợ nông nghiệp/năng lượng tái tạo và khuyến nghị khung giờ bay UAV an toàn dựa trên dự báo gió/mưa là hai ứng dụng khác mà kho dữ liệu đủ khả năng phục vụ, nhưng nhóm chưa cài đặt trong phạm vi đồ án này -- xem hướng phát triển ở Chương~9.
 
 \section{Đóng góp về phương pháp}
 
-Đề tài không đề xuất kỹ thuật lý thuyết mới, mà đóng góp một trường hợp áp dụng và kiểm chứng có hệ thống các kỹ thuật tích hợp dữ liệu lớn đã được thiết lập (Chương 2) trên một miền dữ liệu có đặc điểm dị biệt không-thời gian rõ nét hơn hẳn các ví dụ minh hoạ dạng bảng quan hệ thường gặp trong tài liệu gốc. Cụ thể, đề tài minh chứng bằng số liệu thực nghiệm: (i) cách một mediated schema GAV đơn giản vẫn xử lý được năm nguồn có tới ba dạng cấu trúc cú pháp khác nhau nếu có bước tiền xử lý PIVOT/PARSE tường minh; (ii) cách một quy tắc Survivorship dựa trên xếp hạng độ tin cậy nguồn (thay vì trung bình cộng ngây thơ) tránh được lỗi tích hợp sai nghiêm trọng giữa các đại lượng vật lý dễ nhầm lẫn (áp suất bề mặt và áp suất mực nước biển); và (iii) ranh giới rõ ràng giữa khi nào chỉ cần nội suy không gian thông thường và khi nào thực sự cần ràng buộc vật lý (PINN) để lấp khoảng trống dữ liệu.
+Đề tài không đề xuất kỹ thuật lý thuyết mới, mà đóng góp một trường hợp áp dụng và kiểm chứng có hệ thống các kỹ thuật tích hợp dữ liệu lớn đã được thiết lập (Chương 2) trên một miền dữ liệu có đặc điểm dị biệt không-thời gian rõ nét hơn hẳn các ví dụ minh hoạ dạng bảng quan hệ thường gặp trong tài liệu gốc. Cụ thể, đề tài minh chứng bằng số liệu thực nghiệm: (i) cách một mediated schema GAV đơn giản vẫn xử lý được năm nguồn có tới ba dạng cấu trúc cú pháp khác nhau nếu có bước tiền xử lý PIVOT/PARSE tường minh; (ii) cách một quy tắc Survivorship dựa trên xếp hạng độ tin cậy nguồn (thay vì trung bình cộng ngây thơ) tránh được lỗi tích hợp sai nghiêm trọng giữa các đại lượng vật lý dễ nhầm lẫn (áp suất bề mặt và áp suất mực nước biển). Về ranh giới giữa nội suy không gian thông thường và ràng buộc vật lý (PINN, Mục~6.5), kết quả hiện tại \emph{chưa} cho thấy PINN vượt baseline hồi quy thuần ở quy mô dữ liệu một lát cắt không-thời gian đang có -- đây là câu hỏi mở, không phải đóng góp đã khẳng định được.
 
 % ==========================================================
 \chapter{Quản lý rủi ro}
@@ -846,9 +957,9 @@ với kết quả đo thật, lấy nguyên số liệu từ Chương~6.
 \textbf{Mã} & \textbf{Ngưỡng / tiêu chí} & \textbf{Kết quả đo được} & \textbf{Đạt?} \\
 \midrule
 M1 & Đủ 5/5 nguồn, đúng phạm vi đề cương & 5/5 nguồn, 8.955.315 bản ghi thật, đúng phạm vi (ERA5 5 năm, ISD 10 năm -- Mục~6.1) & Đạt \\
-M2 & Kiểm chứng định lượng GAV + Survivorship & Referential integrity 100\,\% (Mục~6.1); Entity Resolution 22/26 trạm (84,6\,\%) khớp trong 5km (Mục~6.2) & Đạt \\
-M3 & Tăng tốc \texttt{cache()} $\geq 30\,\%$ & 69,4\,\% (0,36s $\to$ 0,11s, trung vị 3 lần, Mục~6.4). Giảm skew thử riêng (11,08\,\%$\to$0,94\,\%) nhưng không áp dụng vì đổi lại chậm hơn 1,5--2,5 lần & Đạt \\
-M4 & Phát hiện đúng chiều 3 sự kiện đối chứng & Tín hiệu rõ ở nắng nóng 2024 và bão Yagi; đúng chiều nhưng tín hiệu yếu ở hạn Mekong (chỉ 2 trạm đủ số liệu mưa -- Mục~6.8) & Đạt \\
+M2 & Kiểm chứng định lượng GAV + Survivorship & Referential integrity 100\,\% (Mục~6.1); Entity Resolution 22/26 trạm (84,6\,\%) khớp trong 5km, precision/recall theo nhãn mã trạm WMO (Mục~6.2) & Đạt một phần \\
+M3 & Tăng tốc \texttt{cache()} $\geq 30\,\%$ & 69,4\,\% (0,36s $\to$ 0,11s, trung bình 3 lần, Mục~6.4). Giảm skew thử riêng (11,08\,\%$\to$0,94\,\%) nhưng không áp dụng vì đổi lại chậm hơn 1,5--2,5 lần & Đạt \\
+M4 & Phát hiện đúng chiều 3 sự kiện đối chứng & Tín hiệu rõ ở nắng nóng 2024 và bão Yagi; đúng chiều nhưng tín hiệu yếu ở hạn Mekong (chỉ 2 trạm đủ số liệu mưa -- Mục~6.8) & Đạt một phần \\
 M5 & Dashboard đọc đúng dữ liệu tích hợp, không lỗi runtime & 10 thành phần đã verify qua trình duyệt thật trên 8,96 triệu bản ghi (Mục~6.7) & Đạt \\
 \midrule
 \multicolumn{4}{@{}l}{\textit{Hạng mục tuỳ chọn nâng cao, không thuộc năm mục tiêu chính}} \\
@@ -858,32 +969,85 @@ M5 & Dashboard đọc đúng dữ liệu tích hợp, không lỗi runtime & 10 
 \end{tabular}
 \end{table}
 
-Qua bốn tuần triển khai, đề tài đã chứng minh được ba đặc điểm đặt ra từ đầu không chỉ ở mức thiết
-kế mà bằng kết quả thực nghiệm cụ thể: \emph{thứ nhất}, toàn bộ nguồn dữ liệu lõi không chỉ được
-kiểm chứng mà đã được tích hợp thành một kho dữ liệu thống nhất 8.955.315 bản ghi thật đúng phạm vi
-đề cương (ERA5 năm năm, ISD mười năm), bao gồm cả việc phát hiện và xử lý các vấn đề nảy sinh ngoài
-dự tính (hai hệ mã trạm độc lập giữa GHCN và ISD, hiệu ứng masking của Z-score, chi phí thực tế của
-chiến lược partition, bốn lỗi số liệu trong pipeline, các giá trị đã bị NOAA đánh dấu lỗi nhưng vẫn
-được dùng), và trên kho dữ liệu đó hệ thống phát hiện đúng
-các sự kiện khí hậu có thật (nắng nóng 2024, bão Yagi cả về áp suất lẫn lượng mưa), tách được xu hướng
-ấm lên dài hạn (+0,21\textdegree{}C mỗi thập kỷ, 25/27 trạm) khỏi dị thường ngắn hạn, phát hiện được
-cảm biến trôi bằng chuỗi tham chiếu ERA5, và phát cảnh báo theo luồng qua Kafka và Spark Structured
-Streaming; \emph{thứ hai}, hai kỹ
-thuật lý thuyết cốt lõi của học phần -- GAV schema mapping và Survivorship-based record linkage --
-không chỉ được áp dụng mà đã được kiểm chuẩn định lượng (referential integrity 100\%, RMSE nội suy
-không gian theo từng biến); \emph{thứ ba}, chiến lược giảm tải cho vai trò kiêm nhiệm đã phát huy
-hiệu quả trong thực tế -- hai hạng mục bắt buộc (Spark batch và Dashboard) được hoàn thành đầy đủ
-trước, các hạng mục nâng cao (PINN, Spark Streaming) được triển khai sau theo đúng thứ tự ưu tiên
-đã hoạch định.
+Sau quá trình triển khai, nhóm đã tích hợp năm nguồn dữ liệu lõi thành một kho thống nhất
+8.955.315 bản ghi thật, đúng phạm vi đề cương (ERA5 năm năm, ISD mười năm). Quá trình này phát hiện
+và xử lý các vấn đề nảy sinh ngoài dự tính: hai hệ mã trạm độc lập giữa GHCN và ISD, hiệu ứng
+masking của Z-score, chi phí thực tế của chiến lược partition, bốn lỗi số liệu trong pipeline, và
+các giá trị đã bị NOAA đánh dấu lỗi nhưng vẫn từng được dùng trước khi sửa. Trên kho dữ liệu đó, hệ
+thống phát hiện đúng chiều các sự kiện khí hậu có thật (nắng nóng 2024, bão Yagi cả về áp suất lẫn
+lượng mưa, tín hiệu yếu hơn ở hạn Mekong), tách được xu hướng ấm lên dài hạn
+(+0,21\textdegree{}C mỗi thập kỷ, 25/27 trạm) khỏi dị thường ngắn hạn, phát hiện được cảm biến trôi
+bằng chuỗi tham chiếu ERA5, và phát cảnh báo theo luồng qua Kafka và Spark Structured Streaming.
+Hai kỹ thuật lý thuyết cốt lõi của học phần -- GAV schema mapping và Survivorship-based record
+linkage -- được áp dụng và kiểm chứng định lượng một phần: referential integrity 100\%, Entity
+Resolution đạt precision và recall 100\% trên tập có nhãn độc lập từ số WMO (Mục~6.2), nhưng quy
+tắc Survivorship (Bảng~\ref{tab:survivorship}) mới dừng ở mức cài đặt có ngưỡng xung đột theo biến
+trong mã nguồn, chưa có số liệu thực thi (bao nhiêu giá trị bị gắn cờ xung đột) được báo cáo. Chiến
+lược giảm tải cho vai trò kiêm nhiệm cũng phát huy hiệu quả: hai hạng mục bắt buộc (Spark batch và
+Dashboard) hoàn thành trước, các hạng mục nâng cao (PINN, Spark Streaming) triển khai sau theo đúng
+thứ tự ưu tiên đã hoạch định.
 
 Nhóm cũng xác định rõ các giới hạn còn tồn đọng tại thời điểm báo cáo: mô hình PINN trường gió
 chưa vượt trội một mô hình hồi quy thuần về sai số bình phương trung bình ở quy mô dữ liệu hiện
-tại; khí hậu nền của ERA5 và ISD còn ngắn (5--10 năm) nên kết luận về dị thường khí hậu chủ yếu dựa
-trên GHCN; chỉ số SPI và xu hướng mưa mới tính được cho rất ít trạm do GHCN thiếu nhiều số liệu mưa ở
-Đông Nam Á; mạng trạm thưa khiến 15.938 dị thường vẫn chưa có đối chứng; và luồng phát hiện dị thường
-mới xử lý bản ghi theo ngày, chưa gom nguồn theo giờ theo thời gian sự kiện. Các giới hạn này được
-ghi nhận trung thực kèm nguyên nhân kỹ thuật cụ thể (Chương~6 và~8), không che giấu nhằm tạo ấn
-tượng kết quả tốt hơn thực tế -- một nguyên tắc nhóm tuân thủ xuyên suốt quá trình thực hiện đề tài.
+tại (dù có lợi thế nhỏ về sai số tuyệt đối trung bình, Mục~6.5); khí hậu nền của ERA5 và ISD còn ngắn
+(5--10 năm) nên kết luận về dị thường khí hậu chủ yếu dựa trên GHCN; chỉ số SPI và xu hướng mưa mới
+tính được cho rất ít trạm do GHCN thiếu nhiều số liệu mưa ở Đông Nam Á; mạng trạm thưa khiến 15.938
+dị thường vẫn chưa có đối chứng; luồng phát hiện dị thường mới xử lý bản ghi theo ngày, chưa gom
+nguồn theo giờ theo thời gian sự kiện; và hạ tầng triển khai hiện chạy trên một máy
+(Mục~\ref{sec:infra-limits}) nên các số đo về tốc độ/quy mô dữ liệu lớn cần đọc cùng với giới hạn này.
+
+\section{Giới hạn hạ tầng triển khai}
+\label{sec:infra-limits}
+
+Năm điểm dưới đây là giới hạn thật của hạ tầng đang dùng, nêu thẳng thay vì chỉ đợi được hỏi:
+
+\begin{itemize}
+    \item \textbf{Kafka một broker}: \texttt{apache/kafka:3.7.0} chạy chế độ KRaft gộp controller
+    và broker trong một container (\texttt{docker-compose.kafka.yml}). Vì chỉ một broker,
+    replication factor phải đặt bằng 1; topic được tạo tự động khi producer ghi lần đầu nên chỉ có
+    1 partition, không có key, retention mặc định 7 ngày. Cấu hình này đủ để kiểm tính đúng của
+    luồng xử lý (179/179 cảnh báo khớp kết quả batch, Mục~6.6) nhưng không chịu lỗi (mất broker là
+    mất topic) và Spark chỉ đọc được bằng 1 task (do 1 partition), bất kể cụm có bao nhiêu worker.
+    \item \textbf{Không có HDFS/object storage}: kho Parquet nằm trên ổ cục bộ của máy chạy, một
+    bản sao duy nhất. Cụm Spark ba container đọc được kho vì cùng mount một thư mục trên một máy
+    vật lý; cấu hình này không chạy được nếu worker nằm ở máy khác -- khi đó cần HDFS, NFS, hoặc
+    object storage (vd MinIO qua \texttt{s3a://}).
+    \item \textbf{AQE (Adaptive Query Execution) dùng cấu hình mặc định}: từ Spark 3.2, tham số
+    \path{spark.sql.adaptive.enabled} mặc định là \texttt{true}; PySpark 4.2.0 dùng ở Mục~6.4
+    không chỉnh tham số này. Mọi phép đo thời gian truy vấn ở Mục~6.4 vì vậy chịu ảnh hưởng của
+    việc Spark tự gộp shuffle partition và tự chọn chiến lược join, không phải cấu hình nhóm tự đặt tay.
+    \item \textbf{Không dùng table format có ACID}: kho là thư mục Parquet thường, không dùng Delta
+    Lake/Iceberg/Hudi -- không có transaction log hay snapshot isolation; mỗi lần sửa lỗi phải build
+    lại toàn bộ kho (khoảng 3 phút ở quy mô hiện tại).
+    \item \textbf{Entity Resolution dùng nhãn WMO một phần}: Mục~6.2 tính được precision/recall
+    100\% trên 15/26 trạm ISD có mã WMO rút ra được; 11 trạm còn lại chưa có nhãn để kiểm.
+\end{itemize}
+
+Không điểm nào trong năm điểm trên làm thay đổi tính đúng của kết quả đã báo cáo (phát hiện dị
+thường, xu hướng, PINN) vì các kết quả đó không phụ thuộc vào việc Kafka có nhiều broker hay kho có
+nằm trên HDFS hay không; chúng giới hạn những gì có thể kết luận về \emph{hiệu năng và độ tin cậy
+của hạ tầng dữ liệu lớn} từ các số đo trong Mục~6.4 và~6.6.
+
+\section{Hướng phát triển}
+\label{sec:future-work}
+
+\begin{enumerate}
+    \item \textbf{Hạ tầng nhiều máy thật}: chuyển kho Parquet sang lưu trữ phân tán (HDFS hoặc
+    object storage qua \texttt{s3a://}, ví dụ MinIO), chạy Spark trên 2--3 máy vật lý thay vì
+    \texttt{local[*]}, và tạo topic Kafka nhiều partition với replication factor $\geq 2$ trên nhiều
+    broker để đo được tính chịu lỗi thật (hiện tại 1 broker, RF $=1$, xem Mục~\ref{sec:infra-limits}).
+    \item \textbf{Thí nghiệm mở rộng quy mô}: đo thời gian truy vấn theo 1$\times$, 2$\times$,
+    4$\times$, 8$\times$ kích thước dữ liệu (nhân bản hoặc tải thêm năm ERA5) và theo số worker, để
+    xác định ngưỡng từ đó Spark thật sự có lợi so với một công cụ đơn máy (Mục~4.3).
+    \item \textbf{Table format có ACID/time travel}: chuyển kho sang Delta Lake hoặc Apache Iceberg
+    để ghi mỗi lần sửa lỗi dữ liệu thành một phiên bản, cho phép so sánh kho trước/sau làm sạch
+    bằng time travel thay vì chỉ mô tả bằng lời.
+    \item \textbf{Hoàn thiện Survivorship và Entity Resolution}: báo cáo số giá trị thật bị gắn cờ
+    xung đột theo ngưỡng đã có trong mã (Bảng~\ref{tab:survivorship}), và mở rộng tập nhãn precision/recall
+    của ER (Mục~6.2) bằng gán nhãn tay cho 11 trạm ISD còn lại chưa có số WMO.
+    \item \textbf{Hai ứng dụng chưa cài đặt}: thống kê hỗ trợ nông nghiệp/năng lượng tái tạo và
+    khuyến nghị khung giờ bay UAV an toàn (Mục~7.1), dựa trên kho dữ liệu đã có sẵn.
+\end{enumerate}
 
 % ==========================================================
 \chapter*{PHỤ LỤC: TÁI LẬP KẾT QUẢ}
@@ -977,7 +1141,9 @@ thương mại.
 
 \bibitem{ullman1997logical} J.~D.~Ullman, ``Information integration using logical views,'' in \emph{Proc. 6th International Conference on Database Theory (ICDT)}, 1997, pp.~19--40.
 
-\bibitem{levy2001survey} A.~Y.~Levy, ``Answering queries using views: A survey,'' \emph{The VLDB Journal}, vol.~10, pp.~270--294, 2001.
+\bibitem{abiteboul1998complexity} S.~Abiteboul and O.~M.~Duschka, ``Complexity of answering queries using materialized views,'' in \emph{Proc. 17th ACM SIGACT-SIGMOD-SIGART Symposium on Principles of Database Systems (PODS)}, 1998, pp.~254--263.
+
+\bibitem{levy2001survey} A.~Y.~Halevy, ``Answering queries using views: A survey,'' \emph{The VLDB Journal}, vol.~10, no.~4, pp.~270--294, 2001.
 
 \bibitem{lenzerini2002theoretical} M.~Lenzerini, ``Data integration: A theoretical perspective,'' in \emph{Proc. 21st ACM SIGMOD-SIGACT-SIGART Symposium on Principles of Database Systems (PODS)}, 2002, pp.~233--246.
 
@@ -1012,6 +1178,28 @@ thương mại.
 \bibitem{raissi2019physics} M.~Raissi, P.~Perdikaris, and G.~E.~Karniadakis, ``Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations,'' \emph{Journal of Computational Physics}, vol.~378, pp.~686--707, 2019.
 
 \bibitem{hersbach2020era5} H.~Hersbach, B.~Bell, P.~Berrisford, et al., ``The ERA5 global reanalysis,'' \emph{Quarterly Journal of the Royal Meteorological Society}, vol.~146, no.~730, pp.~1999--2049, 2020.
+
+\bibitem{mckee1993spi} T.~B.~McKee, N.~J.~Doesken, and J.~Kleist, ``The relationship of drought frequency and duration to time scales,'' in \emph{Proc. 8th Conference on Applied Climatology}, American Meteorological Society, 1993, pp.~179--184.
+
+\bibitem{mann1945nonparametric} H.~B.~Mann, ``Nonparametric tests against trend,'' \emph{Econometrica}, vol.~13, no.~3, pp.~245--259, 1945.
+
+\bibitem{kendall1975rank} M.~G.~Kendall, \emph{Rank Correlation Methods}, 4th ed. London: Griffin, 1975.
+
+\bibitem{sen1968estimates} P.~K.~Sen, ``Estimates of the regression coefficient based on Kendall's tau,'' \emph{Journal of the American Statistical Association}, vol.~63, no.~324, pp.~1379--1389, 1968.
+
+\bibitem{pettitt1979nonparametric} A.~N.~Pettitt, ``A non-parametric approach to the change-point problem,'' \emph{Journal of the Royal Statistical Society: Series C (Applied Statistics)}, vol.~28, no.~2, pp.~126--135, 1979.
+
+\bibitem{hamed1998modified} K.~H.~Hamed and A.~R.~Rao, ``A modified Mann-Kendall trend test for autocorrelated data,'' \emph{Journal of Hydrology}, vol.~204, no.~1--4, pp.~182--196, 1998.
+
+\bibitem{menne2012ghcnd} M.~J.~Menne, I.~Durre, R.~S.~Vose, B.~E.~Gleason, and T.~G.~Houston, ``An overview of the Global Historical Climatology Network-Daily database,'' \emph{Journal of Atmospheric and Oceanic Technology}, vol.~29, no.~7, pp.~897--910, 2012.
+
+\bibitem{smith2011isd} A.~Smith, N.~Lott, and R.~Vose, ``The integrated surface database: Recent developments and partnerships,'' \emph{Bulletin of the American Meteorological Society}, vol.~92, no.~6, pp.~704--708, 2011.
+
+\bibitem{nasapower} NASA Langley Research Center, ``POWER Project,'' \url{https://power.larc.nasa.gov/}, truy cập 30/9/2026.
+
+\bibitem{openmeteo} P.~Zippenfenig, ``Open-Meteo.com Weather API,'' Zenodo, 2023. doi: 10.5281/zenodo.7970649.
+
+\bibitem{arcoera5} Google Research, ``ARCO-ERA5: Analysis-Ready, Cloud Optimized ERA5,'' \url{https://github.com/google-research/arco-era5}, truy cập 30/9/2026.
 
 \end{thebibliography}
 \addcontentsline{toc}{chapter}{TÀI LIỆU THAM KHẢO}
