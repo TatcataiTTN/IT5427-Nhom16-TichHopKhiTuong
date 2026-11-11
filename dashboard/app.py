@@ -254,8 +254,10 @@ m1.metric("Ngày nóng bất thường (z ≥ 2), 4–5/2024", f"{hot['ty_le_nga
           delta_color="inverse")
 m2.metric("Đợt nóng dài nhất 2024", f"{max(int(e['days']) for e in hot['dot_nong_dai_nhat'])} ngày")
 m2.caption(f"{hot['so_tram_co_dot_nong']}/{hot['so_tram']} trạm có đợt nóng trong 4–5/2024")
-m3.metric("Bão Yagi 9/2024 — áp suất ERA5", f"{summ['bao_yagi_9_2024']['ap_suat_thap_nhat_hpa']} hPa")
-m3.caption(f"z = {summ['bao_yagi_9_2024']['z_thap_nhat']} so với nền 2020–2024 (miền Bắc Việt Nam)")
+yagi_hpa = summ["bao_yagi_9_2024"]["ap_suat_thap_nhat_hpa"]
+m3.metric("Bão Yagi 9/2024 — áp suất ERA5", f"{yagi_hpa} hPa" if yagi_hpa is not None else "Chưa có dữ liệu")
+m3.caption(f"z = {summ['bao_yagi_9_2024']['z_thap_nhat']} so với nền 2020–2024 (miền Bắc Việt Nam)"
+           if yagi_hpa is not None else "Không có bản ghi áp suất ERA5 khớp phạm vi lọc hiện tại")
 cross = summ["tong_quan"]["xac_nhan_cheo"]
 m4.metric("Dị thường trạm được ERA5 xác nhận", f"{cross.get('xac_nhan_khi_hau', 0):,}")
 m4.caption(f"{cross.get('nghi_loi_du_lieu', 0)} trường hợp nghi lỗi dữ liệu (trạm cực đoan, ERA5 bình thường)")
