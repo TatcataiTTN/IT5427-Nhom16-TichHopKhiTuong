@@ -658,6 +658,21 @@ nhận đây là hai trạm vật lý khác nhau, không phải một cặp bị
 không có mã WMO để đối chiếu độc lập (khoảng cách 0,047--1,857km, nhất quán về mặt hình học nhưng
 \emph{chưa kiểm chứng được} bằng nhãn ngoài).
 
+\textbf{Số liệu thực thi Survivorship.} Chạy \texttt{warehouse/survivorship.py} trên warehouse hiện
+có (1.076.473 dòng, gộp theo \texttt{location\_id} và ngày) cho 666.897 bản ghi ``golden'': tỷ lệ
+xung đột theo ngưỡng từng biến (Bảng~\ref{tab:survivorship}) là 11.461/640.169 (1,8\,\%) cho nhiệt
+độ, 2.294/387.207 (0,6\,\%) cho mưa, và 0/2.196 cùng 0/9.558 (0\,\%) cho hai loại áp suất. Độ ẩm
+tương đối và tốc độ gió có tỷ lệ xung đột rất cao (10.445/11.498 và 11.751/11.837, trên 90\,\%) --
+kiểm tra lại công thức cho thấy đây là \emph{nhiễu do ngưỡng theo phần trăm}: khi giá trị của nguồn
+``thắng'' gần 0 (gió lặng, hoặc giờ ít chênh lệch ẩm), chênh lệch tuyệt đối nhỏ cũng tạo ra chênh
+lệch phần trăm rất lớn so với ngưỡng 20--30\,\% -- không phải bằng chứng hai nguồn đo sai nhau một
+cách hệ thống. Nguồn thắng nhiều nhất cho nhiệt độ là GHCN (628.436/640.169, đúng thứ hạng 1 ở
+Bảng~\ref{tab:survivorship}), sau đó ISD (9.302), Open-Meteo (2.196), ERA5 (235) -- khớp đúng chiều
+ưu tiên đã thiết kế. Giới hạn hiệu năng cần ghi nhận: cách lặp theo từng nhóm (\texttt{pandas}
+\texttt{groupby} + vòng lặp Python) mất 34.604\,s ($\approx 9$ giờ 37 phút) cho 1,08 triệu dòng --
+không vector hoá, không khả thi để chạy lại trên kho đầy đủ 8,96 triệu dòng mà không viết lại bằng
+phép toán Spark/DuckDB vector hoá.
+
 \section{Kiểm chuẩn sai số nội suy không gian}
 
 Nhóm thực hiện kiểm chuẩn bằng cách so sánh giá trị ERA5 đã nội suy Bilinear vào toạ độ một trạm
@@ -957,7 +972,7 @@ với kết quả đo thật, lấy nguyên số liệu từ Chương~6.
 \textbf{Mã} & \textbf{Ngưỡng / tiêu chí} & \textbf{Kết quả đo được} & \textbf{Đạt?} \\
 \midrule
 M1 & Đủ 5/5 nguồn, đúng phạm vi đề cương & 5/5 nguồn, 8.955.315 bản ghi thật, đúng phạm vi (ERA5 5 năm, ISD 10 năm -- Mục~6.1) & Đạt \\
-M2 & Kiểm chứng định lượng GAV + Survivorship & Referential integrity 100\,\% (Mục~6.1); Entity Resolution 22/26 trạm (84,6\,\%) khớp trong 5km, precision/recall theo nhãn mã trạm WMO (Mục~6.2) & Đạt một phần \\
+M2 & Kiểm chứng định lượng GAV + Survivorship & Referential integrity 100\,\% (Mục~6.1); Entity Resolution precision/recall 100\,\%/100\,\% trên tập có nhãn WMO (Mục~6.2); Survivorship thực thi thật trên 666.897 bản ghi, tỷ lệ xung đột 0--1,8\,\% cho nhiệt độ/mưa/áp suất (Mục~6.2) & Đạt một phần \\
 M3 & Tăng tốc \texttt{cache()} $\geq 30\,\%$ & 69,4\,\% (0,36s $\to$ 0,11s, trung bình 3 lần, Mục~6.4). Giảm skew thử riêng (11,08\,\%$\to$0,94\,\%) nhưng không áp dụng vì đổi lại chậm hơn 1,5--2,5 lần & Đạt \\
 M4 & Phát hiện đúng chiều 3 sự kiện đối chứng & Tín hiệu rõ ở nắng nóng 2024 và bão Yagi; đúng chiều nhưng tín hiệu yếu ở hạn Mekong (chỉ 2 trạm đủ số liệu mưa -- Mục~6.8) & Đạt một phần \\
 M5 & Dashboard đọc đúng dữ liệu tích hợp, không lỗi runtime & 10 thành phần đã verify qua trình duyệt thật trên 8,96 triệu bản ghi (Mục~6.7) & Đạt \\
@@ -1042,9 +1057,11 @@ của hạ tầng dữ liệu lớn} từ các số đo trong Mục~6.4 và~6.6.
     \item \textbf{Table format có ACID/time travel}: chuyển kho sang Delta Lake hoặc Apache Iceberg
     để ghi mỗi lần sửa lỗi dữ liệu thành một phiên bản, cho phép so sánh kho trước/sau làm sạch
     bằng time travel thay vì chỉ mô tả bằng lời.
-    \item \textbf{Hoàn thiện Survivorship và Entity Resolution}: báo cáo số giá trị thật bị gắn cờ
-    xung đột theo ngưỡng đã có trong mã (Bảng~\ref{tab:survivorship}), và mở rộng tập nhãn precision/recall
-    của ER (Mục~6.2) bằng gán nhãn tay cho 11 trạm ISD còn lại chưa có số WMO.
+    \item \textbf{Vector hoá Survivorship và mở rộng nhãn ER}: viết lại \texttt{resolve\_survivorship}
+    bằng phép toán vector hoá (Spark/DuckDB) thay vì vòng lặp Python theo nhóm -- bản hiện tại mất
+    9 giờ 37 phút cho 1,08 triệu dòng (Mục~6.2), không khả thi trên kho đầy đủ 8,96 triệu dòng; và
+    mở rộng tập nhãn precision/recall của ER (Mục~6.2) bằng gán nhãn tay cho 11 trạm ISD còn lại
+    chưa có số WMO.
     \item \textbf{Hai ứng dụng chưa cài đặt}: thống kê hỗ trợ nông nghiệp/năng lượng tái tạo và
     khuyến nghị khung giờ bay UAV an toàn (Mục~7.1), dựa trên kho dữ liệu đã có sẵn.
 \end{enumerate}
