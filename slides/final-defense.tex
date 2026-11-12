@@ -86,21 +86,88 @@ IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
 \begin{columns}[T]
 \begin{column}{0.5\textwidth}
 \begin{enumerate}
+\item Bài toán \& mục tiêu đo được
+\item Kiến trúc hệ thống
 \item \hyperlink{sec1}{Tổng kết kết quả chung}
-\item \hyperlink{sec2}{Ingestion -- TV1}
-\item \hyperlink{sec3}{Schema \& Warehousing -- TV2}
+\item \hyperlink{sec2}{Ingestion -- Ngô Văn Quang}
 \end{enumerate}
 \end{column}
 \begin{column}{0.5\textwidth}
 \begin{enumerate}
-\setcounter{enumi}{3}
-\item \hyperlink{sec4}{Spark, Streaming \& PINN -- TV3}
+\setcounter{enumi}{4}
+\item \hyperlink{sec3}{Schema \& Warehousing -- Nguyễn Cao Lương}
+\item \hyperlink{sec4}{Spark, Streaming \& PINN -- Trương Tuấn Nghĩa}
 \item \hyperlink{sec4b}{Phát hiện dị thường khí hậu}
-\item \hyperlink{sec5}{Dashboard -- TV4}
+\item \hyperlink{sec5}{Dashboard -- Trương Tuấn Nghĩa}
+\item Tiến trình nhóm theo mốc
 \item \hyperlink{sec6}{Rủi ro, giới hạn \& kết luận}
 \end{enumerate}
 \end{column}
 \end{columns}
+\end{frame}
+
+\begin{frame}{Tích hợp năm nguồn khí tượng dị biệt thành một kho dữ liệu, với 5 mục tiêu có ngưỡng đo được trước}
+\centering\footnotesize
+Bài toán: hợp nhất ERA5 (lưới), GHCN-Daily, NOAA ISD (chuỗi trạm), NASA POWER, Open-Meteo (điểm)
+-- ba dạng cấu trúc, ba dạng cú pháp -- thành một kho truy vấn được cho phát hiện dị thường khí hậu
+Đông Nam Á.
+
+\vspace{0.2cm}
+\begin{tabular}{@{}p{0.7cm}p{5.1cm}p{6.3cm}@{}}
+\toprule
+Mã & Mục tiêu & Chỉ số -- ngưỡng (đặt trước) \\
+\midrule
+M1 & Kho dữ liệu chuẩn hoá đủ 5 nguồn & Đủ 5/5 nguồn, đúng phạm vi đề cương (ERA5 5 năm, ISD 10 năm) \\
+M2 & GAV + Survivorship có kiểm chứng định lượng & Referential integrity; tỷ lệ khớp Entity Resolution (biết sau khi đo) \\
+M3 & Spark tối ưu hoá có đo trước/sau & Tăng tốc \texttt{cache()} $\geq 30\,\%$ \\
+M4 & Phát hiện dị thường đối chứng được sự kiện thật & Đúng chiều với 3 sự kiện đã biết (nắng nóng 2024, Yagi, hạn Mekong) \\
+M5 & Dashboard đọc đúng dữ liệu tích hợp & Không lỗi runtime, verify qua trình duyệt thật \\
+\bottomrule
+\end{tabular}
+
+\end{frame}
+
+\begin{frame}{Kiến trúc: 5 nguồn qua Ingestion/QC, kho Parquet, rẽ nhánh batch/streaming, hội tụ Dashboard}
+\centering
+\resizebox{!}{5.6cm}{%
+\begin{tikzpicture}[
+  f/.style={rectangle, rounded corners, draw=hustblue, thick, fill=hustblue!8, minimum width=2.6cm, minimum height=0.9cm, align=center, font=\scriptsize},
+  big/.style={rectangle, rounded corners, draw=hustblue, thick, align=center, font=\small, minimum height=1.1cm},
+  arr/.style={-{Latex[length=2.2mm]}, thick, hustblue},
+  arrlabel/.style={font=\tiny, align=center, fill=white, inner sep=1pt}]
+\node[f] (s1) at (0,4.5) {NASA POWER\\(JSON, điểm)};
+\node[f] (s2) at (0,3.0) {Open-Meteo\\(JSON, điểm)};
+\node[f] (s3) at (0,1.5) {GHCN-Daily\\(CSV long)};
+\node[f] (s4) at (0,0) {NOAA ISD\\(CSV nén trường)};
+\node[f] (s5) at (0,-1.5) {ERA5 ARCO\\(Zarr lưới)};
+\node[big, minimum width=3.0cm, minimum height=7.6cm, fill=warnorange!10, draw=warnorange] (ing) at (3.8,1.5) {};
+\node[font=\small\bfseries, align=center] at (3.8,4.7) {Ingestion\\+ QC 4 tầng};
+\node[font=\tiny, align=left, text width=2.7cm] at (3.8,1.4) {PIVOT (GHCN)\\PARSE (ISD)\\cờ QC nguồn\\giới hạn vật lý\\nhảy giá trị\\khử trùng ISD};
+\node[big, minimum width=2.9cm, fill=goodgreen!10, draw=goodgreen] (ms) at (7.8,3.4) {Mediated Schema\\\texttt{WeatherObs}\\(GAV)};
+\node[big, minimum width=2.9cm, fill=goodgreen!15, draw=goodgreen] (pq) at (7.8,0.3) {Kho Parquet\\\texttt{year/source}\\(8,96 triệu dòng)};
+\draw[arr] (ms) -- (pq) node[midway, arrlabel] {ghi};
+\node[big, minimum width=3.1cm] (er) at (12.2,5.4) {Entity Resolution\\GHCN--ISD};
+\node[big, minimum width=3.1cm] (surv) at (12.2,3.7) {Survivorship\\(hợp giải giá trị)};
+\node[big, minimum width=3.1cm] (anom) at (12.2,2.0) {Dị thường khí hậu\\xu hướng, trôi cảm biến};
+\node[big, minimum width=3.1cm] (pinn) at (12.2,0.3) {PINN\\trường gió/RH};
+\node[big, minimum width=2.7cm, fill=badred!8, draw=badred] (kafka) at (11.9,-2.0) {Kafka topic\\(replay, 1 broker)};
+\node[big, minimum width=3.1cm, fill=badred!8, draw=badred] (stream) at (11.9,-3.9) {Spark Structured\\Streaming};
+\node[big, minimum width=2.8cm, minimum height=1.8cm, fill=hustblue!15, draw=hustblue] (dash) at (16.3,0.9) {Dashboard\\Streamlit\\(10 panel)};
+\foreach \s in {s1,s2,s3,s4,s5} { \draw[arr] (\s) -- (ing); }
+\draw[arr] (ing) -- (ms) node[midway, arrlabel, yshift=0.35cm] {bản ghi sạch};
+\draw[arr] (pq.east) -- ++(0.8,0) |- (er.west);
+\draw[arr] (pq.east) -- ++(0.8,0) |- (surv.west);
+\draw[arr] (pq.east) -- ++(0.8,0) |- (anom.west);
+\draw[arr] (pq.east) -- ++(0.8,0) |- (pinn.west);
+\draw[arr] (pq.east) -- ++(0.8,-2.3) |- (kafka.west) node[pos=0.2, arrlabel] {phát lại theo ngày};
+\draw[arr] (kafka) -- (stream) node[midway, arrlabel, xshift=1.0cm] {1 partition};
+\draw[arr] (er.east) -| ++(1.4,0) |- (dash.north);
+\draw[arr] (surv.east) -| ++(1.1,0) |- (dash.north);
+\draw[arr] (anom.east) -- (dash.north west);
+\draw[arr] (pinn.east) -| (dash.south west);
+\draw[arr] (stream.east) -| ++(1.6,0) |- (dash.south);
+\end{tikzpicture}%
+}
 \end{frame}
 
 \resetPageCount
@@ -122,10 +189,9 @@ IT5427 -- Tích hợp và xử lý dữ liệu lớn -- Nhóm 16\\[3pt]
 \end{center}
 \vspace{0.3cm}
 \centering\small
-GHCN-Daily, NOAA ISD, ERA5 (ARCO), Open-Meteo, NASA POWER -- hội tụ qua Mediated Schema
-\texttt{WeatherObs}, giải quyết cả 2 loại dị biệt cốt lõi: cấu trúc/ngữ nghĩa (PIVOT/PARSE) và
-nhận dạng/toàn vẹn (Survivorship + Entity Resolution). Dữ liệu đủ phạm vi đề cương: ERA5 5 năm
-(2020--2024, 9 biến, theo giờ), ISD 10 năm, GHCN toàn lịch sử 1943--2026 -- \textasciitilde 23\,GB dữ liệu thô.
+GHCN-Daily, NOAA ISD, ERA5 (ARCO), Open-Meteo, NASA POWER hội tụ qua Mediated Schema
+\texttt{WeatherObs}. ERA5 5 năm (2020--2024, 9 biến, theo giờ), ISD 10 năm, GHCN toàn lịch sử
+1943--2026 -- \textasciitilde 23\,GB dữ liệu thô, 303\,MB sau tích hợp.
 \end{frame}
 
 %=============================================================
@@ -157,7 +223,7 @@ Giữ TAVG thật, cột\newline\texttt{temp\_def} riêng \\
 Đầy đủ: \texttt{docs/17-dac-trung-va-yeu-cau-xu-ly-du-lieu.md}.
 \end{frame}
 
-\begin{frame}{IQR phát hiện đủ 5/5 outlier cực đoan trong khi Z-score chỉ bắt được 1/5 -- một phát hiện thống kê thật}
+\begin{frame}{IQR phát hiện đủ 5/5 outlier cực đoan trong khi Z-score chỉ bắt được 1/5, trên dữ liệu mô phỏng N(25, 2)}
 \begin{center}
 \resizebox{!}{3.4cm}{%
 \begin{tikzpicture}[remember picture,
@@ -219,7 +285,7 @@ Bức xạ ERA5 \textbf{sai đại lượng} & Mapping dùng bức xạ đỉnh 
 \end{tabular}
 \end{frame}
 
-\begin{frame}{Kiểm soát chất lượng 4 tầng khi nạp: loại 3.661 giá trị chính NOAA đã đánh dấu sai}
+\begin{frame}{Kiểm soát chất lượng 4 tầng khi nạp: loại 3.661 giá trị mà NOAA đã gắn cờ lỗi}
 \centering\scriptsize
 \begin{tabular}{@{}p{3.1cm}p{5.3cm}p{4.2cm}@{}}
 \toprule
@@ -297,10 +363,11 @@ Partition lớn nhất & 11,08\% & \textcolor{goodgreen}{0,94\%} \\
 \end{tabular}
 \vspace{0.3cm}
 
-\small \textbf{Quyết định trung thực}: KHÔNG áp dụng -- skew hiện tại (11,1\%) đã thấp, còn 1.306 partition
-làm nặng thêm vấn đề ``small-file'': đo lại công bằng trên 9,0 triệu dòng, partition hiện tại vẫn
-\textbf{chậm hơn 1,5--2,5 lần} so với không partition, vì Parquet đã tự bỏ qua dữ liệu không liên quan nhờ
-thống kê min/max theo row-group. Lợi ích partition pruning chỉ rõ ở quy mô lớn hơn hoặc trên S3/GCS.
+\small \textbf{Không áp dụng}: 1.306 partition làm nặng thêm vấn đề ``small-file''; đo lại công bằng
+trên 9,0 triệu dòng (một lần làm nóng, trung vị 5 lần chạy), partition hiện tại vẫn
+\textbf{chậm hơn 1,5--2,5 lần} so với không partition, vì Parquet đã tự bỏ qua dữ liệu không liên
+quan nhờ thống kê min/max theo row-group. Lợi ích partition pruning chỉ rõ ở quy mô lớn hơn hoặc
+trên S3/GCS.
 \end{frame}
 
 %=============================================================
@@ -309,7 +376,7 @@ thống kê min/max theo row-group. Lợi ích partition pruning chỉ rõ ở q
 \hypertarget{sec4}{}
 \hustsectionpage{4. Spark, Streaming\\\& PINN (TV3)}
 
-\begin{frame}{PINN trường gió không vượt baseline hồi quy thuần ở quy mô dữ liệu hiện tại -- một kết quả trung thực, không che giấu}
+\begin{frame}{PINN trường gió chưa vượt baseline hồi quy thuần về RMSE ở quy mô dữ liệu hiện tại}
 \centering\small
 \begin{tabular}{@{}crrr@{}}
 \toprule
@@ -317,33 +384,32 @@ $\lambda$ & Test RMSE & Test MAE & Physics loss cuối \\
 \midrule
 0,0 (baseline) & \textbf{1,0473} & 0,7772 & 0 \\
 0,01 & 1,0636 & 0,7753 & 0,5347 \\
-0,1 & 1,0577 & 0,7706 & 0,1665 \\
+0,1 & 1,0577 & \textbf{0,7706} & 0,1665 \\
 1,0 & 1,1057 & 0,7921 & 0,0112 \\
 \bottomrule
 \end{tabular}
 
 \vspace{0.6cm}
 \centering\small
-Dữ liệu: 113 trạm ERA5 thật (gió trung bình 15--17/6/2021), ràng buộc continuity Navier-Stokes 2D rút gọn. Nguyên nhân hợp lý:
-chỉ 1 snapshot không-thời-gian, ràng buộc vật lý cần nhiều điểm/chuỗi thời gian hơn để thể hiện
-lợi thế MSE. Số liệu cập nhật 10/11 sau khi sửa lỗi trung bình cộng hướng gió theo độ (đại lượng
-vòng tròn) thành trung bình vector $(u,v)$ đúng -- kết luận không đổi, đã verify tái lập được tới 4
-chữ số thập phân.
+Dữ liệu: 113 trạm ERA5 thật (gió trung bình 15--17/6/2021), ràng buộc continuity Navier-Stokes 2D rút gọn.
+Trên RMSE, baseline tốt hơn; trên MAE, PINN $\lambda{=}0{,}1$ tốt hơn (0,7706 so với 0,7772). Chênh
+lệch khoảng 1\% trên 22 trạm kiểm tra và một seed -- chưa đủ để kết luận mô hình nào tốt hơn. Nguyên
+nhân hợp lý: chỉ 1 snapshot không-thời-gian, ràng buộc vật lý cần nhiều điểm/chuỗi thời gian hơn để
+thể hiện lợi thế. Số liệu cập nhật 10/11 sau khi sửa lỗi trung bình cộng hướng gió theo độ (đại
+lượng vòng tròn) thành trung bình vector $(u,v)$ đúng -- kết luận không đổi, tái lập được tới 4 chữ
+số thập phân.
 \end{frame}
 
-\begin{frame}{Spark Structured Streaming đọc Kafka thật và tính đúng cửa sổ trượt 1 phút, phát hiện thêm 2 bug môi trường}
+\begin{frame}{Spark Structured Streaming tính đúng cửa sổ trượt 1 phút trên cụm giả lập một máy}
 \begin{center}
-\bignumS{\checkmark\ 20/10}{Spark 3 node + Kafka\\đã verify thật}{goodgreen}{4.5cm}
+\bignumS{\checkmark\ 20/10}{1 master + 2 worker\\+ Kafka 1 broker\\(giả lập 1 máy)}{goodgreen}{4.5cm}
 \bignumS{\checkmark\ 09/11}{Streaming windowing\\test live thành công}{goodgreen}{4.5cm}
 \end{center}
 \vspace{0.2cm}
 \centering\small
-\texttt{warehouse/spark\_streaming\_consumer.py} đọc topic Kafka thật, console hiển thị đúng
-\texttt{avg\_temp\_c} theo cửa sổ trượt 1 phút/30s từng trạm. Phát hiện + sửa 2 bug môi trường
-thật: (1) \texttt{SparkContext} lỗi do hostname tự phân giải ra IP LAN thay vì localhost (nghi do
-mạng ảo Docker Desktop vừa khởi động lại) -- sửa bằng \texttt{SPARK\_LOCAL\_IP=127.0.0.1}; (2)
-Kafka connector ghim cứng version 4.0.0 không khớp PySpark cài thật 4.2.0 -- sửa bằng lấy version
-tự động.
+\texttt{warehouse/spark\_streaming\_consumer.py} đọc topic Kafka, console hiển thị đúng
+\texttt{avg\_temp\_c} theo cửa sổ trượt 1 phút/30s từng trạm. Cụm Docker 3 container trên một máy
+vật lý (không phải 3 máy thật); Kafka 1 broker KRaft, RF 1, topic tự tạo 1 partition.
 \end{frame}
 
 \begin{frame}{Phát hiện dị thường theo luồng: cảnh báo hiện ra dần qua từng micro-batch và khớp 100\,\% với batch}
@@ -536,7 +602,10 @@ Panel & Nội dung thật \\
 \includegraphics[width=0.95\textwidth]{dashboard_overview.png}
 
 \vspace{0.4cm}
-\scriptsize Panel 1 -- tổng quan tích hợp 5 nguồn: 1.076.473 bản ghi thật, 119 trạm/điểm, chọn trạm/nguồn/biến để xem chuỗi thời gian.
+\scriptsize Panel 1 -- tổng quan tích hợp 5 nguồn: ảnh chụp trên bản warehouse rút gọn đang chạy
+local (1.076.473 dòng, 119 trạm/điểm) -- kết quả phân tích ở các slide khác tính trên kho đầy đủ
+8,96 triệu dòng sau khi tải đủ ERA5 5 năm (Mục~6.1 báo cáo). Chọn trạm/nguồn/biến để xem chuỗi
+thời gian.
 \end{frame}
 
 \begin{frame}{Giao diện dashboard (panel 7): dị thường khí hậu, số liệu đọc trực tiếp từ warehouse}
@@ -544,7 +613,30 @@ Panel & Nội dung thật \\
 \includegraphics[width=0.92\textwidth]{dashboard_anomaly.png}
 
 \vspace{0.3cm}
-\scriptsize Panel 7 -- dị thường khí hậu: 12,3\% ngày nóng bất thường (4--5/2024, gấp 10$\times$ nền 1991--2020), đợt nóng dài nhất 30 ngày, tỷ lệ theo năm cho thấy 2024 vượt trội.
+\scriptsize Panel 7 -- dị thường khí hậu (cùng bản warehouse rút gọn ở trên): 12,3\% ngày nóng bất
+thường (4--5/2024, gấp 10$\times$ nền 1991--2020), đợt nóng dài nhất 30 ngày, tỷ lệ theo năm cho
+thấy 2024 vượt trội -- cùng chiều với kết luận trên kho đầy đủ ở Mục~6.8.
+\end{frame}
+
+\begin{frame}{Ba mốc chính thức (5/10, 20/10, 15/11) đều có sản phẩm cụ thể theo từng người}
+\centering\scriptsize
+\begin{tabular}{@{}p{2.6cm}p{2.0cm}p{5.0cm}p{2.9cm}@{}}
+\toprule
+Người & Mốc & Sản phẩm & Bằng chứng \\
+\midrule
+Ngô Văn Quang & 5/10 & Script tải GHCN/ISD/ERA5 mẫu, kiểm chứng 4 nguồn lõi & \texttt{scripts/check\_data\_sources.py} \\
+Ngô Văn Quang & 20/10--15/11 & Tải đầy đủ 5 nguồn, QC 4 tầng, sửa 4 lỗi pipeline & \texttt{ingestion/}, Mục~6.11 \\
+Nguyễn Cao Lương & 5/10 & Thiết kế Mediated Schema nháp & \texttt{docs/06} \\
+Nguyễn Cao Lương & 20/10--15/11 & Schema chính thức, Survivorship, Entity Resolution & \texttt{warehouse/entity\_resolution.py} \\
+Trương Tuấn Nghĩa & 5/10 & Dựng môi trường Spark, Docker & \texttt{docker-compose.*.yml} \\
+Trương Tuấn Nghĩa & 20/10 & Cụm Spark+Kafka, dashboard khung, streaming cơ bản & Mục~6.6, S17--S18 \\
+Trương Tuấn Nghĩa & 15/11 & PINN, tối ưu Spark, dashboard 10 panel, báo cáo/slide hoàn thiện & Mục~6.4--6.7 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.15cm}
+\scriptsize Không có demo trực tiếp trong phần trình bày theo thông báo 15/11; môi trường demo (cụm
+Docker, \texttt{pytest}) đã sẵn sàng chạy ngay nếu được yêu cầu.
 \end{frame}
 
 %=============================================================

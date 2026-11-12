@@ -262,30 +262,62 @@ Nguồn dữ liệu trung tâm của đề tài, ERA5, được mô tả chi ti�
 
 \section{Kiến trúc tổng thể}
 
-Hình~\ref{fig:pipeline} trình bày kiến trúc pipeline tổng thể của hệ thống. Năm nguồn dữ liệu đi qua bước chuẩn hoá riêng biệt (Raw Zone) trước khi hội tụ về một Mediated Schema duy nhất, từ đó rẽ nhánh phục vụ đồng thời xử lý theo lô (Spark batch), xử lý luồng giả lập (Spark Structured Streaming), và trực quan hoá (Dashboard).
+Hình~\ref{fig:pipeline} trình bày kiến trúc pipeline tổng thể, vẽ lại đúng theo hệ thống đã triển
+khai (Mục~6): năm nguồn qua Ingestion + kiểm soát chất lượng 4 tầng, hội tụ về Mediated Schema rồi
+ghi thành kho Parquet thật (không phải khái niệm trừu tượng); từ kho đó rẽ hai nhánh xử lý theo lô
+(Entity Resolution, phát hiện dị thường/xu hướng/trôi cảm biến, PINN) và theo luồng giả lập qua
+Kafka; cả hai nhánh cùng phục vụ Dashboard. Nhãn trên mỗi mũi tên ghi định dạng/giao thức dữ liệu
+thật đi qua bước đó.
 
 \begin{figure}[H]
 \centering
-\resizebox{0.92\textwidth}{!}{%
+\resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
-  f/.style={rectangle, rounded corners, draw=hustblue, thick, fill=hustblue!8, minimum width=2.8cm, minimum height=0.9cm, align=center, font=\small},
-  arr/.style={-{Latex[length=2.5mm]}, thick, hustblue}]
-\node[f] (s1) at (-6.5,2.4) {NASA POWER};
-\node[f] (s2) at (-6.5,1.2) {Open-Meteo};
-\node[f] (s3) at (-6.5,0) {GHCN-Daily (PIVOT)};
-\node[f] (s4) at (-6.5,-1.2) {NOAA ISD (PARSE)};
-\node[f] (s5) at (-6.5,-2.4) {ERA5 (ARCO)};
-\node[f, minimum width=3.4cm, minimum height=3cm, fill=warnorange!10, draw=warnorange] (raw) at (-2.0,0) {Raw Zone\\+ chuẩn hoá\\đơn vị/thời gian};
-\node[f, minimum width=3.4cm, minimum height=3cm, fill=goodgreen!10, draw=goodgreen] (ms) at (2.0,0) {Mediated Schema\\(GAV + Survivorship)};
-\node[f, minimum width=3.2cm] (spark) at (6.5,1.4) {Spark batch +\\Structured Streaming};
-\node[f, minimum width=3.2cm] (dash) at (6.5,-1.4) {Dashboard\\(bản đồ, cảnh báo)};
-\foreach \s in {s1,s2,s3,s4,s5} { \draw[arr] (\s) -- (raw); }
-\draw[arr] (raw) -- (ms);
-\draw[arr] (ms) -- (spark);
-\draw[arr] (ms) -- (dash);
+  f/.style={rectangle, rounded corners, draw=hustblue, thick, fill=hustblue!8, minimum width=2.6cm, minimum height=0.9cm, align=center, font=\scriptsize},
+  big/.style={rectangle, rounded corners, draw=hustblue, thick, align=center, font=\small, minimum height=1.1cm},
+  arr/.style={-{Latex[length=2.2mm]}, thick, hustblue},
+  arrlabel/.style={font=\tiny, align=center, fill=white, inner sep=1pt}]
+\node[f] (s1) at (0,4.5) {NASA POWER\\(JSON, điểm)};
+\node[f] (s2) at (0,3.0) {Open-Meteo\\(JSON, điểm)};
+\node[f] (s3) at (0,1.5) {GHCN-Daily\\(CSV long)};
+\node[f] (s4) at (0,0) {NOAA ISD\\(CSV nén trường)};
+\node[f] (s5) at (0,-1.5) {ERA5 ARCO\\(Zarr lưới)};
+
+\node[big, minimum width=3.0cm, minimum height=7.6cm, fill=warnorange!10, draw=warnorange] (ing) at (3.8,1.5) {};
+\node[font=\small\bfseries, align=center] at (3.8,4.7) {Ingestion\\+ QC 4 tầng};
+\node[font=\tiny, align=left, text width=2.7cm] at (3.8,1.4) {PIVOT (GHCN)\\PARSE (ISD)\\cờ QC nguồn\\giới hạn vật lý\\nhảy giá trị\\khử trùng ISD};
+
+\node[big, minimum width=2.9cm, fill=goodgreen!10, draw=goodgreen] (ms) at (7.8,3.4) {Mediated Schema\\\texttt{WeatherObs}\\(GAV)};
+\node[big, minimum width=2.9cm, fill=goodgreen!15, draw=goodgreen] (pq) at (7.8,0.3) {Kho Parquet\\\texttt{year/source}\\(8,96 triệu dòng)};
+\draw[arr] (ms) -- (pq) node[midway, arrlabel] {ghi};
+
+\node[big, minimum width=3.1cm] (er) at (12.2,5.4) {Entity Resolution\\GHCN--ISD};
+\node[big, minimum width=3.1cm] (surv) at (12.2,3.7) {Survivorship\\(hợp giải giá trị)};
+\node[big, minimum width=3.1cm] (anom) at (12.2,2.0) {Dị thường khí hậu\\xu hướng, trôi cảm biến};
+\node[big, minimum width=3.1cm] (pinn) at (12.2,0.3) {PINN\\trường gió/RH};
+
+\node[big, minimum width=2.7cm, fill=badred!8, draw=badred] (kafka) at (11.9,-2.0) {Kafka topic\\(replay, 1 broker)};
+\node[big, minimum width=3.1cm, fill=badred!8, draw=badred] (stream) at (11.9,-3.9) {Spark Structured\\Streaming};
+
+\node[big, minimum width=2.8cm, minimum height=1.8cm, fill=hustblue!15, draw=hustblue] (dash) at (16.3,0.9) {Dashboard\\Streamlit\\(10 panel)};
+
+\foreach \s in {s1,s2,s3,s4,s5} { \draw[arr] (\s) -- (ing); }
+\draw[arr] (ing) -- (ms) node[midway, arrlabel, yshift=0.35cm] {bản ghi sạch};
+\draw[arr] (pq.east) -- ++(0.8,0) |- (er.west);
+\draw[arr] (pq.east) -- ++(0.8,0) |- (surv.west);
+\draw[arr] (pq.east) -- ++(0.8,0) |- (anom.west);
+\draw[arr] (pq.east) -- ++(0.8,0) |- (pinn.west);
+\draw[arr] (pq.east) -- ++(0.8,-2.3) |- (kafka.west) node[pos=0.2, arrlabel] {phát lại theo ngày};
+\draw[arr] (kafka) -- (stream) node[midway, arrlabel, xshift=1.0cm] {1 partition};
+\draw[arr] (er.east) -| ++(1.4,0) |- (dash.north);
+\draw[arr] (surv.east) -| ++(1.1,0) |- (dash.north);
+\draw[arr] (anom.east) -- (dash.north west);
+\draw[arr] (pinn.east) -| (dash.south west);
+\draw[arr] (stream.east) -| ++(1.6,0) |- (dash.south);
 \end{tikzpicture}%
 }
-\caption{Kiến trúc pipeline tổng thể của hệ thống}
+\caption{Kiến trúc pipeline tổng thể: năm nguồn thật, kho Parquet thật, hai nhánh xử lý (batch và
+streaming giả lập qua Kafka 1 broker), hội tụ về Dashboard}
 \label{fig:pipeline}
 \end{figure}
 
@@ -705,6 +737,37 @@ lần so với không partition trên bốn loại truy vấn đại diện: b�
 hiệu quả nhờ thống kê min/max theo row-group, trong khi 109 thư mục partition phát sinh chi phí liệt
 kê tệp. Nhóm quyết định giữ nguyên chiến lược partition hiện tại; lợi ích \textit{partition pruning}
 chỉ rõ rệt ở quy mô lớn hơn nhiều hoặc khi lưu trên object storage (S3/GCS).
+
+\subsection{Thí nghiệm mở rộng quy mô: Spark so với một công cụ đơn máy}
+\label{sec:scale-benchmark}
+
+Để trả lời trực tiếp câu hỏi ``dữ liệu có thật sự cần Spark ở quy mô hiện tại'' (Mục~4.3), nhóm đo
+cùng một truy vấn đại diện (nhiệt độ trung bình theo trạm/tháng, nguồn GHCN) trên dữ liệu
+\textbf{nhân bản} 1$\times$, 2$\times$, 4$\times$, 8$\times$ kích thước gốc (655.164 $\to$ 5.241.312
+dòng; nhân bản bằng \texttt{UNION ALL}, không sinh dữ liệu giả, ghi rõ vì dữ liệu lặp làm nén và
+cache đẹp hơn thực tế), chạy bằng Spark \texttt{local[1]}, \texttt{local[4]}, \texttt{local[*]}
+(14 core) và DuckDB (công cụ đơn máy, không cấu hình phân tán) -- mỗi cấu hình 1 lần làm nóng + 5
+lần đo, báo cáo trung vị và khoảng min--max. Script:
+\texttt{warehouse/scale\_benchmark.py}; dữ liệu thô: \texttt{warehouse/output/scale\_benchmark\_result.json}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/scale_benchmark.png}
+\caption{Thời gian truy vấn trung vị (thang log-log) theo kích thước dữ liệu, 4 cấu hình}
+\label{fig:scale-benchmark}
+\end{figure}
+
+Kết quả thật (Hình~\ref{fig:scale-benchmark}): ở mọi mức từ 1$\times$ đến 8$\times$, DuckDB nhanh
+hơn Spark \texttt{local[*]} từ 7,3 đến 8,4 lần (1$\times$: 0,155s so với 1,300s; 8$\times$: 0,979s
+so với 7,168s) -- khoảng cách thu hẹp rất chậm khi dữ liệu tăng, cho thấy điểm hoà vốn (nếu có) nằm
+ở quy mô dữ liệu lớn hơn đáng kể so với phạm vi đã thử. Một phát hiện đáng chú ý khác: trong chính
+Spark, \texttt{local[*]} (14 core) luôn \textbf{chậm hơn} \texttt{local[4]} ở mọi kích thước dữ liệu
+(vd 8$\times$: 7,17s so với 6,31s) -- hiệu suất (speedup/số core) chỉ đạt 0,116--0,16 cho 14 core so
+với 0,64--0,76 cho 4 core, tức chi phí điều phối tác vụ trên nhiều core vượt lợi ích song song ở quy
+mô dữ liệu này. Speedup của \texttt{local[4]} so với \texttt{local[1]} ổn định quanh 2,6--3,1 lần ở
+cả bốn mức dữ liệu. Kết luận trung thực: ở quy mô dữ liệu hiện có (dưới 10 triệu dòng), một công cụ
+đơn máy như DuckDB xử lý nhanh hơn Spark; nhóm vẫn dùng Spark vì mục đích học tập (môn học) và để
+chuẩn bị cho phạm vi đầy đủ hơn (toàn bộ lưới ERA5 thay vì 113 điểm đã nội suy, Mục~9).
 
 \section{Mô hình học máy ràng buộc vật lý (PINN)}
 
