@@ -432,11 +432,11 @@ Cảnh báo cực đoan nhất: 30/4/2024 trạm Thái Lan 38,6°C (nền 30,2°
 \hypertarget{sec4b}{}
 \hustsectionpage{Phát hiện dị thường\\khí hậu}
 
-\begin{frame}{Hệ thống phát hiện đúng cả 3 sự kiện khí hậu có thật -- nắng nóng 2024 nổi bật hẳn so với mọi năm}
+\begin{frame}{Nắng nóng và Yagi rõ rệt, hạn Mekong chỉ có tín hiệu yếu -- hệ thống không phóng đại kết quả}
 \begin{columns}[T]
 \begin{column}{0.56\textwidth}
 \centering\scriptsize
-Tỷ lệ ngày nóng bất thường ($z \ge 2$), tháng 4--5, 34 trạm GHCN\\[2pt]
+Tỷ lệ ngày $z \ge 2$ \textbf{cả năm}, 34 trạm GHCN (khác số 12,3\% tháng 4--5 bên phải)\\[2pt]
 \vspace{-0.15cm}
 \begin{tikzpicture}[x=0.52cm, y=0.17cm]
 \foreach \yr/\v in {2016/3.5,2017/0.2,2018/0.5,2019/3.9,2020/2.4,2021/0.8,2022/0.4,2023/4.1,2025/0.8} {
@@ -484,7 +484,7 @@ $<$ 5\,km bị loại: đó là cùng một trạm vật lý GHCN/ISD (Entity Re
 ISD \textbf{Phnom Penh} 3/7/2023: áp suất dao động 995--1054\,hPa dù đã ``qua QC của NOAA, $z = -5{,}5$ khi ERA5 bình thường -- cảm biến lỗi, không phải bão.
 \end{frame}
 
-\begin{frame}{Bão Yagi: 7/9/2024 là ngày mưa lớn nhất 5 năm ERA5 tại 5 trạm miền Bắc, gấp 3 lần p99}
+\begin{frame}{Bão Yagi: 7/9/2024 là ngày mưa lớn nhất 5 năm ERA5 tại 4 trạm miền Bắc, gấp 2,6--3,1 lần p99}
 \centering\small
 \begin{tabular}{@{}llrrr@{}}
 \toprule
@@ -573,11 +573,11 @@ THW00041018 & nhiệt độ & bước $-$0,69\,°C \\
 \hypertarget{sec5}{}
 \hustsectionpage{5. Dashboard\\(TV4)}
 
-\begin{frame}{Dashboard 10 panel đọc trực tiếp 9,0 triệu bản ghi thật, đã verify qua trình duyệt thật}
+\begin{frame}{Dashboard Streamlit có 10 panel đọc kho Parquet, đã kiểm qua trình duyệt}
 \centering\scriptsize
 \begin{tabular}{@{}p{3.4cm}p{9.2cm}@{}}
 \toprule
-Panel & Nội dung thật \\
+Panel & Nội dung \\
 \midrule
 1. Chuỗi thời gian theo trạm & 119 trạm/điểm, 6 biến chọn được \\
 2. Tổng hợp theo nguồn & Bảng thống kê trực tiếp từ warehouse \\
@@ -619,22 +619,22 @@ thấy 2024 vượt trội -- cùng chiều với kết luận trên kho đầy 
 \end{frame}
 
 \begin{frame}{Ba mốc chính thức (5/10, 20/10, 15/11) đều có sản phẩm cụ thể theo từng người}
-\centering\scriptsize
-\begin{tabular}{@{}p{2.6cm}p{2.0cm}p{5.0cm}p{2.9cm}@{}}
+\centering\tiny
+\begin{tabular}{@{}p{2.3cm}p{1.6cm}p{5.6cm}p{2.6cm}@{}}
 \toprule
 Người & Mốc & Sản phẩm & Bằng chứng \\
 \midrule
-Ngô Văn Quang & 5/10 & Script tải GHCN/ISD/ERA5 mẫu, kiểm chứng 4 nguồn lõi & \texttt{scripts/check\_data\_sources.py} \\
-Ngô Văn Quang & 20/10--15/11 & Tải đầy đủ 5 nguồn, QC 4 tầng, sửa 4 lỗi pipeline & \texttt{ingestion/}, Mục~6.11 \\
+Ngô Văn Quang & 5/10 & Script tải GHCN/ISD/ERA5 mẫu, kiểm chứng 4 nguồn lõi & \texttt{check\_data\_sources.py} \\
+Ngô Văn Quang & 20/10--15/11 & Tải đầy đủ 5 nguồn, QC 4 tầng, sửa 4 lỗi pipeline & \texttt{ingestion/}, Mục 6.11 \\
 Nguyễn Cao Lương & 5/10 & Thiết kế Mediated Schema nháp & \texttt{docs/06} \\
-Nguyễn Cao Lương & 20/10--15/11 & Schema chính thức, Survivorship, Entity Resolution & \texttt{warehouse/entity\_resolution.py} \\
+Nguyễn Cao Lương & 20/10--15/11 & Schema chính thức, Survivorship, Entity Resolution & \texttt{entity\_resolution.py} \\
 Trương Tuấn Nghĩa & 5/10 & Dựng môi trường Spark, Docker & \texttt{docker-compose.*.yml} \\
-Trương Tuấn Nghĩa & 20/10 & Cụm Spark+Kafka, dashboard khung, streaming cơ bản & Mục~6.6, S17--S18 \\
-Trương Tuấn Nghĩa & 15/11 & PINN, tối ưu Spark, dashboard 10 panel, báo cáo/slide hoàn thiện & Mục~6.4--6.7 \\
+Trương Tuấn Nghĩa & 20/10 & Cụm Spark+Kafka, dashboard khung, streaming cơ bản & Mục 6.6, S17--S18 \\
+Trương Tuấn Nghĩa & 15/11 & PINN, tối ưu Spark, dashboard 10 panel, báo cáo/slide hoàn thiện & Mục 6.4--6.7 \\
 \bottomrule
 \end{tabular}
 
-\vspace{0.15cm}
+\vspace{0.1cm}
 \scriptsize Không có demo trực tiếp trong phần trình bày theo thông báo 15/11; môi trường demo (cụm
 Docker, \texttt{pytest}) đã sẵn sàng chạy ngay nếu được yêu cầu.
 \end{frame}
@@ -645,31 +645,38 @@ Docker, \texttt{pytest}) đã sẵn sàng chạy ngay nếu được yêu cầu.
 \hypertarget{sec6}{}
 \hustsectionpage{6. Rủi ro, giới hạn\\\& kết luận}
 
-\begin{frame}{Các giới hạn kỹ thuật còn tồn đọng đều đã ghi nhận rõ nguyên nhân, không che giấu}
+\begin{frame}{Giới hạn hạ tầng nói thẳng trước khi bị hỏi: Kafka 1 broker, không HDFS, AQE mặc định}
 \centering\scriptsize
-\begin{tabular}{@{}p{4.2cm}p{7.9cm}@{}}
+\begin{tabular}{@{}p{4.3cm}p{7.8cm}@{}}
 \toprule
-Giới hạn & Nguyên nhân / hướng xử lý \\
+Giới hạn hạ tầng & Hệ quả \\
 \midrule
-Khí hậu nền ngắn với ERA5/ISD (5--10 năm) & Kết luận khí hậu chỉ dựa trên GHCN nền WMO 1991--2020; SPI mới có 12 trạm do GHCN thiếu số liệu mưa \\
-Mạng trạm thưa & 18/61 trạm không có láng giềng trong 200\,km; 15.938 dị thường vẫn chưa có đối chứng \\
-Pipeline inference (\texttt{infer.py}) chưa tách checkpoint & Script hiện train+eval trong 1 lần chạy -- đủ cho quy mô bài tập lớn, chưa tách để demo nhanh \\
-PINN chưa vượt baseline RMSE thuần & Thiếu chiều thời gian trong dữ liệu hiện tại -- physics loss vẫn có giá trị về tính hợp lý vật lý \\
-GitHub Projects board chưa thiết lập & Đã dùng Issues/Pull Request trên GitHub; trạng thái tác vụ theo dõi ở \texttt{docs/03} \\
+Kafka 1 broker KRaft, RF\,=\,1, topic tự tạo 1 partition & Không chịu lỗi; Spark chỉ đọc bằng 1 task dù cụm có nhiều worker \\
+Không HDFS/object storage, kho Parquet 1 bản sao trên ổ cục bộ & Cụm 3 container chỉ chạy được vì cùng mount 1 máy; đổi sang nhiều máy cần HDFS/MinIO \\
+AQE (Spark 4.x) dùng cấu hình mặc định, không tự chỉnh & Số đo 6.4 chịu ảnh hưởng tự gộp shuffle partition, chưa tách riêng \\
+Entity Resolution có nhãn 15/26 trạm (số WMO) & Precision/recall 100\%/100\% trên tập có nhãn; 11 trạm còn lại chưa gán nhãn \\
+Mạng trạm thưa, khí hậu nền ngắn (ERA5/ISD 5--10 năm) & 15.938 dị thường chưa có đối chứng; SPI mới có 12 trạm do GHCN thiếu mưa \\
 \bottomrule
 \end{tabular}
+
+\vspace{0.1cm}
+\scriptsize Không điểm nào ở trên làm sai kết quả đã báo cáo (phát hiện dị thường, xu hướng) --
+chỉ giới hạn những gì kết luận được về hiệu năng/độ tin cậy của hạ tầng dữ liệu lớn.
 \end{frame}
 
-\begin{frame}{5/5 mục tiêu đo được đạt, pipeline đầy đủ từ ingest tới dashboard, số liệu tái lập được}
+\begin{frame}{3/5 mục tiêu đạt đầy đủ, 2/5 đạt một phần (ER chưa đủ nhãn, Survivorship chưa tối ưu tốc độ)}
 \begin{center}
-\bignum{5/5}{mục tiêu đo được\\đạt (Mục tiêu đề tài)}{goodgreen}{4.2cm}
-\bignumS{8.955.315}{bản ghi thật\\5 nguồn, 9 nước}{goodgreen}{4.2cm}
-\bignum{83}{test tự động\\(gồm Spark + Kafka thật)}{goodgreen}{4.2cm}
+\bignum{3/5}{mục tiêu đạt\\đầy đủ}{goodgreen}{4.2cm}
+\bignumS{8.955.315}{bản ghi\\5 nguồn, 9 nước}{goodgreen}{4.2cm}
+\bignum{83}{test tự động\\(gồm Spark + Kafka)}{goodgreen}{4.2cm}
 \end{center}
-\vspace{0.4cm}
+\vspace{0.3cm}
 \centering\small
-Toàn bộ số liệu trong báo cáo này tái lập được bằng cách chạy lại script tương ứng (xem README
-mục 6b, \texttt{requirements.txt}, \texttt{CHANGELOG.md}) -- không có số liệu ước lượng hoặc bịa.
+M1 (kho đủ 5 nguồn), M3 (cache $\geq$30\%), M5 (dashboard) đạt đầy đủ. M2 (GAV+Survivorship) và M4
+(dị thường đối chứng 3 sự kiện) đạt một phần: ER có precision/recall 100\%/100\% trên tập có nhãn
+nhưng Survivorship chưa tối ưu tốc độ cho kho đầy đủ; hạn Mekong chỉ có tín hiệu yếu (2 trạm).
+Hướng phát triển: vector hoá Survivorship, hạ tầng nhiều máy thật, hai ứng dụng nông
+nghiệp/năng lượng/UAV chưa cài đặt.
 \end{frame}
 
 \hustthankyou
