@@ -175,7 +175,7 @@ Về mặt học thuật, đề tài này được chọn vì nó khớp trực 
 
 Bài toán cốt lõi mà đề tài giải quyết là: \emph{làm thế nào để hợp nhất năm nguồn dữ liệu khí tượng có bản chất không tương thích -- một nguồn dạng lưới không gian liên tục (ERA5), hai nguồn dạng chuỗi thời gian tại điểm trạm (NOAA GHCN-Daily, NOAA ISD), và hai nguồn dạng truy vấn điểm theo mô hình/vệ tinh (NASA POWER, Open-Meteo) -- thành một kho dữ liệu thống nhất, đáng tin cậy, có thể dùng trực tiếp cho các bài toán phân tích thực tế?}
 
-Bài toán này bộc lộ đầy đủ các mức độ dị biệt (heterogeneity) đã học trong học phần: dị biệt cú pháp (định dạng NetCDF/GRIB2 nhị phân đa chiều so với CSV bảng phẳng so với JSON lồng nhau), dị biệt cấu trúc (schema "long/EAV" của GHCN so với schema "wide" của bốn nguồn còn lại), dị biệt ngữ nghĩa (áp suất bề mặt và áp suất mực nước biển là hai đại lượng vật lý khác nhau nhưng dễ bị nhầm là một), và dị biệt thực thể/định danh (cùng một thời điểm, cùng một khu vực, nhiệt độ được đo/ước lượng độc lập bởi tới năm nguồn khác nhau, cần một quy tắc Survivorship rõ ràng để quyết định giá trị nào được tin dùng).
+Bài toán này bộc lộ đầy đủ các mức độ dị biệt (heterogeneity) đã học trong học phần: dị biệt cú pháp (định dạng NetCDF/GRIB2 nhị phân đa chiều so với CSV bảng phẳng so với JSON lồng nhau), dị biệt cấu trúc (schema ``long/EAV'' của GHCN so với schema ``wide'' của bốn nguồn còn lại), dị biệt ngữ nghĩa (áp suất bề mặt và áp suất mực nước biển là hai đại lượng vật lý khác nhau nhưng dễ bị nhầm là một), và dị biệt thực thể/định danh (cùng một thời điểm, cùng một khu vực, nhiệt độ được đo/ước lượng độc lập bởi tới năm nguồn khác nhau, cần một quy tắc Survivorship rõ ràng để quyết định giá trị nào được tin dùng).
 
 \section{Mục tiêu đề tài}
 
@@ -221,7 +221,7 @@ Với các trường dữ liệu không có nguồn quan trắc trực tiếp (v
 
 \section{Dữ liệu tái phân tích khí quyển ERA5}
 
-Nguồn dữ liệu trung tâm của đề tài, ERA5, được mô tả chi tiết bởi Hersbach và cộng sự~\cite{hersbach2020era5} -- bộ dữ liệu tái phân tích thế hệ thứ năm của ECMWF, đồng hoá đồng thời quan trắc vệ tinh và mặt đất thông qua mô hình dự báo số trị, cung cấp độ phân giải không gian $0.25°$ và độ phân giải thời gian một giờ liên tục từ năm 1940 đến nay. Đặc điểm "dạng lưới, có nguồn gốc từ mô hình" của ERA5 chính là nguyên nhân trực tiếp của bài toán dị biệt cấu trúc trung tâm mà đề tài giải quyết (lưới liên tục đối lập với điểm trạm rời rạc).
+Nguồn dữ liệu trung tâm của đề tài, ERA5, được mô tả chi tiết bởi Hersbach và cộng sự~\cite{hersbach2020era5} -- bộ dữ liệu tái phân tích thế hệ thứ năm của ECMWF, đồng hoá đồng thời quan trắc vệ tinh và mặt đất thông qua mô hình dự báo số trị, cung cấp độ phân giải không gian $0.25°$ và độ phân giải thời gian một giờ liên tục từ năm 1940 đến nay. Đặc điểm ``dạng lưới, có nguồn gốc từ mô hình'' của ERA5 chính là nguyên nhân trực tiếp của bài toán dị biệt cấu trúc trung tâm mà đề tài giải quyết (lưới liên tục đối lập với điểm trạm rời rạc).
 
 \section{Khoảng trống dẫn tới đề tài}
 
@@ -276,7 +276,7 @@ WeatherObs(location\_id, timestamp\_utc, source,\\
 Mỗi nguồn được ánh xạ vào schema này qua một view cụ thể; ví dụ với NASA POWER:
 $$\text{WeatherObs}(\text{loc},t,\text{'NASA\_POWER'},\text{temp},\ldots) \supseteq \text{POWER}(\text{loc},t,\text{T2M},\text{RH2M},\ldots)$$
 
-Hai nguồn đòi hỏi bước biến đổi bắt buộc trước khi map: GHCN-Daily lưu dữ liệu ở dạng "long" (một dòng/một biến/một ngày) nên cần \textbf{PIVOT} sang dạng "wide"; NOAA ISD lưu các trường ở dạng chuỗi nén nhiều trường con (ví dụ \texttt{TMP="+0250,1"} gồm giá trị và cờ chất lượng) nên cần \textbf{PARSE} hai tầng trước khi sử dụng.
+Hai nguồn đòi hỏi bước biến đổi bắt buộc trước khi map: GHCN-Daily lưu dữ liệu ở dạng ``long'' (một dòng/một biến/một ngày) nên cần \textbf{PIVOT} sang dạng ``wide''; NOAA ISD lưu các trường ở dạng chuỗi nén nhiều trường con (ví dụ \texttt{TMP="+0250,1"} gồm giá trị và cờ chất lượng) nên cần \textbf{PARSE} hai tầng trước khi sử dụng.
 
 \section{Xử lý dị biệt thực thể: Quy tắc Survivorship}
 
@@ -298,7 +298,7 @@ Bảng~\ref{tab:survivorship} trình bày quy tắc ưu tiên nguồn khi cùng 
 \end{tabular}
 \end{table}
 
-Một phát hiện quan trọng trong quá trình thiết kế: trường áp suất bề mặt (\texttt{pressure\_surface}, có ở NASA POWER và ERA5) và áp suất mực nước biển (\texttt{pressure\_msl}, có ở Open-Meteo và NOAA ISD) là \textbf{hai đại lượng vật lý khác nhau}, không được gộp trực tiếp trong bước Survivorship -- đây là ví dụ cụ thể của dị biệt ngữ nghĩa (semantic heterogeneity) đã trình bày trong lý thuyết môn học, và là lý do Mediated Schema ở Mục 3.2 giữ hai cột riêng biệt thay vì gộp chung một cột "pressure".
+Một phát hiện quan trọng trong quá trình thiết kế: trường áp suất bề mặt (\texttt{pressure\_surface}, có ở NASA POWER và ERA5) và áp suất mực nước biển (\texttt{pressure\_msl}, có ở Open-Meteo và NOAA ISD) là \textbf{hai đại lượng vật lý khác nhau}, không được gộp trực tiếp trong bước Survivorship -- đây là ví dụ cụ thể của dị biệt ngữ nghĩa (semantic heterogeneity) đã trình bày trong lý thuyết môn học, và là lý do Mediated Schema ở Mục 3.2 giữ hai cột riêng biệt thay vì gộp chung một cột ``pressure''.
 
 \section{Nội suy không gian và vai trò của PINN}
 
@@ -381,7 +381,7 @@ Con số 35--36 GB vượt khả năng xử lý thuận tiện bằng công cụ
 
 \begin{itemize}
     \item \textbf{Volume}: xấp xỉ 35--36 GB (Mục 4.3), vượt ngưỡng xử lý bằng công cụ truyền thống đơn máy.
-    \item \textbf{Variety}: năm nguồn với ba dạng cấu trúc khác nhau -- lưới đa chiều nhị phân (ERA5), bảng "long" (GHCN), bảng có trường nén (ISD) -- và ba dạng cú pháp (NetCDF/GRIB2, CSV, JSON).
+    \item \textbf{Variety}: năm nguồn với ba dạng cấu trúc khác nhau -- lưới đa chiều nhị phân (ERA5), bảng ``long'' (GHCN), bảng có trường nén (ISD) -- và ba dạng cú pháp (NetCDF/GRIB2, CSV, JSON).
     \item \textbf{Velocity}: dữ liệu lịch sử tĩnh, mô phỏng tính chất luồng qua kiến trúc Replay Streaming Pipeline (Kafka + Spark Structured Streaming).
     \item \textbf{Veracity}: độ phủ trạm quan trắc lệch mạnh giữa các nước (Mục 4.2) và xung đột giá trị giữa nguồn trạm/mô hình (Mục 3.3) đòi hỏi quy tắc Survivorship và báo cáo giới hạn tường minh.
     \item \textbf{Value}: phát hiện dị thường khí hậu, hỗ trợ nông nghiệp/năng lượng tái tạo, hỗ trợ vận hành UAV an toàn (Mục 1.3).
@@ -504,7 +504,7 @@ Tràn bộ nhớ khi xử lý dữ liệu ERA5 đa chiều & Trung bình & Áp d
 \chapter{Kết luận}
 % ==========================================================
 
-Đề tài đã được thiết kế với ba đặc điểm phân biệt so với một đề xuất dự án thông thường: \emph{thứ nhất}, toàn bộ nguồn dữ liệu lõi đã được kiểm chứng bằng thực nghiệm thật (gọi API, tải mẫu, xác minh nội dung) thay vì chỉ tra cứu tài liệu, bao gồm cả việc phát hiện và sửa các sai lệch so với ghi chú ban đầu (ví dụ bản chất "Requester Pays" của ERA5 trên AWS, hay việc phát hiện kênh ARCO-ERA5 miễn phí thay thế); \emph{thứ hai}, hai kỹ thuật lý thuyết cốt lõi của học phần -- GAV schema mapping và Survivorship-based record linkage -- được áp dụng cụ thể, có công thức và bảng quy tắc rõ ràng, không dừng ở mức mô tả định tính; \emph{thứ ba}, kế hoạch thực hiện phản ánh đúng ràng buộc nguồn lực thực tế của nhóm (ba thành viên, một người kiêm nhiệm hai vai trò), kèm chiến lược giảm tải cụ thể thay vì một kế hoạch lý tưởng hoá không tính đến rủi ro nhân sự.
+Đề tài đã được thiết kế với ba đặc điểm phân biệt so với một đề xuất dự án thông thường: \emph{thứ nhất}, toàn bộ nguồn dữ liệu lõi đã được kiểm chứng bằng thực nghiệm thật (gọi API, tải mẫu, xác minh nội dung) thay vì chỉ tra cứu tài liệu, bao gồm cả việc phát hiện và sửa các sai lệch so với ghi chú ban đầu (ví dụ bản chất ``Requester Pays'' của ERA5 trên AWS, hay việc phát hiện kênh ARCO-ERA5 miễn phí thay thế); \emph{thứ hai}, hai kỹ thuật lý thuyết cốt lõi của học phần -- GAV schema mapping và Survivorship-based record linkage -- được áp dụng cụ thể, có công thức và bảng quy tắc rõ ràng, không dừng ở mức mô tả định tính; \emph{thứ ba}, kế hoạch thực hiện phản ánh đúng ràng buộc nguồn lực thực tế của nhóm (ba thành viên, một người kiêm nhiệm hai vai trò), kèm chiến lược giảm tải cụ thể thay vì một kế hoạch lý tưởng hoá không tính đến rủi ro nhân sự.
 
 Với nền tảng dữ liệu, kiến trúc, và kế hoạch đã trình bày, nhóm tin rằng đề tài hoàn toàn khả thi để hoàn thành đúng tiến độ năm mốc chính thức của học phần, đồng thời tạo ra một sản phẩm có giá trị sử dụng thực tế vượt ra ngoài phạm vi bài tập học phần.
 

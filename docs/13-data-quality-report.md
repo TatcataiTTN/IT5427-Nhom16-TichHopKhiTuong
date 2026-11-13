@@ -1,6 +1,6 @@
 # Data Quality Report (TV2 #8, Tuần 3)
 
-Sinh tự động từ `warehouse/data_quality_report.py`, chạy thật trên `warehouse/output/weatherobs.parquet` ngày 2026-11-10. Tổng 8,955,315 bản ghi.
+Sinh tự động từ `warehouse/data_quality_report.py`, chạy thật trên `warehouse/output/weatherobs.parquet` ngày 2026-11-13. Tổng 8,955,313 bản ghi.
 
 ## 1. Tỷ lệ Missing theo nguồn (%)
 
@@ -8,7 +8,7 @@ Sinh tự động từ `warehouse/data_quality_report.py`, chạy thật trên `
 |:-----------|------------:|---------------------:|---------------------:|------------------------:|----------------------------:|-------------------------------:|
 | ERA5       |     4954824 |                  0   |                100   |                     0   |                         0   |                            0   |
 | ISD        |     3071275 |                  0.1 |                  0.3 |                   100   |                         0.4 |                           81.1 |
-| GHCN       |      655166 |                  0.3 |                100   |                    41.3 |                       100   |                          100   |
+| GHCN       |      655164 |                  0.3 |                100   |                    41.3 |                       100   |                          100   |
 | OPEN_METEO |      263088 |                  0   |                  0   |                     0   |                         0   |                            0   |
 | NASA_POWER |       10962 |                  0   |                  0   |                     0   |                         0   |                          100   |
 
@@ -28,7 +28,7 @@ Lưu ý phương pháp: dùng IQR thay vì Z-score làm chỉ số chính vì IQ
 
 | source     |   n_locations | date_min   | date_max   |   n_days_span |
 |:-----------|--------------:|:-----------|:-----------|--------------:|
-| GHCN       |            41 | 1943-01-01 | 2026-10-07 |         30596 |
+| GHCN       |            41 | 1943-01-01 | 2026-10-06 |         30595 |
 | ISD        |            26 | 2015-01-01 | 2024-12-31 |          3653 |
 | ERA5       |           113 | 2020-01-01 | 2024-12-31 |          1827 |
 | NASA_POWER |             6 | 2020-01-01 | 2024-12-31 |          1827 |
