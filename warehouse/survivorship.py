@@ -44,41 +44,48 @@ VALUE_COLUMNS = [
 ]
 
 
-def resolve_survivorship(df: pd.DataFrame, time_tolerance: str = "30min") -> pd.DataFrame:
+def resolve_survivorship(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Input: WeatherObs DataFrame nhieu nguon (co the cung location_id/thoi diem gan nhau
-           tu cac nguon khac nhau).
-    Output: 1 dong/location_id/thoi_diem_lam_tron, moi cot gia tri la gia tri "thang"
-            theo survivorship + cot <field>_conflict (bool) + <field>_source_used.
+    Input: WeatherObs DataFrame nhieu nguon (cung location_id, nhieu ban ghi/ngay tu
+           cac nguon co tan suat khac nhau -- GHCN/NASA_POWER theo ngay, ISD/Open-Meteo
+           theo gio, ERA5 theo gio).
+    Output: 1 dong/location_id/ngay, moi cot gia tri la gia tri "thang" theo survivorship
+            + cot <field>_source_used + cot <field>_conflict (bool).
 
-    Don gian hoa thuc te: group theo (location_id, timestamp lam tron ve gio) vi cac
-    nguon co tan suat khac nhau (GHCN/POWER = ngay, ISD/Open-Meteo = gio).
+    Sua loi phuong phap cua ban dau (xem docstring warehouse/survivorship_conflict_by_source.py):
+    PHAI gop ve 1 gia tri trung binh/nguon/ngay TRUOC khi so sanh giua cac nguon, neu khong bien
+    thien tu nhien trong ngay cua 1 nguon tan suat gio (vd nhiet do sang-trua cua ISD) se bi tinh
+    nham thanh "xung dot giua cac nguon". Day la ham DUY NHAT sinh gia tri da hop giai (dung de
+    kiem tra "Survivorship co that su sinh ra ban ghi da hop nhat khong") -- warehouse/
+    survivorship_conflict_by_source.py chi dung de doi chieu ty le % tong hop, khong ghi ra bang.
     """
+    cols = [c for c in VALUE_COLUMNS if c in df.columns]
     work = df.copy()
-    work["priority"] = work["source"].map(SOURCE_PRIORITY).fillna(99)
-    work["time_bucket"] = work["timestamp_utc"].dt.floor("D")  # gop theo ngay de so sanh da nguon
+    work["day"] = work["timestamp_utc"].dt.floor("D")
+    per_source_day = (work.groupby(["location_id", "day", "source"], observed=True)[cols]
+                       .mean().reset_index())
+    per_source_day["priority"] = per_source_day["source"].map(SOURCE_PRIORITY).fillna(99)
 
-    out_rows = []
-    for (loc, t), group in work.groupby(["location_id", "time_bucket"]):
-        row = {"location_id": loc, "timestamp_utc": t}
-        for col in VALUE_COLUMNS:
-            candidates = group[["source", "priority", col]].dropna(subset=[col])
-            if candidates.empty:
-                row[col] = np.nan
-                row[f"{col}_source_used"] = None
-                row[f"{col}_conflict"] = False
-                continue
-            candidates = candidates.sort_values("priority")
-            winner = candidates.iloc[0]
-            row[col] = winner[col]
-            row[f"{col}_source_used"] = winner["source"]
+    # Vector hoa theo tung cot (khong lap Python qua tung nhom (location_id, day) -- voi hang
+    # tram nghin nhom se rat cham). Voi moi cot: sap theo priority roi lay dong dau moi nhom
+    # (= nguon thang), cong voi max/min cua cot trong nhom de tinh % xung dot.
+    result = None
+    for col in cols:
+        sub = per_source_day.dropna(subset=[col])[["location_id", "day", "source", "priority", col]]
+        if sub.empty:
+            continue
+        g = sub.groupby(["location_id", "day"], observed=True)
+        winner = (sub.sort_values(["location_id", "day", "priority"])
+                  .groupby(["location_id", "day"], observed=True).first())
+        agg = g[col].agg(["max", "min", "size"])
+        piece = winner.join(agg, rsuffix="_agg").reset_index()
+        spread_pct = (piece["max"] - piece["min"]) / (piece[col].abs() + 1e-6) * 100.0
+        conflict = (piece["size"] > 1) & (spread_pct > CONFLICT_THRESHOLD_PCT.get(col, np.inf))
+        piece = piece[["location_id", "day", col, "source"]].assign(**{f"{col}_conflict": conflict})
+        piece = piece.rename(columns={"source": f"{col}_source_used"})
+        result = piece if result is None else result.merge(
+            piece, on=["location_id", "day"], how="outer")
 
-            conflict = False
-            if col in CONFLICT_THRESHOLD_PCT and len(candidates) > 1:
-                vals = candidates[col].to_numpy(dtype=float)
-                spread_pct = (vals.max() - vals.min()) / (abs(winner[col]) + 1e-6) * 100.0
-                conflict = spread_pct > CONFLICT_THRESHOLD_PCT[col]
-            row[f"{col}_conflict"] = conflict
-        out_rows.append(row)
-
-    return pd.DataFrame(out_rows).sort_values(["location_id", "timestamp_utc"]).reset_index(drop=True)
+    if result is None:
+        return pd.DataFrame(columns=["location_id", "day"])
+    return result.sort_values(["location_id", "day"]).reset_index(drop=True)
