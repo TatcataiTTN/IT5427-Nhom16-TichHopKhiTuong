@@ -1055,6 +1055,16 @@ Streaming lấy tối đa 150 bản ghi mỗi micro-batch, join tĩnh với bả
 (Mục~6.8), tính dị thường chuẩn hoá $z$ và phát cảnh báo $|z| \ge 2$ ngay trong micro-batch. Phát lại đợt
 nắng nóng 1/4--15/5/2024 (1.407 bản ghi) cho 179 cảnh báo xuất hiện dần qua 10 micro-batch, khớp
 179/179 với kết quả batch và giá trị $z$ giống hệt -- vì hai đường xử lý dùng chung một logic tính toán.
+Cấu hình thật: \texttt{trigger(processingTime="3 seconds")}, \texttt{spark.sql.shuffle.partitions=4}
+(phù hợp quy mô dữ liệu phát lại nhỏ, không dùng mặc định 200 gây quá nhiều task rỗng),
+\texttt{checkpointLocation} cục bộ để phục hồi được sau khi dừng. Không dùng watermark: dữ liệu
+phát lại gán \texttt{event\_time} bằng giờ xử lý hiện tại (\texttt{current\_timestamp()}) nên không
+có mốc thời gian gốc đáng tin cậy để watermark bám theo -- nhóm ghi nhận đây là giới hạn của một
+luồng \emph{replay} chứ không giấu đi; ngữ nghĩa phân phối đạt được gần với
+\emph{at-least-once} (dựa vào checkpoint của Spark, chưa kiểm thử lại sau khi chủ động kill
+driver giữa chừng). Spark batch (các Mục~6.1--6.4, 6.8--6.12) chạy \texttt{local[*]} trên máy 14
+nhân, \texttt{spark.driver.memory=4g}, dùng \texttt{spark.sql.shuffle.partitions} và AQE theo giá
+trị mặc định của Spark 4.2.0 (chưa tự cấu hình lại, xem giới hạn ở Mục~\ref{sec:infra-limits}).
 
 Quá trình kiểm thử trực tiếp phát hiện và khắc phục hai sự cố môi trường thực tế, không phải lỗi
 logic xử lý: \emph{thứ nhất}, phiên Spark cục bộ không khởi tạo được do hệ điều hành tự phân giải
