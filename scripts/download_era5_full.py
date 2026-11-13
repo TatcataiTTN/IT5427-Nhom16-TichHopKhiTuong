@@ -15,9 +15,11 @@ Chạy lại được: file tháng nào đã có thì bỏ qua (resume sau khi n
 Chạy:
   python3 scripts/download_era5_full.py                       # mặc định 2020-01 → 2024-12, 9 biến
   python3 scripts/download_era5_full.py --start 2024-01 --end 2024-03 --vars 2m_temperature
-  python3 scripts/download_era5_full.py --workers 32          # số luồng tải song song
+  python3 scripts/download_era5_full.py --workers 4            # số luồng dask TRONG 1 file
+  python3 scripts/download_era5_full.py --concurrency 6        # số file (tháng,biến) tải ĐỒNG THỜI
 """
 import argparse
+import concurrent.futures
 import os
 import sys
 import time
@@ -73,9 +75,24 @@ def download_month(ds, var, month, workers):
     # Ghi ra file tạm rồi đổi tên — tránh để lại file hỏng nếu bị ngắt giữa chừng
     tmp = fp + ".part"
     sub.astype("float32").to_dataset(name=var).to_netcdf(
-        tmp, encoding={var: {"zlib": True, "complevel": 4}})
+        tmp, engine="netcdf4", encoding={var: {"zlib": True, "complevel": 4}})
     os.replace(tmp, fp)
     return fp, "ok", time.time() - t0
+
+
+def _worker(var, month, workers):
+    """Chạy trong tiến trình con riêng: tự mở kết nối Zarr (không share được qua process),
+    tránh tranh chấp GIL/kết nối khi nhiều (tháng, biến) tải đồng thời.
+
+    Kiểm tra file đã có TRƯỚC khi mở Zarr: mở kết nối Zarr/GCS để lấy metadata tốn ~1 phút mạng
+    (thấy rõ khi resume sau khi máy sập — hàng chục file "skip" vẫn mất cả chục phút), trong khi
+    chỉ cần os.path.exists() là biết ngay. Việc này không đổi kết quả, chỉ tránh phí mạng vô ích."""
+    outdir = os.path.join(OUT, var)
+    fp = os.path.join(outdir, f"{month}.nc")
+    if os.path.exists(fp):
+        return fp, "skip", 0.0
+    ds = xr.open_zarr(ARCO_URL, storage_options={"token": "anon"}, chunks={"time": 1})
+    return download_month(ds, var, month, workers)
 
 
 def main():
@@ -83,25 +100,59 @@ def main():
     parser.add_argument("--start", default="2020-01")
     parser.add_argument("--end", default="2024-12")
     parser.add_argument("--vars", nargs="+", default=VARIABLES)
-    parser.add_argument("--workers", type=int, default=32)
+    parser.add_argument("--workers", type=int, default=4,
+                         help="So luong dask THREADS trong 1 file (doc chunk Zarr)")
+    parser.add_argument("--concurrency", type=int, default=1,
+                         help="So file (thang,bien) tai DONG THOI qua ProcessPoolExecutor")
+    parser.add_argument("--reverse", action="store_true",
+                         help="Di tu thang/nam cuoi (--end) lui ve dau (--start), "
+                              "de chay song song voi 1 tien trinh khac di tu dau len "
+                              "(gap nhau giua duong thi tu bo qua file da co, khong tai trung)")
     args = parser.parse_args()
 
-    ds = xr.open_zarr(ARCO_URL, storage_options={"token": "anon"}, chunks={"time": 1})
     months = month_range(args.start, args.end)
-    total = len(months) * len(args.vars)
-    print(f"ERA5: {len(args.vars)} biến × {len(months)} tháng = {total} file -> {os.path.abspath(OUT)}")
+    if args.reverse:
+        months = list(reversed(months))
+    tasks = [(var, month) for month in months for var in args.vars]
+    total = len(tasks)
+    print(f"ERA5: {len(args.vars)} biến × {len(months)} tháng = {total} file -> {os.path.abspath(OUT)} "
+          f"(concurrency={args.concurrency}, dask workers/file={args.workers})")
 
     done, failed, t_start = 0, [], time.time()
-    for month in months:
-        for var in args.vars:
+    if args.concurrency <= 1:
+        consecutive_fail = 0
+        for var, month in tasks:
             done += 1
             try:
-                fp, status, secs = download_month(ds, var, month, args.workers)
+                fp, status, secs = _worker(var, month, args.workers)
                 size = os.path.getsize(fp) / 2**20
                 print(f"[{done}/{total}] {month} {var}: {status} {size:.1f}MB {secs:.0f}s", flush=True)
+                consecutive_fail = 0
             except Exception as e:
                 failed.append((month, var, str(e)))
-                print(f"[{done}/{total}] {month} {var}: LOI {e}", flush=True)
+                consecutive_fail += 1
+                print(f"[{done}/{total}] {month} {var}: LOI {e} (loi lien tiep: {consecutive_fail})", flush=True)
+                if consecutive_fail >= 3:
+                    # Nhieu loi lien tiep thuong la mang/GCS gian doan tam thoi, khong phai loi
+                    # du lieu — cho tang dan (toi da 10 phut) roi tu thu lai, thay vi chay het qua
+                    # toan bo file con lai that bai lien tuc trong vai giay.
+                    wait_s = min(60 * consecutive_fail, 600)
+                    print(f"  -> {consecutive_fail} loi lien tiep, co the mang dang gian doan. "
+                          f"Cho {wait_s}s roi tu thu lai...", flush=True)
+                    time.sleep(wait_s)
+    else:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=args.concurrency) as pool:
+            futures = {pool.submit(_worker, var, month, args.workers): (var, month) for var, month in tasks}
+            for fut in concurrent.futures.as_completed(futures):
+                var, month = futures[fut]
+                done += 1
+                try:
+                    fp, status, secs = fut.result()
+                    size = os.path.getsize(fp) / 2**20
+                    print(f"[{done}/{total}] {month} {var}: {status} {size:.1f}MB {secs:.0f}s", flush=True)
+                except Exception as e:
+                    failed.append((month, var, str(e)))
+                    print(f"[{done}/{total}] {month} {var}: LOI {e}", flush=True)
 
     print(f"\nXONG trong {(time.time() - t_start) / 3600:.2f} giờ. Lỗi: {len(failed)}")
     for f in failed:
