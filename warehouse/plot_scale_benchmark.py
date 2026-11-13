@@ -32,25 +32,27 @@ def main():
     multipliers = sorted(int(k) for k in results.keys())
     sizes = [n_base * m for m in multipliers]
 
-    fig, ax = plt.subplots(figsize=(6.3, 4.2), dpi=200)
+    fig, ax = plt.subplots(figsize=(4.55, 3.5), dpi=300)
     for key, label, color, marker in SERIES:
         medians = [results[str(m)][key]["median"] for m in multipliers]
         lo = [results[str(m)][key]["median"] - results[str(m)][key]["min"] for m in multipliers]
         hi = [results[str(m)][key]["max"] - results[str(m)][key]["median"] for m in multipliers]
         ax.errorbar(sizes, medians, yerr=[lo, hi], label=label, color=color, marker=marker,
-                    markersize=5, linewidth=1.4, capsize=3)
+                    markersize=4, linewidth=1.2, capsize=2.5)
 
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel("Số dòng GHCN (nhân bản 1x/2x/4x/8x, thang log)")
-    ax.set_ylabel("Thời gian truy vấn trung vị, 5 lần chạy (s, thang log)")
-    ax.set_title("Thời gian truy vấn nhiệt độ TB theo trạm/tháng: Spark và DuckDB")
+    ax.set_xlabel("Số dòng GHCN (nhân bản 1x/2x/4x/8x, thang log)", fontsize=8.5)
+    ax.set_ylabel("Thời gian truy vấn (giây, thang log)", fontsize=8.5)
+    ax.set_title("Thời gian truy vấn nhiệt độ TB theo trạm/tháng: Spark và DuckDB", fontsize=9, pad=8)
+    ax.tick_params(labelsize=7.5)
     ax.xaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"{x/1e6:.2f}M" if x >= 1e6 else f"{x/1e3:.0f}K"))
-    ax.grid(True, which="both", linestyle=":", linewidth=0.5, alpha=0.6)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=2, fontsize=8, frameon=False)
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax.grid(True, which="major", linestyle=":", linewidth=0.5, alpha=0.6)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=2, fontsize=7.3, frameon=False)
     fig.tight_layout()
     os.makedirs(os.path.dirname(OUT_PNG), exist_ok=True)
-    fig.savefig(OUT_PNG, bbox_inches="tight")
+    fig.savefig(OUT_PNG, bbox_inches="tight", pad_inches=0.05)
     print(f"Wrote {OUT_PNG}")
 
     # In bang speedup Spark local[*] vs DuckDB de dua vao bao cao
