@@ -190,7 +190,7 @@ M5 & Dashboard đọc đúng dữ liệu tích hợp & Không lỗi runtime, ver
 \end{center}
 \vspace{0.3cm}
 \centering\small
-GHCN-Daily, NOAA ISD, ERA5 (ARCO), Open-Meteo, NASA POWER hội tụ qua Mediated Schema
+GHCN-Daily, NOAA ISD, ERA5 (CDS), Open-Meteo, NASA POWER hội tụ qua Mediated Schema
 \texttt{WeatherObs}. ERA5 5 năm (2020--2024, 9 biến, theo giờ), ISD 10 năm, GHCN toàn lịch sử
 1943--2026 -- \textasciitilde 23\,GB dữ liệu thô, 303\,MB sau tích hợp.
 \end{frame}
@@ -296,10 +296,12 @@ Open-Meteo + NASA POWER & 54.900 & \textbf{274.050} & 6 điểm, 2020--2024 \\
 \end{tabular}
 \vspace{0.15cm}
 
-\footnotesize Kiểm thử ERA5 ``không thiếu tháng nào'': 540/540 file, đủ 43.848/43.848 giờ mỗi biến, 0\% NaN.
-Nút thắt là \textbf{băng thông}, không phải số luồng: mỗi chunk ARCO-ERA5 là 1 giờ \emph{toàn cầu}, nên
-lấy vùng ĐNA vẫn phải tải \textasciitilde 1\,TB (\textasciitilde 24 giờ) để giữ lại 22\,GB. Script tải theo tháng,
-chạy lại được sau khi bị ngắt.
+\footnotesize Kiểm thử ERA5 ``không thiếu tháng nào'': 540/540 file qua kênh CDS chính thức, đủ
+43.848/43.848 giờ mỗi biến, 0\% NaN. CDS cắt vùng phía máy chủ nên không có nút thắt băng thông;
+nút thắt thật là hàng đợi CDS (có lúc đứng ``accepted'' hơn 1 giờ), khắc phục bằng 2 tài khoản chạy
+song song 2 chiều. Nếu tải qua kênh ARCO (chỉ dùng phát triển ban đầu, Mục 4.1 báo cáo): mỗi chunk
+là 1 giờ \emph{toàn cầu}, nên lấy vùng ĐNA vẫn phải tải \textasciitilde 1\,TB (\textasciitilde 27,8 giờ ở 10\,MB/s)
+để giữ lại 22\,GB. Script tải theo tháng, chạy lại được sau khi bị ngắt.
 \end{frame}
 
 \begin{frame}{Kiểm tra lại trên dữ liệu đầy đủ phát hiện và sửa 4 lỗi số liệu thật trong pipeline}
@@ -309,7 +311,7 @@ chạy lại được sau khi bị ngắt.
 Lỗi & Nguyên nhân & Hệ quả / sửa \\
 \midrule
 Gió Open-Meteo \textbf{phóng đại 3,6 lần} & API trả km/h (\texttt{hourly\_units}) nhưng ghi thẳng vào cột \texttt{wind\_speed\_ms} & Sai mọi so sánh gió đa nguồn -- parser đọc đơn vị và quy đổi, có test \\ \addlinespace[2pt]
-\textbf{Tương quan giả} (gió--độ ẩm +0,57) & Thay NaN bằng 0 trước khi tính; mỗi nguồn thiếu biến khác nhau & Tính từng cặp: lộ ra nhiệt độ--độ ẩm \textbf{$-$0,60}, nhiệt độ--áp suất \textbf{$-$0,61} (đúng vật lý) \\ \addlinespace[2pt]
+\textbf{Tương quan giả} (gió--độ ẩm +0,57) & Thay NaN bằng 0 trước khi tính; mỗi nguồn thiếu biến khác nhau & Tính từng cặp: lộ ra nhiệt độ--độ ẩm \textbf{$-$0,59}, nhiệt độ--áp suất \textbf{$-$0,61} (đúng vật lý) \\ \addlinespace[2pt]
 Benchmark partition so với \textbf{bản sao cũ} & Bản không partition chỉ ghi 1 lần; luôn in ``nhanh hơn'' & Đo lại công bằng: partition chậm hơn 1,5--2,5 lần ở 9,0 triệu dòng \\ \addlinespace[2pt]
 Bức xạ ERA5 \textbf{sai đại lượng} & Mapping dùng bức xạ đỉnh khí quyển (TOA) & Đổi sang bức xạ bề mặt, cùng đại lượng với NASA POWER / Open-Meteo \\ \addlinespace[2pt]
 \bottomrule
@@ -694,7 +696,7 @@ Ngô Văn Quang & 20/10--15/11 & Tải đầy đủ 5 nguồn, QC 4 tầng, sử
 Nguyễn Cao Lương & 5/10 & Thiết kế Mediated Schema nháp & \texttt{docs/06} \\
 Nguyễn Cao Lương & 20/10--15/11 & Schema chính thức, Survivorship, Entity Resolution & \texttt{entity\_resolution.py} \\
 Trương Tuấn Nghĩa & 5/10 & Dựng môi trường Spark, Docker & \texttt{docker-compose.*.yml} \\
-Trương Tuấn Nghĩa & 20/10 & Cụm Spark+Kafka, dashboard khung, streaming cơ bản & Mục 6.6, S17--S18 \\
+Trương Tuấn Nghĩa & 20/10 & Cụm Spark+Kafka, dashboard khung, streaming cơ bản & Mục 6.6 \\
 Trương Tuấn Nghĩa & 15/11 & PINN, tối ưu Spark, dashboard 10 panel, báo cáo/slide hoàn thiện & Mục 6.4--6.7 \\
 \bottomrule
 \end{tabular}
@@ -720,7 +722,7 @@ Giới hạn hạ tầng & Hệ quả \\
 Kafka 1 broker KRaft, RF\,=\,1, topic tự tạo 1 partition & Không chịu lỗi; Spark chỉ đọc bằng 1 task dù cụm có nhiều worker \\
 Không HDFS/object storage, kho Parquet 1 bản sao trên ổ cục bộ & Cụm 3 container chỉ chạy được vì cùng mount 1 máy; đổi sang nhiều máy cần HDFS/MinIO \\
 AQE (Spark 4.x) dùng cấu hình mặc định, không tự chỉnh & Số đo 6.4 chịu ảnh hưởng tự gộp shuffle partition, chưa tách riêng \\
-Entity Resolution có nhãn 15/26 trạm (số WMO) & Precision/recall 100\%/100\% trên tập có nhãn; 11 trạm còn lại chưa gán nhãn \\
+Entity Resolution có nhãn độc lập 15/26 trạm (23/26 có mã WMO, chỉ 15 ghép được đúng 1 cặp GHCN) & Precision/recall 100\%/100\% trên 15 cặp có nhãn; 11 trạm còn lại chưa ghép được cặp nhãn độc lập \\
 Mạng trạm thưa, khí hậu nền ngắn (ERA5/ISD 5--10 năm) & 15.938 dị thường chưa có đối chứng; SPI mới có 12 trạm do GHCN thiếu mưa \\
 \bottomrule
 \end{tabular}
