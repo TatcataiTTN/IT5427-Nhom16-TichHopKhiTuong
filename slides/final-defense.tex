@@ -8,6 +8,7 @@
 \usepackage{xcolor}
 \usepackage{array}
 \usepackage{tikz}
+\usepackage{pgfgantt}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usetikzlibrary{shapes.callouts, positioning, arrows.meta, fit, backgrounds}
@@ -683,6 +684,43 @@ thời gian.
 \tiny Panel 7 -- dị thường khí hậu (cùng bản warehouse rút gọn ở trên): 12,3\% ngày nóng bất
 thường (4--5/2024, gấp 10$\times$ nền 1991--2020), đợt nóng dài nhất 30 ngày, tỷ lệ theo năm cho
 thấy 2024 vượt trội -- cùng chiều với kết luận trên kho đầy đủ ở Mục~6.8.
+\end{frame}
+
+\begin{frame}{Tiến độ thật theo từng người: mỗi thanh là một sản phẩm cụ thể, không phải thanh trải đều cả kỳ}
+\centering
+\resizebox{!}{3.75cm}{%
+\begin{ganttchart}[
+    vgrid, hgrid,
+    x unit=0.26cm,
+    y unit chart=0.75cm,
+    bar height=0.5,
+    bar/.append style={fill=hustblue!55},
+    bar label font=\tiny,
+    milestone/.append style={fill=badred},
+    milestone label font=\tiny,
+    title height=1,
+    time slot format=isodate
+    ]{2026-09-26}{2026-11-15}
+    \gantttitlecalendar{year, month=shortname} \\
+    \ganttbar{Quang -- script tải mẫu}{2026-09-26}{2026-10-05} \\
+    \ganttbar{Quang -- tải đủ 5 nguồn, QC, sửa 4 lỗi}{2026-10-20}{2026-11-15} \\
+    \ganttbar{Lương -- Mediated Schema nháp}{2026-09-26}{2026-10-05} \\
+    \ganttbar{Lương -- schema chính thức, ER, Survivorship}{2026-10-20}{2026-11-15} \\
+    \ganttbar{Nghĩa -- dựng môi trường Spark/Docker}{2026-09-26}{2026-10-05} \\
+    \ganttbar{Nghĩa -- cụm Spark+Kafka, dashboard khung}{2026-10-05}{2026-10-20} \\
+    \ganttbar{Nghĩa -- PINN, tối ưu, dashboard, báo cáo}{2026-10-20}{2026-11-15} \\
+    \ganttmilestone{Chốt nhóm 26/9}{2026-09-26} \\
+    \ganttmilestone{Đề cương 5/10}{2026-10-05} \\
+    \ganttmilestone{Tiến độ 20/10}{2026-10-20} \\
+    \ganttmilestone{Kiểm thử 27/10}{2026-10-27} \\
+    \ganttmilestone{Hội tụ 2/11}{2026-11-02} \\
+    \ganttmilestone{Cuối kỳ 15/11}{2026-11-15}
+\end{ganttchart}%
+}
+
+\vspace{0.02cm}
+{\tiny Ba mốc chính thức tô đỏ đậm (đề cương 5/10, tiến độ 20/10, cuối kỳ 15/11); ba mốc nội bộ tô
+nhạt hơn. Chi tiết sản phẩm từng mốc ở slide sau.\par}
 \end{frame}
 
 \begin{frame}{Ba mốc chính thức (5/10, 20/10, 15/11) đều có sản phẩm cụ thể theo từng người}
