@@ -3,7 +3,7 @@
 \documentclass[t,aspectratio=169,12pt]{beamer}
 \usepackage{fontspec}
 \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
-\setmonofont{Liberation Mono}[Scale=0.88]
+\IfFontExistsTF{Liberation Mono}{\setmonofont{Liberation Mono}[Scale=0.88]}{\setmonofont{Menlo}[Scale=0.88]}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{booktabs}
