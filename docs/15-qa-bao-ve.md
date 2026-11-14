@@ -1,5 +1,8 @@
 # Câu hỏi phản biện dự kiến + đáp án (docs/03 Tuần 4: TV1 #8, TV2 #6, TV3 #4, TV4 #6)
 
+**File cũ, một số số liệu đã lỗi thời (RMSE 1,02 °C trên 104 cặp, skew 33,28%).** Dùng
+`slides/hoi-dap-bao-ve.md` (32 câu, số liệu khớp bản ERA5 540/540 hiện tại) cho buổi bảo vệ 15/11/2026.
+
 Tổng hợp 1 file duy nhất (thay vì 4 file rời của từng vai trò) — mỗi câu đều có số liệu thật dẫn
 chứng, không trả lời chung chung.
 

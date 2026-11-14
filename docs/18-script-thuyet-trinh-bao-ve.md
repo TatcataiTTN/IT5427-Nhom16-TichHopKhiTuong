@@ -1,5 +1,10 @@
 # Script thuyết trình bảo vệ — Nhóm 16, IT5427 (15/11/2026)
 
+**File cũ, viết cho bản deck 41 slide/1 người nói/15 phút.** Deck hiện tại (`final-defense.tex`) đã
+đổi bố cục (không dải xanh) và lên 53 trang theo đúng khung giờ thật 30 phút/nhóm. Dùng
+`slides/kich-ban-bao-ve.md` (31 trang bài chính, chia vai Quang/Lương/Nghĩa, khoảng 21 phút + hỏi đáp)
+cho buổi bảo vệ 15/11/2026. Giữ file này lại chỉ để tham khảo mạch kể chuyện gốc.
+
 Script này viết cho **một người nói liên tục từ đầu tới cuối** — chưa chia vai theo từng phần, để cả
 nhóm đọc hiểu trọn vẹn mạch câu chuyện trước, rồi tự quyết định ai nói đoạn nào. Mỗi mục dưới đây
 ứng với đúng một slide trong `final-defense.tex` (41 slide, kể cả slide tiêu đề/ngăn mục), theo đúng
