@@ -7,15 +7,15 @@
 - [C. Big data và Spark](#c-big-data-và-spark)
 - [D. Phân tích và mô hình](#d-phân-tích-và-mô-hình)
 - [E. Câu hỏi về nhóm](#e-câu-hỏi-về-nhóm)
-- [F. Phụ lục, trang 34–65](#f-phụ-lục-trang-3465-ai-hiểu-chínhphụ-xem-bảng-đầu-kich-ban-bao-vemd): 25 câu riêng cho các trang chỉ mở khi bị hỏi
+- [F. Phụ lục, trang 35–66](#f-phụ-lục-trang-3465-ai-hiểu-chínhphụ-xem-bảng-đầu-kich-ban-bao-vemd): 25 câu riêng cho các trang chỉ mở khi bị hỏi
 - [G. Kiểm chứng tích hợp — đúng kiểu câu cô hay hỏi](#g-kiểm-chứng-tích-hợp--đúng-kiểu-câu-cô-hay-hỏi): 28 câu, soạn
   từ ghi chép thật buổi bảo vệ Nhóm 15 (cô hỏi rất sâu về nguồn dữ liệu, ghép theo khoá hay theo thứ tự, luật ưu
   tiên, log đối chiếu) — áp đúng kiểu câu đó vào dữ liệu của nhóm mình
 - [H. Cửa sổ 2020–2024, Fellegi–Sunter và liên kết trạm–lưới](#h-cửa-sổ-20202024-fellegisunter-và-liên-kết-trạmlưới): 8 câu
-  cùng kiểu G cho các phần mới thêm (Phụ lục trang 60–65)
+  cùng kiểu G cho các phần mới thêm (Phụ lục trang 61–66)
 
 **Cách trả lời:** một câu kết luận trước, rồi số liệu, rồi mở slide nếu cần. Câu nào nhóm chưa làm thì nói thẳng là
-chưa làm, đừng đoán. Số trang là trang trong `final-defense.pdf` (bài chính trang 1–33, Phụ lục trang 34–65).
+chưa làm, đừng đoán. Số trang là trang trong `final-defense.pdf` (bài chính trang 1–34, Phụ lục trang 35–66).
 
 **Lưu ý:** `docs/15-qa-bao-ve.md` là bản cũ, nhiều số đã lỗi thời (RMSE 1,02 °C trên 104 cặp, skew 33,28 %).
 Dùng file này.
@@ -50,7 +50,7 @@ chứng, không phải bằng ngưỡng. Slide 13.
 **A5. Vì sao IQR mà không dùng Z-score để phát hiện outlier?**
 
 Z-score bị "masking": chính outlier làm độ lệch chuẩn phình ra. Thử trên dữ liệu mô phỏng N(25,2) với 5 outlier, std
-từ 2,0 lên 72,2, Z-score chỉ bắt 1/5, IQR bắt 5/5. Phụ lục trang 42.
+từ 2,0 lên 72,2, Z-score chỉ bắt 1/5, IQR bắt 5/5. Phụ lục trang 43.
 
 **A6. Nhưng phát hiện dị thường lại dùng z-score, có mâu thuẫn không?**
 
@@ -92,7 +92,7 @@ Nhóm ghi rõ là hạn chế.
 Lấy chuỗi chênh lệch trạm − ERA5 theo tháng. Khí hậu thật có ở cả hai nên triệt tiêu, phần còn lại là lỗi điểm đo.
 Trôi dần dùng Mann-Kendall và độ dốc Sen, nhảy bậc dùng Pettitt. Gắn cờ 4/80 chuỗi, rõ nhất là áp suất Phnom Penh
 nhảy −2,6 hPa từ 11/2022. Tiêm lỗi nhân tạo vào 76 chuỗi ổn định: bắt 100% ca trôi, 95–98% ca nhảy bậc. Hiệu chỉnh
-cần hồ sơ lịch sử trạm để biết nguyên nhân, nhóm chưa có. Phụ lục trang 48.
+cần hồ sơ lịch sử trạm để biết nguyên nhân, nhóm chưa có. Phụ lục trang 49.
 
 **A13. Gió 2 m quy về 10 m thế nào?**
 
@@ -121,7 +121,7 @@ trạm có 5 chữ số đầu trùng nhưng cách 100,9 km. Nhóm nói rõ đâ
 **B4. Sao không dùng blocking?**
 
 Chỉ 26 × 41 = 1.066 cặp, so hết còn nhanh. Blocking (ví dụ LSH) cần khi lên toàn cầu: GHCN hơn 14.000 trạm thì số
-cặp lên hàng trăm triệu. Phụ lục trang 55.
+cặp lên hàng trăm triệu. Phụ lục trang 56.
 
 **B5. Hạng nguồn trong Survivorship dựa vào đâu? Ngưỡng xung đột chọn thế nào?**
 
@@ -139,7 +139,7 @@ trạm–nguồn.
 **B7. Open-Meteo không độc lập với ERA5, vậy tích hợp vào làm gì?**
 
 Nó có độ ẩm và áp suất mực biển theo giờ ở các điểm đại diện, dùng được khi nguồn khác thiếu (hạng 3). Nhưng nhóm
-không tính Open-Meteo là một xác nhận độc lập khi đối chứng dị thường. Phụ lục trang 36.
+không tính Open-Meteo là một xác nhận độc lập khi đối chứng dị thường. Phụ lục trang 37.
 
 **B8. Provenance: nhìn một giá trị trong kho có biết nó từ đâu không?**
 
@@ -163,25 +163,25 @@ producer; nhóm chưa thử.
 **C3. 69,4% đo thế nào? Có công bằng không?**
 
 Cùng một truy vấn, trung bình 3 lần chạy, so với và không có `cache()`. Hạn chế: AQE của Spark 4 để mặc định, có tự
-gộp shuffle partition, nhóm chưa tách riêng ảnh hưởng này. Phụ lục trang 54.
+gộp shuffle partition, nhóm chưa tách riêng ảnh hưởng này. Phụ lục trang 55.
 
 **C4. Kafka 1 broker, 1 partition thì có gì sai không?**
 
 Chạy đúng nhưng không chịu lỗi, và Spark chỉ đọc bằng 1 task dù có 2 worker. Lên nhiều máy cần RF ≥ 3 và nhiều
-partition. Phụ lục trang 54.
+partition. Phụ lục trang 55.
 
 **C5. Partition chậm hơn không partition sao vẫn giữ?**
 
 Ở 9 triệu bản ghi trên ổ cục bộ, Parquet đã bỏ qua dữ liệu nhờ thống kê min/max của row-group, nên partition không
 giúp được thêm. Partition pruning có lợi khi dữ liệu lớn hơn nhiều hoặc nằm trên S3/GCS, nơi mỗi lần đọc file tốn
-kém. Phụ lục trang 44.
+kém. Phụ lục trang 45.
 
 ## D. Phân tích và mô hình
 
 **D1. Khí hậu nền chỉ từ GHCN 1991–2020, các nguồn ngắn hơn (ERA5 5 năm) thì sao?**
 
 Tỷ lệ ngày z ≥ 2 trên slide tính trên 34 trạm GHCN với nền 1991–2020. ERA5 và ISD chỉ có 5–10 năm, ngắn hơn chuẩn
-30 năm của WMO; nhóm ghi đây là giới hạn (Phụ lục trang 54). Kết quả chỉ báo cho 2020–2024, khi luôn có ERA5 để
+30 năm của WMO; nhóm ghi đây là giới hạn (Phụ lục trang 55). Kết quả chỉ báo cho 2020–2024, khi luôn có ERA5 để
 đối chứng: 0 ca thiếu đối chứng trong cửa sổ này.
 
 **D2. Ngưỡng |z| ≥ 2 có phải tuỳ tiện không?**
@@ -206,15 +206,15 @@ pháp nội suy.
 **E1. Mỗi người làm phần nào?**
 
 Quang: thu thập 5 nguồn, QC, sửa lỗi pipeline. Lương: Mediated Schema, Entity Resolution, Survivorship. Nghĩa: môi
-trường Spark/Docker, Kafka, streaming, PINN, tối ưu, dashboard. Phụ lục trang 52–53.
+trường Spark/Docker, Kafka, streaming, PINN, tối ưu, dashboard. Phụ lục trang 53–54.
 
 **E2. Có demo được không?**
 
 Theo thông báo 15/11 thì không demo trực tiếp. Cụm Docker và `pytest` chạy được ngay nếu cô yêu cầu.
 
-## F. Phụ lục, trang 34–65 (ai hiểu chính/phụ: xem bảng đầu `kich-ban-bao-ve.md`)
+## F. Phụ lục, trang 35–66 (ai hiểu chính/phụ: xem bảng đầu `kich-ban-bao-ve.md`)
 
-**F1. Bảng 6 mức dị biệt ở slide 35 lấy từ đâu, áp dụng đúng vào 5 nguồn ra sao?**
+**F1. Bảng 6 mức dị biệt ở slide 36 lấy từ đâu, áp dụng đúng vào 5 nguồn ra sao?**
 
 Lấy từ 6 mức xung đột dữ liệu trong bài giảng Buổi 2: hệ thống, cú pháp, lược đồ, ngữ nghĩa, định danh, chất
 lượng. Mỗi mức có ví dụ thật: hệ thống là 3 kiểu giao thức khác nhau (REST API, CSV trên S3, CDS API/Zarr); lược
@@ -225,13 +225,13 @@ lý bằng Entity Resolution ở phần 4.
 
 Open-Meteo là lớp trung gian, nội suy lại từ ERA5/ICON/GFS nên không độc lập với ERA5. Khi đối chứng dị thường
 khí hậu, nhóm chỉ dùng ERA5 và trạm lân cận làm hai nguồn đối chứng độc lập, không tính Open-Meteo là xác nhận
-thứ ba. Phụ lục trang 36.
+thứ ba. Phụ lục trang 37.
 
 **F3. 119 vị trí gồm những gì, vì sao phân bố không đều giữa 9 nước?**
 
 113 trạm quan trắc thật (GHCN, ISD) cộng 6 điểm lưới (NASA POWER, Open-Meteo). Không đều vì nhóm chỉ lấy vị trí
 có đủ nguồn lõi kiểm chứng được; Singapore và Timor-Leste nằm trong bbox nhưng không có trạm nào nhóm chọn được.
-Phụ lục trang 37.
+Phụ lục trang 38.
 
 **F4. Vì sao từ 23 GB dữ liệu thô chỉ còn 303 MB Parquet sau tích hợp? Có mất thông tin không?**
 
@@ -243,73 +243,73 @@ Không mất thông tin cần cho bài toán, vì chỉ cần giá trị tại v
 
 Bản tin ISD trạm 48097099999 ngày 1/1/2024 ghi `SLP="99999,9"`, là mã "không đo" của NOAA; đọc thẳng sẽ thành áp
 suất 9.999,9 hPa, một giá trị không thể có trong thực tế. Sau chuẩn hoá, cột `pressure_msl_hpa` được đặt NULL.
-Phụ lục trang 39.
+Phụ lục trang 40.
 
 **F6. Vì sao không dùng kênh ARCO để tải ERA5 nhanh hơn?**
 
 Kênh ARCO chia theo chunk 1 giờ cho toàn cầu, nên lấy vùng Đông Nam Á 22 GB vẫn phải tải khoảng 1 TB dữ liệu
 toàn cầu trước, mất khoảng 27,8 giờ ở 10 MB/s. Nhóm chọn tải qua CDS API, cắt vùng ngay phía máy chủ, dù phải
-xếp hàng đợi (có lúc hơn 1 giờ) nên chạy song song 2 tài khoản để bù. Phụ lục trang 40.
+xếp hàng đợi (có lúc hơn 1 giờ) nên chạy song song 2 tài khoản để bù. Phụ lục trang 41.
 
 **F7. QC chỉ can thiệp 0,09% số bản ghi thì có đáng tin không, có bỏ sót lỗi không?**
 
 0,09% là can thiệp ở tầng 1–2 (cờ QC gốc và giới hạn vật lý), chạy ngay khi nạp. Lỗi tinh vi hơn — bước nhảy bất
 thường, lệch so với ERA5, trôi cảm biến dài hạn — được bắt ở tầng 4–7 sau khi đã tích hợp, không nằm trong
-0,09% này. Phụ lục trang 41.
+0,09% này. Phụ lục trang 42.
 
 **F8. Lỗi tương quan giả gió–độ ẩm 0,57 đã sửa thế nào, số đúng là bao nhiêu?**
 
 Lỗi gốc là thay NaN bằng 0 trước khi tính tương quan, trong khi mỗi nguồn thiếu biến khác nhau nên tạo tương
 quan giả. Sửa bằng cách tính theo từng cặp bản ghi đều có giá trị (pairwise, không impute); kết quả đúng là
-nhiệt độ–độ ẩm −0,59, nhiệt độ–áp suất −0,61. Phụ lục trang 43 và 49.
+nhiệt độ–độ ẩm −0,59, nhiệt độ–áp suất −0,61. Phụ lục trang 44 và 50.
 
 **F9. Partition pruning là gì, vì sao Parquet hiện tại vẫn nhanh dù không partition theo tháng?**
 
 Mỗi row-group trong Parquet lưu sẵn thống kê min/max từng cột; khi truy vấn có điều kiện lọc, Spark đọc thống kê
 này trước và bỏ qua row-group không khớp mà không cần đọc dữ liệu thật. Ở quy mô 9 triệu dòng, cơ chế này đã đủ
 hiệu quả nên partition thêm theo tháng (tăng 12 lần số partition) không giúp thêm, còn chậm hơn vì small-file.
-Phụ lục trang 44.
+Phụ lục trang 45.
 
 **F10. Cụm Spark và Kafka có thật sự phân tán không hay chỉ giả lập trên một máy?**
 
 Giả lập trên một máy vật lý, chạy 3 container Docker: 1 master, 2 worker, 1 broker Kafka. Mục đích là kiểm chứng
 đúng luồng pipeline chạy đúng logic phân tán, không phải đo hiệu năng phân tán thật — hạn chế này nhóm ghi rõ ở
-slide "Giới hạn hạ tầng". Phụ lục trang 45 và 54.
+slide "Giới hạn hạ tầng". Phụ lục trang 46 và 55.
 
 **F11. Vì sao dùng chỉ số ETCCDI (p95/p99, Rx1day, R95p) thay vì một ngưỡng mưa cố định?**
 
 Mưa không phân bố chuẩn nên một ngưỡng mm cố định sẽ không công bằng giữa các trạm có khí hậu nền khác nhau.
 Chuẩn ETCCDI tính phân vị trên chính chuỗi dữ liệu của từng trạm (chỉ tính ngày ướt ≥ 1 mm), nên "cực đoan" được
-định nghĩa tương đối với khí hậu nền của đúng trạm đó. Phụ lục trang 46.
+định nghĩa tương đối với khí hậu nền của đúng trạm đó. Phụ lục trang 47.
 
 **F12. Trạm GHCN Phù Liễn mất số liệu đúng lúc bão rồi báo 214 mm ngày 11/9, số này có đáng tin không?**
 
 Đây là hạn chế nhóm ghi nhận, chưa khẳng định chắc chắn: nhiều khả năng là mưa dồn, trạm đo thủ công cộng dồn
 các ngày mất số liệu vào lần đo tiếp theo, không phải mưa thật của riêng ngày 11/9. Nhóm không điền số liệu bù
-cho 2 ngày mất, chỉ ghi nhận hiện tượng. Phụ lục trang 46.
+cho 2 ngày mất, chỉ ghi nhận hiện tượng. Phụ lục trang 47.
 
 **F13. Vì sao dùng Mann-Kendall và độ dốc Sen cho xu hướng nhiệt độ thay vì hồi quy tuyến tính?**
 
 Hồi quy tuyến tính giả định phần dư phân bố chuẩn và nhạy với outlier. Mann-Kendall là kiểm định phi tham số cho
 ý nghĩa thống kê của xu hướng, không cần giả định phân bố; độ dốc Sen ước lượng tốc độ bằng trung vị độ dốc giữa
-các cặp điểm nên bền với outlier hơn. Phụ lục trang 47 và 48.
+các cặp điểm nên bền với outlier hơn. Phụ lục trang 48 và 49.
 
 **F14. Xu hướng ấm lên dài hạn có mâu thuẫn với phần dị thường khí hậu (đo so với nền 1991–2020) không?**
 
 Không mâu thuẫn. Dị thường (z-score) đo độ lệch so với khí hậu nền cố định 1991–2020 theo từng ngày trong năm,
 dùng để phát hiện sự kiện bất thường tại một thời điểm. Xu hướng dài hạn đo chính khí hậu nền đó có đang dịch
-chuyển theo thời gian không. Slide 47 nói rõ: trừ xu hướng nền đi thì năm 2024 vẫn nổi bật.
+chuyển theo thời gian không. Slide 48 nói rõ: trừ xu hướng nền đi thì năm 2024 vẫn nổi bật.
 
 **F15. Sao biết trôi cảm biến không phải là biến đổi khí hậu thật?**
 
 Lấy chênh lệch trạm trừ ERA5 cùng vị trí theo tháng: biến động khí hậu thật xảy ra ở cả hai chuỗi như nhau nên
-bị triệt tiêu trong phép trừ; phần còn lại chỉ có thể là lỗi riêng của cảm biến hoặc điểm đo. Phụ lục trang 48.
+bị triệt tiêu trong phép trừ; phần còn lại chỉ có thể là lỗi riêng của cảm biến hoặc điểm đo. Phụ lục trang 49.
 
 **F16. PCA chỉ giải thích 48–56% phương sai, kết quả có dùng được không?**
 
 Đây là phân tích khám phá để kiểm tra PCA có tự gom đúng các biến liên quan về mặt vật lý không, không dùng để
 giảm chiều phục vụ mô hình chính. PC2 của Open-Meteo tự gom độ ẩm, mưa và áp thấp, đúng kiểu hình bão, mà không
-cần gán nhãn trước — đủ để minh hoạ cấu trúc dữ liệu. Phụ lục trang 49.
+cần gán nhãn trước — đủ để minh hoạ cấu trúc dữ liệu. Phụ lục trang 50.
 
 **F17. Vì sao chọn Streamlit cho dashboard mà không phải công cụ BI khác như Superset?**
 
@@ -317,19 +317,19 @@ Mục 3.5 báo cáo ghi rõ nhóm cân nhắc Apache Superset nhưng không dùn
 hợp trực tiếp với pandas/Parquet đã có sẵn trong pipeline, không cần dựng thêm server/database riêng, phù hợp
 quy mô đồ án một học kỳ.
 
-**F18. Ảnh dashboard ở slide 51 chụp trên bản rút gọn 1,08 triệu dòng, kết luận trình bày trong bài có đáng tin không?**
+**F18. Ảnh dashboard ở slide 52 chụp trên bản rút gọn 1,08 triệu dòng, kết luận trình bày trong bài có đáng tin không?**
 
 Có. Ảnh chụp chỉ để minh hoạ giao diện chạy được, dùng bản rút gọn cho nhẹ khi chụp. Mọi con số và kết luận phân
-tích trong bài đều tính trên kho đầy đủ 8,96 triệu dòng, nêu ở Mục 6.1 báo cáo. Phụ lục trang 50–51.
+tích trong bài đều tính trên kho đầy đủ 8,96 triệu dòng, nêu ở Mục 6.1 báo cáo. Phụ lục trang 51–52.
 
 **F19. Khối lượng công việc chia không đều, Nghĩa có vẻ phụ trách nhiều phần nhất, có hợp lý không?**
 
-Theo bảng "Sản phẩm của từng người theo mốc" (slide 53): Quang phụ trách ingestion và QC 4 tầng, Lương phụ
+Theo bảng "Sản phẩm của từng người theo mốc" (slide 54): Quang phụ trách ingestion và QC 4 tầng, Lương phụ
 trách Schema, Entity Resolution và Survivorship, Nghĩa phụ trách hạ tầng Spark/Docker/Kafka, streaming, PINN,
 tối ưu và dashboard — phần có nhiều cấu phần kỹ thuật nhất nên khối lượng việc lớn hơn, không phải chia ngẫu
 nhiên.
 
-**F20. Giới hạn hạ tầng nào ở slide 54 nghiêm trọng nhất, nếu có thêm thời gian sẽ ưu tiên sửa gì?**
+**F20. Giới hạn hạ tầng nào ở slide 55 nghiêm trọng nhất, nếu có thêm thời gian sẽ ưu tiên sửa gì?**
 
 Nghiêm trọng nhất là Kafka chỉ 1 broker/1 partition, vì nó giới hạn luôn khả năng Spark đọc song song (chỉ 1
 task dù có nhiều worker) — nút thắt này lan sang cả phần streaming. Nếu có thêm thời gian, nhóm ưu tiên tăng
@@ -339,7 +339,7 @@ partition Kafka và đo lại ảnh hưởng của AQE tới số đo cache() 69
 
 Lưu trữ và Entity Resolution tốn kém nhất: ERA5 toàn cầu lên tới hàng trăm TB cần HDFS/S3/MinIO thay vì một ổ
 cục bộ, và GHCN có hơn 14.000 trạm nên số cặp so khớp không còn 1.066 mà lên hàng trăm triệu, bắt buộc dùng
-Blocking/LSH thay vì so toàn bộ cặp như hiện tại. Phụ lục trang 55.
+Blocking/LSH thay vì so toàn bộ cặp như hiện tại. Phụ lục trang 56.
 
 **F22. Tất cả số liệu trên các slide phụ lục có kiểm chứng lại được, hay chỉ tính một lần rồi ghi cố định?**
 
@@ -351,15 +351,15 @@ Toàn bộ số liệu tính trực tiếp từ kho Parquet bằng script trong 
 
 Trong 23 trạm có định dạng mã WMO, 15 cặp ghép đúng 1-1 với GHCN để làm nhãn kiểm chứng độc lập. 11 trạm còn
 lại: 3 trạm không đúng định dạng mã và 8 trạm không tìm được cặp khớp tương ứng phía GHCN, nên chưa dùng làm
-nhãn được — nhóm ghi đây là hướng mở rộng, không che giấu. Phụ lục trang 54.
+nhãn được — nhóm ghi đây là hướng mở rộng, không che giấu. Phụ lục trang 55.
 
 **F24. Nếu chỉ được hỏi đúng một slide phụ lục để đánh giá cả nhóm, nên hỏi slide nào?**
 
-Slide 43 "Lỗi số liệu trong pipeline" phù hợp nhất, vì buộc trả lời được cả bốn khía cạnh: phát hiện lỗi thế
+Slide 44 "Lỗi số liệu trong pipeline" phù hợp nhất, vì buộc trả lời được cả bốn khía cạnh: phát hiện lỗi thế
 nào, nguyên nhân kỹ thuật, hệ quả nếu không sửa, và cách sửa kèm bằng chứng — đúng tinh thần "chỉ rõ tiến trình
 thực hiện và kết quả đánh giá thực nghiệm" mà cô yêu cầu trong thông báo 15/11.
 
-**F25. Khái niệm "6 mức dị biệt dữ liệu" ở slide 35 học từ buổi nào, áp dụng nguyên văn hay có điều chỉnh?**
+**F25. Khái niệm "6 mức dị biệt dữ liệu" ở slide 36 học từ buổi nào, áp dụng nguyên văn hay có điều chỉnh?**
 
 Từ bài giảng Buổi 2 (Mediation & Query reformulation / Schema Alignment). Nhóm áp dụng đúng 6 mức nhưng thay ví
 dụ lý thuyết bằng ví dụ thật đo được trên chính 5 nguồn của đồ án, không chỉ liệt kê định nghĩa suông.
@@ -430,7 +430,7 @@ bao giờ nội suy để lấp khoảng thiếu.
 
 **G11. Vị trí của các nguồn có được kiểm chứng bằng bản đồ thật không, hay chỉ giả định cùng toạ độ?**
 
-Có bản đồ vùng nghiên cứu (phụ lục trang 37) vẽ đúng 119 vị trí theo toạ độ thật trong bảng Location, không vẽ
+Có bản đồ vùng nghiên cứu (phụ lục trang 38) vẽ đúng 119 vị trí theo toạ độ thật trong bảng Location, không vẽ
 minh hoạ giả định.
 
 **G12. Đồng bộ thời gian giữa các nguồn xử lý ra sao, có nguồn nào lệch múi giờ không?**
@@ -530,7 +530,7 @@ Mọi số dưới đây lấy từ báo cáo cuối (Mục 6.2, 6.5, 6.8, 6.12)
 
 Vì 2020–2024 là giai đoạn cả 5 nguồn cùng có dữ liệu và luôn có ERA5 để đối chứng. Trước 2020 phần lớn dị thường
 tại trạm không có đối chứng nào, nên không tách được khí hậu thật với lỗi cảm biến. Chuỗi GHCN dài chỉ dùng làm
-khí hậu nền 1991–2020 và để tính xu hướng 30 năm (Phụ lục trang 47).
+khí hậu nền 1991–2020 và để tính xu hướng 30 năm (Phụ lục trang 48).
 
 **H2. Trong 2020–2024 không còn ca nào thiếu đối chứng, có phải do nhóm lọc bớt không?**
 
@@ -542,7 +542,7 @@ ERA5 phủ đủ mọi ngày và mọi vị trí trong cửa sổ, không phải
 
 Không chọn tay: lấy theo định nghĩa gốc của Fellegi–Sunter. θh ứng với tỷ lệ ghép nhầm μ ≤ 0,05%, θl ứng với tỷ
 lệ bỏ sót λ ≤ 1%, tính từ xác suất m, u ước lượng bằng EM không giám sát trên 2.262 cặp. Mã WMO không làm đặc
-trưng vì đó là nhãn đánh giá (Phụ lục trang 64).
+trưng vì đó là nhãn đánh giá (Phụ lục trang 65).
 
 **H4. Fellegi–Sunter có tốt hơn luật Haversine 5 km không? Nếu không thì làm để làm gì?**
 
@@ -563,14 +563,14 @@ Vì đó là hai thực thể khác nhau: trạm là một điểm đo, ô ERA5 
 vị trí lệch độ cao quá 100 m; Luang Prabang trạm ở 291 m, ô ERA5 ở 749 m, trạm ấm hơn 3,53 °C. Bias theo độ lệch
 độ cao có độ dốc −5,66 °C/km, gần gradient chuẩn −6,5, nên phần lớn là khác biệt đại diện. Gộp sẽ biến chênh lệch
 đó thành "xung đột" cần chọn bên thắng. Bảng `station_grid_link.parquet` ghi quan hệ, trung vị 9,42 km (Phụ lục
-trang 65).
+trang 66).
 
 **H7. Lỗi dữ liệu tập trung ở đâu? Có phải lỗi rải đều do pipeline không?**
 
 Không rải đều, nên không phải lỗi pipeline: trong 2020–2024, 1.590 dòng gắn cờ QC nằm ở 32/61 trạm, năm trạm ISD
 ở Campuchia, Lào, Myanmar, Thái Lan chiếm 56,4%. 20 ca nghi lỗi từ xác nhận chéo ở 8 trạm, riêng Phnom Penh 13 ca.
 Phnom Penh có mặt ở cả ba lớp (219 dòng cờ QC, 13 ca nghi lỗi, trôi áp suất −0,65 hPa/năm); Viêng Chăn có 210
-dòng cờ QC và nhảy bậc nhiệt độ (Phụ lục trang 63).
+dòng cờ QC và nhảy bậc nhiệt độ (Phụ lục trang 64).
 
 **H8. PINN giải quyết được bao nhiêu phần trăm dị thường? Mục tiêu tiếp theo có đo được không?**
 
@@ -581,4 +581,4 @@ số liệu giữa các ô lưới ERA5 hoặc tại trạm (22 vị trí giữ 
 còn cao, cần thêm chiều thời gian). Phần dư của mô hình gió đánh dấu 4/113
 vị trí lệch trường vật lý quá 2,62 m/s (Mandalay cả mã ISD lẫn GHCN, Đồng Hới, Phú Quốc), là ứng viên dị thường
 gió cục bộ. Mục tiêu tiếp theo đo được: dùng trường PINN phân xử 375 ca dị thường cục bộ (6,3%) mà lưới ERA5
-khoảng 28 km không xác nhận được; chỉ tiêu là số ca cục bộ giảm mà tỉ lệ nghi lỗi không tăng giả (Phụ lục trang 56).
+khoảng 28 km không xác nhận được; chỉ tiêu là số ca cục bộ giảm mà tỉ lệ nghi lỗi không tăng giả (Phụ lục trang 57).

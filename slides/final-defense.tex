@@ -503,6 +503,32 @@
 \hypertarget{sec5}{}
 \hustsectionpage{5. Xử lý và phân tích}
 
+\begin{frame}{Tối ưu Spark: bốn việc đã làm}
+  \ychinh{Cùng một truy vấn, đo trước và sau, mỗi cấu hình chạy 3 lần lấy trung bình}
+  \scriptsize
+  \renewcommand{\arraystretch}{1.1}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.25cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{6.5cm}>{\raggedright\arraybackslash}p{4.3cm}@{}}
+    \toprule
+    & \textbf{Việc đã làm} & \textbf{Cách làm cụ thể} & \textbf{Kết quả đo} \\
+    \midrule
+    1 & Chọn truy vấn đại diện &
+      \texttt{filter(source='GHCN').groupBy(location\_id, month).agg(avg, count)}: quét Parquet, đẩy điều kiện lọc
+      xuống tầng đọc, gộp sơ bộ trong từng partition, shuffle theo khoá, gộp lần cuối &
+      Mốc ban đầu 0,36\,s \\
+    2 & Cache dữ liệu đã lọc &
+      Đọc và lọc GHCN một lần rồi \texttt{.cache()}; so sánh \texttt{EXPLAIN} trước và sau &
+      \texttt{FileScan} $\to$ \texttt{InMemoryTableScan}; 0,11\,s, giảm \textbf{69,4\%} (ngưỡng 30\%) \\
+    3 & Đo lệch dữ liệu &
+      Đếm dòng mỗi partition: \texttt{groupBy(year, source).count()} so với thêm \texttt{month} &
+      Partition lớn nhất 11,08\% $\to$ 0,94\%; số partition 109 $\to$ 1.306 \\
+    4 & Có/không chia thư mục &
+      \texttt{partitionBy(year, source)} bỏ qua cả thư mục không khớp; một thư mục thì Parquet bỏ qua từng khối nhờ min/max &
+      Không chia nhanh hơn 1,5--2,5 lần ở 9,0 triệu dòng \\
+    \bottomrule
+  \end{tabular}
+  \nguon{Mã: \texttt{warehouse/query\_optimization.py}, \texttt{warehouse/skew\_repartition\_analysis.py}}
+  \slidenote{5.1}
+\end{frame}
 \begin{frame}{Tối ưu Spark}
   \ychinh{\texttt{cache()} giảm 69,4\,\% thời gian truy vấn, ngưỡng đặt ra là 30\,\%}
   \begin{center}
@@ -514,7 +540,7 @@
     \item Thử partition \texttt{year/month/source}: partition lớn nhất giảm từ 11,08\% xuống 0,94\% dữ liệu (bớt data skew), nhưng số partition tăng từ 109 lên 1.306
     \item Trên kho 9,0 triệu bản ghi, partition hiện tại chậm hơn không partition 1,5--2,5 lần, vì Parquet đã có predicate pushdown theo min/max của row-group. Nhóm vẫn giữ \texttt{year/source} vì partition pruning có lợi khi dữ liệu lớn hơn hoặc nằm trên S3/GCS
   \end{itemize}
-  \slidenote{5.1}
+  \slidenote{5.2}
 \end{frame}
 \begin{frame}{Đối chứng với ba sự kiện đã biết}
   \ychinh{Nắng nóng 2024 và bão Yagi có tín hiệu rõ, hạn Mekong tín hiệu yếu}
@@ -544,7 +570,7 @@
     \end{column}
   \end{columns}
   \nguon{Cửa sổ 2020--2024; $z$ = (giá trị $-$ nền)/độ lệch chuẩn, nền GHCN 1991--2020 $\pm$15 ngày; đợt nóng TG90p, SPI gamma.}
-  \slidenote{5.2}
+  \slidenote{5.3}
 \end{frame}
 \begin{frame}{Dị thường 2020--2024 theo không gian và thời gian}
   \ychinh{Dị thường rải đều theo trạm, dồn theo thời gian vào 4/2024 và 9/2024}
@@ -564,7 +590,7 @@
       \end{itemize}
     \end{column}
   \end{columns}
-  \slidenote{5.3}
+  \slidenote{5.4}
 \end{frame}
 \begin{frame}{Điểm dị thường trong hai sự kiện 2024}
   \ychinh{Nắng nóng 30/4 lệch dương khắp lục địa, bão Yagi 7/9 chỉ ở Bắc Bộ}
@@ -572,7 +598,7 @@
   \includegraphics[width=\textwidth,height=4.05cm,keepaspectratio]{anomaly_event_maps.png}
   \raggedright
   \nguon{(a) 176/179 giá trị lệch dương, cao nhất $z=+3{,}53$. (b) 11 giá trị $z\le-3$, quanh Hải Phòng (978,8\,hPa, $z=-7{,}2$).}
-  \slidenote{5.4}
+  \slidenote{5.5}
 \end{frame}
 \begin{frame}{Đối chứng bằng ERA5 và trạm lân cận}
   \ychinh{2020--2024: 93,3\% dị thường tại trạm được xác nhận chéo, 0 ca thiếu đối chứng}
@@ -584,7 +610,7 @@
     \item Trạm lân cận ($\le$ 200\,km, bỏ trạm $<$ 5\,km) thêm 135 ca so với chỉ ERA5
     \item 13/20 ca nghi lỗi thuộc ISD Phnom Penh, khớp trôi áp suất phát hiện độc lập
   \end{itemize}
-  \slidenote{5.5}
+  \slidenote{5.6}
 \end{frame}
 \begin{frame}{Phát hiện dị thường theo luồng}
   \ychinh{Streaming phát 179 cảnh báo, khớp 179/179 với kết quả batch}
@@ -599,7 +625,7 @@
     \item Stream--static join với bảng khí hậu nền tính sẵn bằng batch, cảnh báo khi $|z| \ge 2$
     \item Cảnh báo cao nhất: 30/4/2024, một trạm Thái Lan đo 38,6°C (nền 30,2°C, $z = +3{,}53$)
   \end{itemize}
-  \slidenote{5.6}
+  \slidenote{5.7}
 \end{frame}
 \begin{frame}{PINN cho trường gió}
   \ychinh{PINN điền được trường gió nhất quán vật lý, sai số ngang hồi quy thuần}
@@ -630,8 +656,8 @@
     \end{column}
   \end{columns}
   \ketluan{\small Tăng $\lambda$: vi phạm vật lý 0,53 $\to$ 0,011; RMSE 1,06 so với 1,05}
-  \nguon{Kiến trúc mạng đầy đủ và đồ thị training cong: phụ lục trang 56.}
-  \slidenote{5.7}
+  \nguon{Kiến trúc mạng đầy đủ và đồ thị training cong: phụ lục trang 57.}
+  \slidenote{5.8}
 \end{frame}
 \begin{frame}{Dashboard}
   \ychinh{10 panel Streamlit đọc trực tiếp từ kho Parquet; kiểm tra trên trình duyệt không có lỗi runtime}
@@ -639,7 +665,7 @@
   \includegraphics[width=\textwidth,height=4.2cm,keepaspectratio]{dashboard_anomaly.png}
   \raggedright
   \nguon{Panel 7, dị thường khí hậu. Các panel khác: chuỗi thời gian, tổng hợp theo nguồn, bản đồ + time slider, so sánh nguồn, cảnh báo IQR, kết quả PINN, xu hướng dài hạn, trôi cảm biến, cảnh báo theo luồng.}
-  \slidenote{5.8}
+  \slidenote{5.9}
 \end{frame}
 
 % ============================================================================ Phần 6
@@ -719,7 +745,7 @@
     Chất lượng & Mỗi nguồn có cơ chế QC riêng, độ tin cậy khác nhau \\
     \bottomrule
   \end{tabular}
-  \slidenote{35}
+  \slidenote{36}
 \end{frame}
 \begin{frame}{Năm nguồn dữ liệu}
   \ychinh{Các nguồn khác nhau về dạng dữ liệu và không độc lập hoàn toàn với nhau}
@@ -737,7 +763,7 @@
     \bottomrule
   \end{tabular}
   \ketluan{\small Chỉ GHCN và ISD dùng làm ground truth; ERA5 và Open-Meteo không tính là hai xác nhận độc lập}
-  \slidenote{36}
+  \slidenote{37}
 \end{frame}
 \begin{frame}{Vùng nghiên cứu}
   \ychinh{Bbox ERA5 phủ 11 nước ASEAN, trạm quan trắc chỉ có ở 9 nước}
@@ -754,7 +780,7 @@
       \end{itemize}
     \end{column}
   \end{columns}
-  \slidenote{37}
+  \slidenote{38}
 \end{frame}
 \begin{frame}{Quy mô kho sau tích hợp}
   \ychinh{Kho có 8.955.313 bản ghi từ 5 nguồn, đưa về chung Mediated Schema \texttt{WeatherObs}}
@@ -768,7 +794,7 @@
     \item ERA5 5 năm (2020--2024, 9 biến, theo giờ), ISD 10 năm, GHCN 1943--2026
     \item Dữ liệu thô \textasciitilde 23\,GB, sau tích hợp còn 303\,MB Parquet
   \end{itemize}
-  \slidenote{38}
+  \slidenote{39}
 \end{frame}
 \begin{frame}{Dữ liệu thô trước chuẩn hoá}
   \ychinh{Ba vấn đề gặp trong dữ liệu thô: giá trị thiếu, đơn vị khác, định nghĩa khác}
@@ -789,7 +815,7 @@
     \bottomrule
   \end{tabular}
   \nguon{Trích từ \texttt{data\_samples/} (dữ liệu thô tải về). Đầy đủ: \texttt{docs/17-dac-trung-va-yeu-cau-xu-ly-du-lieu.md}}
-  \slidenote{39}
+  \slidenote{40}
 \end{frame}
 \begin{frame}{Tải dữ liệu theo phạm vi đề cương}
   \ychinh{Tải đủ phạm vi đề cương, kho tăng từ 1,08 lên 8,96 triệu bản ghi}
@@ -813,13 +839,13 @@
     \item CDS cắt vùng phía máy chủ. Nút thắt là hàng đợi CDS (có request chờ hơn 1 giờ), nhóm chạy 2 tài khoản song song
     \item Kênh ARCO mỗi chunk là 1 giờ toàn cầu: giữ 22\,GB vùng ĐNA phải tải \textasciitilde 1\,TB (\textasciitilde 27,8 giờ ở 10\,MB/s)
   \end{itemize}
-  \slidenote{40}
+  \slidenote{41}
 \end{frame}
 \begin{frame}{Tỷ lệ dữ liệu bị QC can thiệp}
   \ychinh{QC đặt NULL hoặc gắn cờ 0,09\,\% số bản ghi, phần lớn do cờ lỗi gốc của ISD}
   \centering
   \includegraphics[height=5.0cm]{data_quality_qc_flags.png}
-  \slidenote{41}
+  \slidenote{42}
 \end{frame}
 \begin{frame}{Chọn IQR thay cho Z-score}
   \ychinh{Trên dữ liệu mô phỏng, IQR bắt được 5/5 outlier, Z-score bắt được 1/5}
@@ -850,7 +876,7 @@
     \end{column}
   \end{columns}
   \ketluan{Nhóm chọn IQR làm chỉ số chính cho Data Quality Report}
-  \slidenote{42}
+  \slidenote{43}
 \end{frame}
 \begin{frame}{Lỗi số liệu trong pipeline}
   \ychinh{Chạy trên dữ liệu đầy đủ phát hiện 4 lỗi số liệu trong pipeline, đã sửa}
@@ -866,7 +892,7 @@
     Bức xạ ERA5 sai đại lượng & Mapping dùng bức xạ đỉnh khí quyển (TOA) & Đổi sang bức xạ bề mặt, cùng đại lượng với NASA POWER và Open-Meteo \\
     \bottomrule
   \end{tabular}
-  \slidenote{43}
+  \slidenote{44}
 \end{frame}
 \begin{frame}{Chiến lược partition}
   \ychinh{Partition thêm theo tháng giảm skew nhưng tăng 12 lần số partition}
@@ -886,7 +912,7 @@
     \item Parquet đã bỏ qua dữ liệu không liên quan nhờ thống kê min/max theo row-group
   \end{itemize}
   \ketluan{Giữ \texttt{year/source}; partition pruning chỉ có lợi rõ ở quy mô lớn hơn hoặc trên S3/GCS}
-  \slidenote{44}
+  \slidenote{45}
 \end{frame}
 \begin{frame}{Cụm Spark và Kafka}
   \ychinh{Streaming theo cửa sổ trượt chạy trên cụm 3 container Docker, cùng một máy}
@@ -898,7 +924,7 @@
     \item \texttt{warehouse/spark\_streaming\_consumer.py} đọc topic Kafka, in \texttt{avg\_temp\_c} từng trạm theo cửa sổ 1 phút, trượt 30\,s
     \item 3 container trên cùng một máy vật lý; Kafka 1 broker KRaft, RF 1, topic 1 partition
   \end{itemize}
-  \slidenote{45}
+  \slidenote{46}
 \end{frame}
 \begin{frame}{Mưa cực đoan khi bão Yagi}
   \ychinh{7/9/2024 là ngày mưa lớn nhất 5 năm tại 4 trạm miền Bắc, gấp 2,6--3,1 lần p99}
@@ -919,7 +945,7 @@
     \item 11/13 cặp trạm--nguồn vượt p99 trong 6--11/9/2024
     \item Trạm GHCN Phù Liễn mất số liệu đúng 7--8/9 khi bão đổ bộ, rồi ghi 214\,mm ngày 11/9
   \end{itemize}
-  \slidenote{46}
+  \slidenote{47}
 \end{frame}
 \begin{frame}{Xu hướng nhiệt độ dài hạn}
   \ychinh{25/27 trạm ấm lên có ý nghĩa thống kê giai đoạn 1975--2024, trung vị +0,21\,°C mỗi thập kỷ}
@@ -948,7 +974,7 @@
       \end{itemize}
     \end{column}
   \end{columns}
-  \slidenote{47}
+  \slidenote{48}
 \end{frame}
 \begin{frame}{Phát hiện trôi cảm biến}
   \ychinh{Chênh lệch trạm $-$ ERA5 cho thấy áp suất Phnom Penh nhảy bậc $-$2,6\,hPa từ 11/2022}
@@ -984,7 +1010,7 @@
     \end{column}
   \end{columns}
   \ketluan{\small Tiêm lỗi nhân tạo vào 76 chuỗi thật đang ổn định: phát hiện 100\% ca trôi, 95--98\% ca nhảy bậc}
-  \slidenote{48}
+  \slidenote{49}
 \end{frame}
 \begin{frame}{Tương quan và PCA}
   \ychinh{PC2 của Open-Meteo gom độ ẩm, mưa và áp thấp mà không cần gán nhãn trước}
@@ -1010,7 +1036,7 @@
   \end{tabular}
   \raggedright
   \ketluan{\small PC1 và PC2 chỉ giải thích 48--56\% phương sai, cần thêm thành phần để mô tả biến động khí tượng ĐNA}
-  \slidenote{49}
+  \slidenote{50}
 \end{frame}
 \begin{frame}{Các panel của dashboard}
   \ychinh{10 panel Streamlit đọc trực tiếp từ kho Parquet; kiểm tra trên trình duyệt không có lỗi runtime}
@@ -1033,14 +1059,14 @@
     \bottomrule
   \end{tabular}
   \nguon{Bảng được cache theo ngày, đổi ngày hoặc trạm mất \textasciitilde 0,6\,s.}
-  \slidenote{50}
+  \slidenote{51}
 \end{frame}
 \begin{frame}{Panel 1: tổng quan tích hợp}
   \centering
   \includegraphics[width=\textwidth,height=5.0cm,keepaspectratio]{dashboard_overview.png}
   \raggedright
   \nguon{Ảnh chụp từ trình duyệt, chạy local trên bản warehouse rút gọn (1.076.473 dòng, 119 trạm/điểm). Các slide phân tích dùng kho đầy đủ 8,96 triệu dòng (Mục 6.1 báo cáo).}
-  \slidenote{51}
+  \slidenote{52}
 \end{frame}
 \begin{frame}{Tiến độ theo từng người}
 \vskip2mm
@@ -1078,7 +1104,7 @@
 \end{ganttchart}
 \raggedright
 \nguon{Nét liền: mốc chính thức. Nét đứt: mốc nội bộ (kiểm thử 27/10, hội tụ 2/11). Trục bắt đầu từ ngày chốt nhóm 26/9.}
-  \slidenote{52}
+  \slidenote{53}
 \end{frame}
 \begin{frame}{Sản phẩm của từng người theo mốc}
   \scriptsize
@@ -1097,7 +1123,7 @@
     \bottomrule
   \end{tabular}
   \nguon{Theo thông báo 15/11, buổi trình bày không có demo trực tiếp. Cụm Docker và \texttt{pytest} vẫn chạy được ngay nếu hội đồng yêu cầu.}
-  \slidenote{53}
+  \slidenote{54}
 \end{frame}
 \begin{frame}{Giới hạn hạ tầng}
   \ychinh{Hạ tầng chạy trên một máy nên chưa kết luận được về hiệu năng phân tán}
@@ -1114,7 +1140,7 @@
     Khí hậu nền ERA5/ISD ngắn (5--10 năm); trước 2020 chưa có ERA5 & Trong 2020--2024 mọi dị thường tại trạm đều có đối chứng, trước 2020 phần lớn thì không; SPI mới có 12 trạm do GHCN thiếu mưa \\
     \bottomrule
   \end{tabular}
-  \slidenote{54}
+  \slidenote{55}
 \end{frame}
 \begin{frame}{Mở rộng ra toàn cầu}
   \ychinh{Mở rộng ra toàn cầu thì Entity Resolution, lưu trữ, Kafka và Spark đều phải thay đổi}
@@ -1131,7 +1157,7 @@
     \bottomrule
   \end{tabular}
   \nguon{Cùng lý do, Mục 2.1 báo cáo không chọn Dataspace/pay-as-you-go.}
-  \slidenote{55}
+  \slidenote{56}
 \end{frame}
 
 \begin{frame}{Kiến trúc PINN và huấn luyện}
@@ -1158,7 +1184,7 @@
     \end{column}
   \end{columns}
   \ketluan{\scriptsize PINN mở rộng phát hiện sang độ ẩm và gió; mục tiêu đo được tiếp theo: 375 ca dị thường cục bộ (6,3\%)}
-  \slidenote{56}
+  \slidenote{57}
 \end{frame}
 
 \begin{frame}{Các loại dị thường khí hậu và bảng xu hướng}
@@ -1196,7 +1222,7 @@
   \end{columns}
   \ketluan{\scriptsize Bảng xu hướng (Mann-Kendall + độ dốc Sen) đo CHÍNH khí hậu nền có đang dịch chuyển theo
     thời gian không -- khác z-score, vốn đo một ngày lệch bao nhiêu so với nền cố định}
-  \slidenote{57}
+  \slidenote{58}
 \end{frame}
 
 \begin{frame}{Ghép theo khoá, không theo thứ tự mảng}
@@ -1227,7 +1253,7 @@
     \end{column}
   \end{columns}
   \ketluan{\scriptsize Ghép theo khoá được đặt ngay từ thiết kế Mediated Schema, không phải sửa chữa về sau}
-  \slidenote{58}
+  \slidenote{59}
 \end{frame}
 
 \begin{frame}{Trường dữ liệu và độ phân giải theo từng nguồn}
@@ -1247,7 +1273,7 @@
   \end{tabular}
   \ketluan{\scriptsize Mỗi trường đều $\geq$2 nguồn báo cáo và đều đo được mức sai lệch (Bảng xung đột
     Survivorship, slide 20): nhiệt độ 5 nguồn/3,2\%, mưa 4 nguồn/91,6\%, áp suất mực biển 3 nguồn/0,0\%}
-  \slidenote{59}
+  \slidenote{60}
 \end{frame}
 
 \begin{frame}{Chuỗi ngày tại trạm kèm các điểm dị thường}
@@ -1255,7 +1281,7 @@
   \centering
   \includegraphics[width=\textwidth,height=4.2cm,keepaspectratio]{images/anomaly_station_timeseries.png}
   \nguon{Bangkok: chỉ 21/4 vượt ngưỡng nóng ($z=+2{,}01$), 6 ngày còn lại là ngày mát. Hải Phòng: 978,8\,hPa ngày 7/9 ($z=-7{,}2$).}
-  \slidenote{60}
+  \slidenote{61}
 \end{frame}
 
 \begin{frame}{Đợt nóng và hạn SPI-3 trong 2020--2024}
@@ -1272,7 +1298,7 @@
       \tiny Cà Mau, Phan Thiết: 4/7 tháng--trạm 1--5/2020 có SPI-3 $\leq -1$, so với 9,9\% cả cửa sổ
     \end{column}
   \end{columns}
-  \slidenote{61}
+  \slidenote{62}
 \end{frame}
 
 \begin{frame}{Mưa cực đoan theo nước (R95pTOT)}
@@ -1280,7 +1306,7 @@
   \centering
   \includegraphics[width=\textwidth,height=4.1cm,keepaspectratio]{images/precip_r95ptot_by_country.png}
   \nguon{Chênh giữa các nước chỉ khoảng 8 điểm \% và nhiều nước ít năm--vị trí, nên không xếp hạng chặt.}
-  \slidenote{62}
+  \slidenote{63}
 \end{frame}
 
 \begin{frame}{Mật độ trạm đo lỗi dữ liệu 2020--2024}
@@ -1288,7 +1314,7 @@
   \centering
   \includegraphics[width=\textwidth,height=4.1cm,keepaspectratio]{images/data_error_density.png}
   \nguon{(a) 1.590 dòng cờ QC ở 32/61 trạm, 5 trạm ISD chiếm 56,4\%. (b) 20 ca nghi lỗi ở 8 trạm; vòng đen: 4 chuỗi trôi cảm biến.}
-  \slidenote{63}
+  \slidenote{64}
 \end{frame}
 
 \begin{frame}{Fellegi--Sunter và luật phủ quyết}
@@ -1318,7 +1344,7 @@
     \end{column}
   \end{columns}
   \ketluan{\scriptsize FS lộ cấu trúc nhiều--một: Đà Nẵng, Tân Sơn Nhất, Don Mueang có 2 chuỗi GHCN mỗi nơi}
-  \slidenote{64}
+  \slidenote{65}
 \end{frame}
 
 \begin{frame}{Liên kết trạm với lưới ERA5, không gộp}
@@ -1340,7 +1366,7 @@
     \end{column}
   \end{columns}
   \ketluan{\scriptsize Gộp sẽ biến chênh 3,5\,°C ở Luang Prabang thành ``xung đột'' cần chọn bên thắng}
-  \slidenote{65}
+  \slidenote{66}
 \end{frame}
 
 \end{document}

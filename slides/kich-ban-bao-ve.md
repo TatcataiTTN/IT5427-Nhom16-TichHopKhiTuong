@@ -2,7 +2,7 @@
 
 **Người nghe:** hội đồng IT5427 (cô Vũ Tuyết Trinh). **Mục đích:** bảo vệ project cuối kỳ (60% điểm).
 **Thời lượng:** 30 phút gồm cả hỏi đáp. Bài chính khoảng 20 phút, để lại khoảng 10 phút hỏi đáp.
-**Slide:** `final-defense.pdf`, bài chính trang 1–33, Phụ lục trang 34–65 (chỉ mở khi bị hỏi).
+**Slide:** `final-defense.pdf`, bài chính trang 1–34, Phụ lục trang 35–66 (chỉ mở khi bị hỏi).
 
 **Cô quan tâm nhất:** dữ liệu thu thập có đặc trưng gì, yêu cầu xử lý gì (thiếu, ngoài khoảng, đơn vị không đồng
 nhất…), và đặc biệt — theo đúng kiểu cô hỏi nhóm 15 — **ghép dữ liệu giữa các nguồn có dựa vào giả định không,
@@ -23,52 +23,52 @@ chạy luôn Dashboard Streamlit tại `localhost:8501`.
 | 2 | Mục tiêu, dữ liệu và kiến trúc | Quang | 6–9 | 3:00 |
 | 3 | Đặc trưng dữ liệu và yêu cầu xử lý | Quang | 10–16 | 6:30 |
 | 4 | Tích hợp dữ liệu | Lương | 17–20 | 3:00 |
-| 5 | Xử lý và phân tích | Nghĩa | 21–29 | 6:30 |
-| 6 | Kết luận | Nghĩa | 30–33 | 1:30 |
-| | **Tổng bài chính** | | **33 trang** | **khoảng 23:00** |
+| 5 | Xử lý và phân tích | Nghĩa | 21–30 | 7:30 |
+| 6 | Kết luận | Nghĩa | 31–34 | 1:30 |
+| | **Tổng bài chính** | | **34 trang** | **khoảng 24:00** |
 
-Quang: 11:30 (slide 1–16). Lương: 3:00 (slide 17–20). Nghĩa: 8:00 (slide 21–33).
+Quang: 11:30 (slide 1–16). Lương: 3:00 (slide 17–20). Nghĩa: 9:00 (slide 21–34).
 
-**Phụ lục (trang 34–65), ai hiểu chính/hiểu phụ nếu hội đồng hỏi** — người hiểu chính trả lời trước, người hiểu
+**Phụ lục (trang 35–66), ai hiểu chính/hiểu phụ nếu hội đồng hỏi** — người hiểu chính trả lời trước, người hiểu
 phụ chỉ bổ sung nếu được hỏi thêm hoặc người chính trả lời chưa đủ. Lời nói gợi ý cho từng trang nằm trong mục
 "Phụ lục: lời nói gợi ý từng trang" ở cuối file (cũng in sẵn trong `final-defense-notes.pdf`, cột bên phải mỗi
 trang phụ lục):
 
 | Trang | Nội dung | Hiểu chính | Hiểu phụ |
 |---|---|---|---|
-| 35 | Dữ liệu nằm ở năm nguồn khác nhau | Quang | Lương |
-| 36 | Năm nguồn dữ liệu | Quang | Nghĩa |
-| 37 | Vùng nghiên cứu | Quang | Lương |
-| 38 | Quy mô kho sau tích hợp | Quang | Nghĩa |
-| 39 | Dữ liệu thô trước chuẩn hoá | Lương | Quang |
-| 40 | Tải dữ liệu theo phạm vi đề cương | Quang | Nghĩa |
-| 41 | Tỷ lệ dữ liệu bị QC can thiệp | Quang | Lương |
-| 42 | Chọn IQR thay cho Z-score | Lương | Quang |
-| 43 | Lỗi số liệu trong pipeline | Quang | Nghĩa |
-| 44 | Chiến lược partition | Nghĩa | Quang |
-| 45 | Cụm Spark và Kafka | Nghĩa | Lương |
-| 46 | Mưa cực đoan khi bão Yagi | Nghĩa | Lương |
-| 47 | Xu hướng nhiệt độ dài hạn | Nghĩa | Lương |
-| 48 | Phát hiện trôi cảm biến | Lương | Nghĩa |
-| 49 | Tương quan và PCA | Lương | Nghĩa |
-| 50 | Các panel của dashboard | Nghĩa | Lương |
-| 51 | Panel 1: tổng quan tích hợp | Nghĩa | Quang |
-| 52 | Tiến độ theo từng người | Nghĩa | Quang |
-| 53 | Sản phẩm của từng người theo mốc | Nghĩa | Lương |
-| 54 | Giới hạn hạ tầng | Nghĩa | Lương |
-| 55 | Mở rộng ra toàn cầu | Nghĩa | Lương |
-| 56 | Kiến trúc PINN và huấn luyện | Nghĩa | Lương |
-| 57 | Các loại dị thường khí hậu và bảng xu hướng | Nghĩa | Lương |
-| 58 | Ghép theo khoá, không theo thứ tự mảng | Lương | Quang |
-| 59 | Trường dữ liệu và độ phân giải theo từng nguồn | Quang | Lương |
-| 60 | Chuỗi ngày tại trạm kèm các điểm dị thường | Nghĩa | Lương |
-| 61 | Đợt nóng và hạn SPI-3 trong 2020–2024 | Nghĩa | Quang |
-| 62 | Mưa cực đoan theo nước (R95pTOT) | Nghĩa | Quang |
-| 63 | Mật độ trạm đo lỗi dữ liệu 2020–2024 | Quang | Nghĩa |
-| 64 | Fellegi–Sunter và luật phủ quyết | Lương | Nghĩa |
-| 65 | Liên kết trạm với lưới ERA5, không gộp | Lương | Nghĩa |
+| 36 | Dữ liệu nằm ở năm nguồn khác nhau | Quang | Lương |
+| 37 | Năm nguồn dữ liệu | Quang | Nghĩa |
+| 38 | Vùng nghiên cứu | Quang | Lương |
+| 39 | Quy mô kho sau tích hợp | Quang | Nghĩa |
+| 40 | Dữ liệu thô trước chuẩn hoá | Lương | Quang |
+| 41 | Tải dữ liệu theo phạm vi đề cương | Quang | Nghĩa |
+| 42 | Tỷ lệ dữ liệu bị QC can thiệp | Quang | Lương |
+| 43 | Chọn IQR thay cho Z-score | Lương | Quang |
+| 44 | Lỗi số liệu trong pipeline | Quang | Nghĩa |
+| 45 | Chiến lược partition | Nghĩa | Quang |
+| 46 | Cụm Spark và Kafka | Nghĩa | Lương |
+| 47 | Mưa cực đoan khi bão Yagi | Nghĩa | Lương |
+| 48 | Xu hướng nhiệt độ dài hạn | Nghĩa | Lương |
+| 49 | Phát hiện trôi cảm biến | Lương | Nghĩa |
+| 50 | Tương quan và PCA | Lương | Nghĩa |
+| 51 | Các panel của dashboard | Nghĩa | Lương |
+| 52 | Panel 1: tổng quan tích hợp | Nghĩa | Quang |
+| 53 | Tiến độ theo từng người | Nghĩa | Quang |
+| 54 | Sản phẩm của từng người theo mốc | Nghĩa | Lương |
+| 55 | Giới hạn hạ tầng | Nghĩa | Lương |
+| 56 | Mở rộng ra toàn cầu | Nghĩa | Lương |
+| 57 | Kiến trúc PINN và huấn luyện | Nghĩa | Lương |
+| 58 | Các loại dị thường khí hậu và bảng xu hướng | Nghĩa | Lương |
+| 59 | Ghép theo khoá, không theo thứ tự mảng | Lương | Quang |
+| 60 | Trường dữ liệu và độ phân giải theo từng nguồn | Quang | Lương |
+| 61 | Chuỗi ngày tại trạm kèm các điểm dị thường | Nghĩa | Lương |
+| 62 | Đợt nóng và hạn SPI-3 trong 2020–2024 | Nghĩa | Quang |
+| 63 | Mưa cực đoan theo nước (R95pTOT) | Nghĩa | Quang |
+| 64 | Mật độ trạm đo lỗi dữ liệu 2020–2024 | Quang | Nghĩa |
+| 65 | Fellegi–Sunter và luật phủ quyết | Lương | Nghĩa |
+| 66 | Liên kết trạm với lưới ERA5, không gộp | Lương | Nghĩa |
 
-Trang 34 chỉ là trang ngăn mục, không cần ai giải thích riêng. "Hiểu chính" ưu tiên người thật sự làm ra nội
+Trang 35 chỉ là trang ngăn mục, không cần ai giải thích riêng. "Hiểu chính" ưu tiên người thật sự làm ra nội
 dung đó (Quang: ingestion/QC; Lương: schema/ER/Survivorship; Nghĩa: Spark/Kafka/PINN/dashboard), không nhất
 thiết trùng người đang nói phần chính tương ứng.
 
@@ -440,16 +440,37 @@ vẹn tham chiếu 100%.
 
 # Phần 5. Xử lý và phân tích
 
-## 5.1. Tối ưu Spark (1 phút)
+## 5.1. Tối ưu Spark: bốn việc đã làm (1 phút)
+
+**Trên slide**
+
+Bảng 4 việc: chọn truy vấn đại diện, cache dữ liệu đã lọc, đo lệch dữ liệu, so sánh có/không chia thư mục.
+
+**Lời nói**
+> Em là Nghĩa. Mục tiêu M3 là tối ưu Spark, và nhóm làm bốn việc, mỗi việc đo trước và sau trên cùng một truy vấn,
+> chạy 3 lần lấy trung bình.
+>
+> Một, chọn truy vấn đại diện cho dashboard: lọc GHCN, nhóm theo trạm và tháng, tính nhiệt độ trung bình. Spark quét
+> Parquet, đẩy điều kiện lọc xuống tầng đọc, gộp sơ bộ trong từng partition, shuffle theo khoá rồi gộp lần cuối.
+>
+> Hai, cache dữ liệu đã lọc: EXPLAIN cho thấy bước quét Parquet đổi thành đọc từ bộ nhớ.
+>
+> Ba, đo lệch dữ liệu bằng cách đếm số dòng mỗi partition khi chia theo năm–nguồn và theo năm–tháng–nguồn.
+>
+> Bốn, so sánh có và không chia thư mục: chia thì Spark bỏ qua cả thư mục không khớp, không chia thì Parquet vẫn bỏ
+> qua từng khối nhờ min/max lưu sẵn. Cấu hình AQE và số partition khi shuffle để mặc định của Spark 4.2.
+
+**Chuyển ý**
+> Kết quả đo của bốn việc này ở slide tiếp theo.
+
+## 5.2. Tối ưu Spark (1 phút)
 
 **Trên slide**
 
 `cache()` giảm 69,4% thời gian truy vấn (0,36s → 0,11s); thử partition theo tháng; giữ `year/source`.
 
 **Lời nói**
-> Em là Nghĩa. Mục tiêu M3 là tối ưu Spark.
->
-> Với truy vấn tổng hợp nhiệt độ theo trạm và tháng, `cache()` giảm thời gian từ 0,36 giây xuống 0,11 giây, tức
+> Kết quả chính: với truy vấn tổng hợp nhiệt độ theo trạm và tháng, `cache()` giảm thời gian từ 0,36 giây xuống 0,11 giây, tức
 > giảm 69,4%, vượt ngưỡng 30%.
 >
 > Nhóm cũng thử partition thêm theo tháng. Data skew giảm rõ, nhưng số partition tăng từ 109 lên hơn 1.300.
@@ -460,7 +481,7 @@ vẹn tham chiếu 100%.
 **Chuyển ý**
 > Kho đã truy vấn được, giờ là ứng dụng chính: phát hiện dị thường khí hậu.
 
-## 5.2. Đối chứng với ba sự kiện đã biết (45 giây)
+## 5.3. Đối chứng với ba sự kiện đã biết (45 giây)
 
 **Trên slide**
 
@@ -481,7 +502,7 @@ Biểu đồ tỷ lệ ngày z ≥ 2 trong tháng 4–5 theo năm, 2020–2024 (
 **Chuyển ý**
 > Ba sự kiện là kiểm tra có chọn trước. Bức tranh đầy đủ của cả cửa sổ thì như sau.
 
-## 5.3. Dị thường 2020–2024 theo không gian và thời gian (45 giây)
+## 5.4. Dị thường 2020–2024 theo không gian và thời gian (45 giây)
 
 **Trên slide**
 
@@ -500,7 +521,7 @@ Bản đồ tỉ lệ ngày dị thường tại 119 vị trí; biểu đồ s�
 **Chuyển ý**
 > Phóng to vào đúng một ngày của mỗi sự kiện.
 
-## 5.4. Điểm dị thường trong hai sự kiện 2024 (45 giây)
+## 5.5. Điểm dị thường trong hai sự kiện 2024 (45 giây)
 
 **Trên slide**
 
@@ -518,7 +539,7 @@ Hai bản đồ điểm z: (a) nhiệt độ 30/4/2024; (b) áp suất 7/9/2024,
 **Chuyển ý**
 > Một giá trị z cao có thể là nóng thật, cũng có thể là cảm biến hỏng. Nhóm tách hai trường hợp này như sau.
 
-## 5.5. Đối chứng bằng ERA5 và trạm lân cận (1 phút)
+## 5.6. Đối chứng bằng ERA5 và trạm lân cận (1 phút)
 
 **Trên slide**
 
@@ -538,7 +559,7 @@ Biểu đồ phân loại 5.910 ca tại trạm 2020–2024: 93,3% xác nhận k
 **Chuyển ý**
 > Các phép tính này chạy bằng batch. Nhóm kiểm tra xem làm theo luồng có ra cùng kết quả không.
 
-## 5.6. Phát hiện dị thường theo luồng (1 phút)
+## 5.7. Phát hiện dị thường theo luồng (1 phút)
 
 **Trên slide**
 
@@ -557,7 +578,7 @@ Biểu đồ phân loại 5.910 ca tại trạm 2020–2024: 93,3% xác nhận k
 **Chuyển ý**
 > Ngoài thống kê, nhóm thử một mô hình học máy có ràng buộc vật lý cho trường gió.
 
-## 5.7. PINN cho trường gió (45 giây)
+## 5.8. PINN cho trường gió (45 giây)
 
 **Trên slide**
 
@@ -578,7 +599,7 @@ Bảng λ = 0; 0,01; 0,1; 1,0 với RMSE, MAE, physics loss. PINN điền đư�
 **Chuyển ý**
 > Kết quả của các phần trên được gom lại trên dashboard.
 
-## 5.8. Dashboard (30 giây)
+## 5.9. Dashboard (30 giây)
 
 **Trên slide**
 
@@ -657,7 +678,7 @@ Bảng M1–M5 với kết quả đo được (2020–2024); 4/5 đạt đầy �
 Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi. Người "hiểu chính" ở bảng đầu file trả lời trước,
 đọc thẳng gợi ý dưới đây rồi diễn giải tự nhiên; không cần đọc nguyên văn.
 
-## 35. Dữ liệu nằm ở năm nguồn khác nhau
+## 36. Dữ liệu nằm ở năm nguồn khác nhau
 
 **Lời nói**
 > **Chính:** Quang · **Phụ:** Lương.
@@ -667,7 +688,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > ERA5 là CDS API và Zarr. Ví dụ ngữ nghĩa: áp suất bề mặt khác áp suất mực nước biển, có 4 cách định nghĩa nhiệt
 > độ ngày. Mỗi hàng trong bảng ứng với đúng một vấn đề nhóm đã xử lý ở phần 3.
 
-## 36. Năm nguồn dữ liệu
+## 37. Năm nguồn dữ liệu
 
 **Lời nói**
 > **Chính:** Quang · **Phụ:** Nghĩa.
@@ -676,7 +697,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > dị thường nhóm không tính Open-Meteo là một xác nhận độc lập. GHCN và ISD cùng của NOAA nhưng QC gốc khác
 > nhau, 406 so với 3.255 giá trị lỗi. Chỉ GHCN và ISD được dùng làm ground truth thật.
 
-## 37. Vùng nghiên cứu
+## 38. Vùng nghiên cứu
 
 **Lời nói**
 > **Chính:** Quang · **Phụ:** Lương.
@@ -685,7 +706,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > Singapore và Timor-Leste nằm trong bbox nhưng không có trạm GHCN, ISD hay NASA POWER nào nhóm chọn được. Ranh
 > giới dùng Natural Earth 10m, đã cập nhật Timor-Leste gia nhập ASEAN 26/10/2025.
 
-## 38. Quy mô kho sau tích hợp
+## 39. Quy mô kho sau tích hợp
 
 **Lời nói**
 > **Chính:** Quang · **Phụ:** Nghĩa.
@@ -693,7 +714,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > Kho có 8.955.313 bản ghi từ 5 nguồn, 119 vị trí, 9 nước, đưa về chung Mediated Schema WeatherObs. ERA5 lấy 5
 > năm 2020–2024 theo giờ, ISD 10 năm, GHCN từ 1943. Dữ liệu thô khoảng 23 GB, sau tích hợp còn 303 MB Parquet.
 
-## 39. Dữ liệu thô trước chuẩn hoá
+## 40. Dữ liệu thô trước chuẩn hoá
 
 **Lời nói**
 > **Chính:** Lương · **Phụ:** Quang.
@@ -703,7 +724,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > (TMAX+TMIN)/2 tới 0,4 độ nên nhóm giữ cả hai, thêm cột temp_def. Trích trực tiếp từ data_samples/, chi tiết ở
 > docs/17.
 
-## 40. Tải dữ liệu theo phạm vi đề cương
+## 41. Tải dữ liệu theo phạm vi đề cương
 
 **Lời nói**
 > **Chính:** Quang · **Phụ:** Nghĩa.
@@ -713,7 +734,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > qua kênh ARCO thì mỗi chunk là 1 giờ toàn cầu, giữ vùng Đông Nam Á 22 GB phải tải khoảng 1 TB, mất khoảng 27,8
 > giờ ở 10 MB/s.
 
-## 41. Tỷ lệ dữ liệu bị QC can thiệp
+## 42. Tỷ lệ dữ liệu bị QC can thiệp
 
 **Lời nói**
 > **Chính:** Quang · **Phụ:** Lương.
@@ -721,7 +742,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > QC chỉ đặt NULL hoặc gắn cờ 0,09% số bản ghi, phần lớn do cờ lỗi gốc của ISD, 3.255 giá trị, nhiều hơn GHCN,
 > 406 giá trị. Tỷ lệ nhỏ vì đây là can thiệp ở tầng 1 và 2, trước khi tích hợp.
 
-## 42. Chọn IQR thay cho Z-score
+## 43. Chọn IQR thay cho Z-score
 
 **Lời nói**
 > **Chính:** Lương · **Phụ:** Quang.
@@ -730,7 +751,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > nên ngưỡng 3 sigma rộng tới mức Z-score chỉ bắt được 1/5. IQR tính trên tứ phân vị nên không bị kéo theo, bắt
 > được 5/5. Vì vậy nhóm chọn IQR làm chỉ số chính cho Data Quality Report.
 
-## 43. Lỗi số liệu trong pipeline
+## 44. Lỗi số liệu trong pipeline
 
 **Lời nói**
 > **Chính:** Quang · **Phụ:** Nghĩa.
@@ -741,7 +762,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > partition chậm hơn 1,5–2,5 lần; bức xạ ERA5 dùng nhầm đại lượng đỉnh khí quyển thay vì bề mặt, đã đổi lại để
 > cùng đại lượng với NASA POWER.
 
-## 44. Chiến lược partition
+## 45. Chiến lược partition
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Quang.
@@ -751,7 +772,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > partition 1,5–2,5 lần, vì Parquet đã tự bỏ qua dữ liệu nhờ thống kê min/max theo row-group. Nhóm giữ
 > year/source, vì lợi ích chỉ rõ ở quy mô lớn hơn hoặc trên S3/GCS.
 
-## 45. Cụm Spark và Kafka
+## 46. Cụm Spark và Kafka
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -760,7 +781,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > spark_streaming_consumer.py đọc topic Kafka, in nhiệt độ trung bình từng trạm theo cửa sổ trượt 1 phút, trượt
 > 30 giây. Mốc 20/10 dựng xong cụm, mốc 9/11 streaming windowing chạy thật.
 
-## 46. Mưa cực đoan khi bão Yagi
+## 47. Mưa cực đoan khi bão Yagi
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -770,7 +791,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > ngày ướt, Rx1day, R95p. 11/13 cặp trạm–nguồn vượt p99 trong 6–11/9/2024. Trạm GHCN Phù Liễn mất số liệu đúng
 > lúc bão đổ bộ 7–8/9, rồi ghi 214 mm vào ngày 11/9.
 
-## 47. Xu hướng nhiệt độ dài hạn
+## 48. Xu hướng nhiệt độ dài hạn
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -780,7 +801,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > +0,41, Penang +0,35, Bangkok +0,35, Cao Bằng +0,34 độ mỗi thập kỷ. Trừ xu hướng nền này thì năm 2024 vẫn nổi
 > bật. Xu hướng mưa chỉ có 1–6 trạm đủ 30 năm số liệu nên chưa đủ kết luận.
 
-## 48. Phát hiện trôi cảm biến
+## 49. Phát hiện trôi cảm biến
 
 **Lời nói**
 > **Chính:** Lương · **Phụ:** Nghĩa.
@@ -790,7 +811,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > là áp suất Phnom Penh nhảy bậc −2,6 hPa từ 11/2022, tương đương trôi −0,65 hPa mỗi năm. Tiêm lỗi nhân tạo vào
 > 76 chuỗi thật đang ổn định: phát hiện 100% ca trôi, 95–98% ca nhảy bậc.
 
-## 49. Tương quan và PCA
+## 50. Tương quan và PCA
 
 **Lời nói**
 > **Chính:** Lương · **Phụ:** Nghĩa.
@@ -800,7 +821,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > kiểu bão mà không cần gán nhãn trước. PC1 và PC2 chỉ giải thích 48–56% phương sai, cần thêm thành phần để mô
 > tả đủ biến động khí tượng Đông Nam Á.
 
-## 50. Các panel của dashboard
+## 51. Các panel của dashboard
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -809,7 +830,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > Panel 5 cảnh báo bất thường theo IQR, panel 7 dị thường khí hậu, panel 9 trôi cảm biến, panel 10 cảnh báo theo
 > luồng Kafka. Bảng được cache theo ngày, đổi ngày hoặc trạm mất khoảng 0,6 giây.
 
-## 51. Panel 1: tổng quan tích hợp
+## 52. Panel 1: tổng quan tích hợp
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Quang.
@@ -817,7 +838,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > Ảnh chụp thật từ trình duyệt, chạy local trên bản warehouse rút gọn 1.076.473 dòng, 119 trạm/điểm, để chụp ảnh
 > nhanh. Các slide phân tích chính của bài dùng kho đầy đủ 8,96 triệu dòng, nêu ở Mục 6.1 báo cáo.
 
-## 52. Tiến độ theo từng người
+## 53. Tiến độ theo từng người
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Quang.
@@ -826,7 +847,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > thức: đề cương 5/10, tiến độ 20/10, cuối kỳ 15/11. Nét đứt là hai mốc nội bộ nhóm tự đặt: kiểm thử 27/10, hội
 > tụ 2/11.
 
-## 53. Sản phẩm của từng người theo mốc
+## 54. Sản phẩm của từng người theo mốc
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -836,7 +857,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > 6.4–6.7. Theo thông báo 15/11, buổi trình bày không có demo trực tiếp, nhưng cụm Docker và pytest vẫn chạy
 > được ngay nếu hội đồng yêu cầu.
 
-## 54. Giới hạn hạ tầng
+## 55. Giới hạn hạ tầng
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -848,7 +869,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > 2020–2024 mọi dị thường tại trạm đều có đối chứng; trước 2020, khi chưa có ERA5, phần lớn thì không, nên nhóm
 > chỉ báo kết quả cho 2020–2024. SPI mới tính được ở 12 trạm vì GHCN thiếu số liệu mưa.
 
-## 55. Mở rộng ra toàn cầu
+## 56. Mở rộng ra toàn cầu
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -858,7 +879,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > cần RF từ 3 trở lên và nhiều partition; Spark cần cụm nhiều máy thật vì DuckDB chỉ nhanh hơn khi dữ liệu còn
 > vừa RAM một máy. Cùng lý do này, Mục 2.1 báo cáo không chọn kiến trúc Dataspace hay pay-as-you-go.
 
-## 56. Kiến trúc PINN và huấn luyện
+## 57. Kiến trúc PINN và huấn luyện
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -882,7 +903,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > Bước tiếp theo đo được là dùng trường PINN phân xử 375 ca dị thường cục bộ, 6,3%, mà lưới ERA5 khoảng 28 km
 > không xác nhận được.
 
-## 57. Các loại dị thường khí hậu và bảng xu hướng
+## 58. Các loại dị thường khí hậu và bảng xu hướng
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -900,7 +921,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > Bảng xu hướng khác với z-score ở chỗ nó đo chính khí hậu nền có đang dịch chuyển theo thời gian hay không,
 > dùng kiểm định Mann-Kendall cho ý nghĩa thống kê và độ dốc Sen cho tốc độ thay đổi mỗi thập kỷ.
 
-## 58. Ghép theo khoá, không theo thứ tự mảng
+## 59. Ghép theo khoá, không theo thứ tự mảng
 
 **Lời nói**
 > **Chính:** Lương · **Phụ:** Quang.
@@ -919,7 +940,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > cho precision và recall đều 100% trên 15 cặp có nhãn — tức là ghép theo khoá vị trí và ghép theo khoá WMO cho
 > ra cùng kết quả, không phải trùng hợp ngẫu nhiên.
 
-## 59. Trường dữ liệu và độ phân giải theo từng nguồn
+## 60. Trường dữ liệu và độ phân giải theo từng nguồn
 
 **Lời nói**
 > **Chính:** Quang · **Phụ:** Lương.
@@ -935,7 +956,7 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 
 Không cắt phần 3: đây là phần cô hỏi trực tiếp.
 
-## 60. Chuỗi ngày tại trạm kèm các điểm dị thường
+## 61. Chuỗi ngày tại trạm kèm các điểm dị thường
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Lương.
@@ -946,7 +967,7 @@ Không cắt phần 3: đây là phần cô hỏi trực tiếp.
 > số đợt nóng TG90p bên cạnh z. Tại Hải Phòng, áp suất rơi từ 992,6 hPa ngày 6/9 xuống 978,8 hPa ngày 7/9, z
 > bằng âm 7,2, rồi về lại dải nền sau hai ngày, đúng dạng bão Yagi đi qua.
 
-## 61. Đợt nóng và hạn SPI-3 trong 2020–2024
+## 62. Đợt nóng và hạn SPI-3 trong 2020–2024
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Quang.
@@ -958,7 +979,7 @@ Không cắt phần 3: đây là phần cô hỏi trực tiếp.
 > của đợt hạn 2019–2020: 4 trên 7 tháng–trạm có SPI-3 từ âm 1 trở xuống, so với 9,9% của cả giai đoạn. Đúng
 > chiều, nhưng hai trạm ven biển chưa đại diện cho cả lưu vực.
 
-## 62. Mưa cực đoan theo nước (R95pTOT)
+## 63. Mưa cực đoan theo nước (R95pTOT)
 
 **Lời nói**
 > **Chính:** Nghĩa · **Phụ:** Quang.
@@ -968,7 +989,7 @@ Không cắt phần 3: đây là phần cô hỏi trực tiếp.
 > 19,2%. Chênh giữa các nước chỉ khoảng 8 điểm phần trăm và nhiều nước có ít năm–vị trí, nên nhóm không xếp hạng
 > chặt giữa các nước.
 
-## 63. Mật độ trạm đo lỗi dữ liệu 2020–2024
+## 64. Mật độ trạm đo lỗi dữ liệu 2020–2024
 
 **Lời nói**
 > **Chính:** Quang · **Phụ:** Nghĩa.
@@ -981,7 +1002,7 @@ Không cắt phần 3: đây là phần cô hỏi trực tiếp.
 > áp suất âm 0,65 hPa mỗi năm. Viêng Chăn có 210 dòng gắn cờ và nhảy bậc nhiệt độ. Đây là các trạm cần kiểm tra
 > hồ sơ thiết bị trước khi dùng chuỗi.
 
-## 64. Fellegi–Sunter và luật phủ quyết
+## 65. Fellegi–Sunter và luật phủ quyết
 
 **Lời nói**
 > **Chính:** Lương · **Phụ:** Nghĩa.
@@ -999,7 +1020,7 @@ Không cắt phần 3: đây là phần cô hỏi trực tiếp.
 > Don Mueang. Giá trị của nó là ngưỡng gắn với tỷ lệ lỗi tường minh, và lộ ra Đà Nẵng, Tân Sơn Nhất, Don Mueang
 > mỗi nơi có hai chuỗi GHCN của cùng một sân bay.
 
-## 65. Liên kết trạm với lưới ERA5, không gộp
+## 66. Liên kết trạm với lưới ERA5, không gộp
 
 **Lời nói**
 > **Chính:** Lương · **Phụ:** Nghĩa.
