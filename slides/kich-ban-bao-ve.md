@@ -60,6 +60,7 @@ trang phụ lục):
 | 54 | Kiến trúc PINN và huấn luyện | Nghĩa | Lương |
 | 55 | Các loại dị thường khí hậu và bảng xu hướng | Nghĩa | Lương |
 | 56 | Ghép theo khoá, không theo thứ tự mảng | Lương | Quang |
+| 57 | Trường dữ liệu và độ phân giải theo từng nguồn | Quang | Lương |
 
 Trang 32 chỉ là trang ngăn mục, không cần ai giải thích riêng. "Hiểu chính" ưu tiên người thật sự làm ra nội
 dung đó (Quang: ingestion/QC; Lương: schema/ER/Survivorship; Nghĩa: Spark/Kafka/PINN/dashboard), không nhất
@@ -854,5 +855,19 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > Bằng chứng đo được: Entity Resolution kiểm chứng chéo bằng mã WMO, một khoá hoàn toàn độc lập với toạ độ, vẫn
 > cho precision và recall đều 100% trên 15 cặp có nhãn — tức là ghép theo khoá vị trí và ghép theo khoá WMO cho
 > ra cùng kết quả, không phải trùng hợp ngẫu nhiên.
+
+## 57. Trường dữ liệu và độ phân giải theo từng nguồn
+
+**Lời nói**
+> **Chính:** Quang · **Phụ:** Lương.
+>
+> Mỗi nguồn chỉ được chọn đúng tập trường cần cho WeatherObs, không phải toàn bộ trường mà API hay tệp gốc có
+> thể cung cấp. GHCN chỉ cho nhiệt độ và mưa, theo ngày, từ 1943. ISD cho thêm độ ẩm suy từ điểm sương, áp suất
+> và gió, theo giờ, nhưng chỉ từ 2015. NASA POWER và Open-Meteo đều là điểm, gọi API đúng toạ độ trạm, 5 năm gần
+> đây. ERA5 là nguồn duy nhất dạng lưới, 0,25 độ, phải nội suy Bilinear về toạ độ trạm trước khi so sánh được.
+>
+> Điểm quan trọng: mọi trường trong sáu trường chính đều có ít nhất hai nguồn cùng báo cáo, và đều đo được mức
+> sai lệch cụ thể giữa các nguồn, từ 0% ở áp suất mực biển tới 91,6% ở mưa. Đây là điều kiện bắt buộc để Entity
+> Resolution và Survivorship có ý nghĩa — nếu một trường chỉ một nguồn báo cáo thì không có gì để đối chiếu.
 
 Không cắt phần 3: đây là phần cô hỏi trực tiếp.

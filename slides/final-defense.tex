@@ -1209,4 +1209,24 @@
   \slidenote{56}
 \end{frame}
 
+\begin{frame}{Trường dữ liệu và độ phân giải theo từng nguồn}
+  \ychinh{\small Mỗi nguồn chỉ chọn đúng tập trường cần cho WeatherObs, không phải toàn bộ API/tệp gốc}
+  \tiny
+  \renewcommand{\arraystretch}{0.85}
+  \begin{tabular}{@{}>{\bfseries}p{1.5cm}p{6.1cm}p{1.9cm}p{1.6cm}p{1.9cm}@{}}
+    \toprule
+    Nguồn & Trường được chọn & Không gian & Thời gian & Phạm vi \\
+    \midrule
+    GHCN-Daily & temp\_c (TAVG), precip\_mm & Điểm (trạm) & Theo ngày & 1943--2026 \\
+    NOAA ISD & temp\_c, dewpoint\_c, rh\_pct (suy ra), pressure\_msl/surface\_hpa, wind\_speed/dir & Điểm (trạm) & Theo giờ (METAR, SYNOP) & 2015--2024 \\
+    NASA POWER & temp\_c, rh\_pct, dewpoint\_c, precip\_mm, wind\_speed\_ms, pressure\_surface\_hpa, solar\_rad\_wm2 & Điểm (API đúng toạ độ) & Theo ngày & 2020--2024 \\
+    Open-Meteo & temp\_c, rh\_pct, precip\_mm, wind\_speed/dir, pressure\_msl\_hpa, solar\_rad\_wm2 & Điểm (API, nội suy nội bộ ERA5/ICON/GFS) & Theo giờ & 2020--2024 \\
+    ERA5 (CDS) & temp\_c, precip\_mm, wind\_speed/dir (u10,v10), pressure\_surface/msl\_hpa, solar\_rad\_wm2, cloud\_cover\_pct -- 9 biến & Lưới $0{,}25°$ ($\approx$28km), nội suy Bilinear & Theo giờ & 2020--2024 \\
+    \bottomrule
+  \end{tabular}
+  \ketluan{\scriptsize Mỗi trường đều $\geq$2 nguồn báo cáo và đều đo được mức sai lệch (Bảng xung đột
+    Survivorship, slide 20): nhiệt độ 5 nguồn/3,2\%, mưa 4 nguồn/91,6\%, áp suất mực biển 3 nguồn/0,0\%}
+  \slidenote{57}
+\end{frame}
+
 \end{document}

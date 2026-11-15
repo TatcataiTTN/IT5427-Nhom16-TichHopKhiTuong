@@ -470,6 +470,63 @@ API gọi lại dữ liệu lịch sử nội suy từ \textbf{nhiều mô hình
 
 Hệ quả thiết kế trực tiếp từ Bảng~\ref{tab:source-credibility}: (i) chỉ GHCN và ISD được dùng làm quan trắc ``ground truth'' để đối chứng dị thường (Mục 6.8), ERA5 chỉ đóng vai trò \emph{đối chứng độc lập thứ hai} chứ không thay thế trạm; (ii) khi diễn giải việc ERA5 và Open-Meteo ``khớp nhau'' ở đâu đó, nhóm không coi đó là hai nguồn độc lập xác nhận lẫn nhau, vì Open-Meteo có thể chính là ERA5 được định dạng lại; (iii) NASA POWER và ERA5, dù cùng là sản phẩm mô hình, dùng hệ thống đồng hoá khác nhau nên vẫn có giá trị đối chứng chéo thật sự.
 
+\subsection{Trường dữ liệu được chọn và độ phân giải không gian/thời gian theo từng nguồn}
+\label{sec:source-fields}
+
+Năm nguồn không cung cấp cùng một tập biến, cùng độ phân giải không gian, hay cùng độ phân giải thời
+gian -- đây là một trong những dị biệt chính phải xử lý ở Chương~6 (Mục~6.5). Bảng~\ref{tab:source-fields}
+liệt kê đúng tập trường mà parser của nhóm thực sự trích xuất cho từng nguồn (hàm
+\texttt{parse\_ghcn}, \texttt{parse\_isd}, \texttt{parse\_nasa\_power}, \texttt{parse\_openmeteo} trong
+\texttt{ingestion/parsers.py}, và tập biến CDS khai báo trong \texttt{scripts/download\_era5\_cds.py}
+cho ERA5), không phải toàn bộ trường mà API/tệp gốc có thể cung cấp -- nhóm chỉ chọn các trường cần cho
+lược đồ chung \texttt{WeatherObs} (Mục~3.2).
+
+\begin{table}[H]
+\centering\footnotesize
+\caption{Trường dữ liệu được chọn và độ phân giải theo từng nguồn (đối chiếu trực tiếp với code)}
+\label{tab:source-fields}
+\begin{tabular}{@{}p{1.7cm}p{4.7cm}p{2.0cm}p{1.9cm}p{2.5cm}@{}}
+\toprule
+\textbf{Nguồn} & \textbf{Trường dữ liệu được chọn} & \textbf{Độ phân giải không gian} & \textbf{Độ phân giải thời gian} & \textbf{Phạm vi thời gian} \\
+\midrule
+GHCN-Daily &
+\texttt{temp\_c} (TAVG, hoặc (TMAX+TMIN)/2 khi thiếu TAVG), \texttt{precip\_mm} &
+Điểm (toạ độ trạm) &
+Theo ngày &
+1943--2026 (83 năm) \\
+NOAA ISD &
+\texttt{temp\_c}, \texttt{dewpoint\_c}, \texttt{rh\_pct} (suy từ điểm sương), \texttt{pressure\_msl\_hpa}, \texttt{pressure\_surface\_hpa}, \texttt{wind\_speed\_ms}, \texttt{wind\_dir\_deg} &
+Điểm (toạ độ trạm) &
+Theo giờ (bản tin METAR, SYNOP) &
+2015--2024 (10 năm) \\
+NASA POWER &
+\texttt{temp\_c}, \texttt{rh\_pct}, \texttt{dewpoint\_c}, \texttt{precip\_mm}, \texttt{wind\_speed\_ms} (quy đổi từ 2\,m nếu thiếu 10\,m), \texttt{pressure\_surface\_hpa}, \texttt{solar\_rad\_wm2} &
+Điểm (truy vấn API đúng toạ độ trạm) &
+Theo ngày &
+2020--2024 (5 năm) \\
+Open-Meteo &
+\texttt{temp\_c}, \texttt{rh\_pct}, \texttt{precip\_mm}, \texttt{wind\_speed\_ms}, \texttt{wind\_dir\_deg}, \texttt{pressure\_msl\_hpa}, \texttt{solar\_rad\_wm2} &
+Điểm (truy vấn API đúng toạ độ trạm, nội suy nội bộ từ ERA5/ICON/GFS) &
+Theo giờ &
+2020--2024 (5 năm) \\
+ERA5 (CDS) &
+\texttt{temp\_c} (t2m), \texttt{precip\_mm} (tp), \texttt{wind\_speed\_ms}/\texttt{wind\_dir\_deg} (từ u10, v10), \texttt{pressure\_surface\_hpa} (sp), \texttt{pressure\_msl\_hpa} (msl), \texttt{solar\_rad\_wm2} (ssrd/tisr), \texttt{cloud\_cover\_pct} (tcc) -- 9 biến CDS &
+Lưới $0{,}25°$ ($\approx$28\,km), nội suy Bilinear về toạ độ trạm (Mục~6.6) &
+Theo giờ &
+2020--2024 (5 năm) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Mỗi trường đều có từ hai nguồn trở lên báo cáo, và đều đo được mức sai lệch cụ thể giữa các
+nguồn} -- đây là điều kiện bắt buộc để Entity Resolution/Survivorship (Mục~6.2, 6.12) có ý nghĩa: nếu
+một trường chỉ một nguồn báo cáo thì không có gì để đối chiếu. Bảng~\ref{tab:survivorship-conflict} (đã
+trình bày ở Mục~6.12) đo chính xác điều này trên kho đầy đủ: nhiệt độ có 5 nguồn cùng báo cáo, 3,2\,\%
+nhóm (vị trí, ngày) xung đột; độ ẩm có 3 nguồn, 9,0\,\%; mưa có 4 nguồn, 91,6\,\% -- cao nhất, vì mỗi
+nguồn tích luỹ theo chu kỳ khác nhau (Mục~6.5); gió có 4 nguồn, 44,6\,\%; áp suất bề mặt có 3 nguồn,
+5,3\,\%; áp suất mực nước biển có 3 nguồn, 0,0\,\% -- duy nhất trường ba nguồn đồng thuận tuyệt đối.
+Không trường nào trong sáu trường chính chỉ có một nguồn duy nhất báo cáo.
+
 \section{Trạm quan trắc}
 
 Danh sách trạm quan trắc được lọc trực tiếp từ hai tệp metadata chính thức của GHCN và ISD (không suy đoán), phủ toàn bộ chín quốc gia Đông Nam Á. Bảng~\ref{tab:stations} tổng hợp số liệu.
