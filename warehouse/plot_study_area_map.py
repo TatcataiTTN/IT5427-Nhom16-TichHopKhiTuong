@@ -33,6 +33,15 @@ ASEAN_ISO3 = {
 }
 NO_DATA_ISO3 = {"SGP", "TLS"}  # ASEAN nhung nhom khong co tram/diem nao
 SRC_COLOR = {"GHCN": "#2a78d6", "ISD": "#eb6834", "NASA_POWER/Open-Meteo": "#1baf7a"}
+# Vi tri nhan ten nuoc (lon, lat, can le), chon tay de nam o vung trong, khong de len diem tram
+COUNTRY_LABEL_POS = {
+    "Myanmar": (97.3, 25.6, "center"), "Laos": (102.1, 21.5, "center"),
+    "Vietnam": (110.3, 16.6, "left"), "Thailand": (101.4, 15.7, "center"),
+    "Cambodia": (104.9, 13.1, "center"), "Malaysia": (104.6, 4.8, "left"),
+    "Brunei": (113.9, 6.0, "right"), "Indonesia": (113.4, -1.2, "center"),
+    "Philippines": (126.4, 13.6, "left"),
+}
+NO_DATA_MARKERS = {"1": (103.82, 1.35), "2": (125.9, -8.75)}
 
 
 def classify_source(location_id: str) -> str:
@@ -88,44 +97,36 @@ def main():
                   marker="o" if src != "NASA_POWER/Open-Meteo" else "^",
                   c=color, edgecolor="white", linewidth=0.4, zorder=4, label=f"{src} ({len(sub)})")
 
-    # Nhan ten nuoc ASEAN (tru Singapore/Timor-Leste, qua nho hoac can nhan rieng -- tach ra co duong dan)
-    for iso3, name in ASEAN_ISO3.items():
-        if iso3 in NO_DATA_ISO3:
-            continue
-        row = world[world["ISO_A3"] == iso3]
-        if row.empty:
-            continue
-        c = row.geometry.representative_point().iloc[0]
-        if not (BBOX["lon_min"] - 8 <= c.x <= BBOX["lon_max"] + 8 and BBOX["lat_min"] - 8 <= c.y <= BBOX["lat_max"] + 8):
-            continue
-        ax.annotate(name, (c.x, c.y), zorder=5, fontsize=6.5, ha="center", color="#2b2b2b")
+    # Nhan ten nuoc dat tay vao vung trong (bien hoac dat lien khong co diem), khong de chu de len diem
+    # tram; ha="left"/"right" chon theo phia con trong.
+    for name, (x, y, ha) in COUNTRY_LABEL_POS.items():
+        ax.text(x, y, name, fontsize=6.5, ha=ha, va="center", color="#2b2b2b", zorder=5,
+                style="italic")
 
-    # Singapore: toa do that (~103.8E, 1.35N), nhan tach ra vung trong phia duoi, co duong dan
-    sg_lon, sg_lat = 103.82, 1.35
-    ax.annotate("Singapore — KHÔNG có trạm nào", xy=(sg_lon, sg_lat), xytext=(109.5, -4.5),
-               fontsize=6.3, ha="left", va="center", color="#9a3b3b", fontweight="bold", zorder=6,
-               arrowprops=dict(arrowstyle="-", color="#9a3b3b", linewidth=0.8,
-                               shrinkA=2, shrinkB=2))
-
-    # Timor-Leste: toa do that (~125.6E, -8.8S), nhan tach rieng, co duong dan (gia nhap ASEAN 26/10/2025)
-    tl_lon, tl_lat = 125.6, -8.8
-    ax.annotate("Timor-Leste — KHÔNG có trạm nào", xy=(tl_lon, tl_lat), xytext=(131.0, -6.0),
-               fontsize=6.3, ha="left", va="center", color="#9a3b3b", fontweight="bold", zorder=6,
-               arrowprops=dict(arrowstyle="-", color="#9a3b3b", linewidth=0.8,
-                               shrinkA=2, shrinkB=2))
+    # Singapore (~103,82°E; 1,35°N) va Timor-Leste (~125,6°E; -8,8°N): danh dau so ①② dat ngay tai
+    # cho, giai thich trong chu giai -- khong dung duong dan dai cat ngang ban do.
+    for num, (x, y) in NO_DATA_MARKERS.items():
+        ax.scatter([x], [y], s=70, facecolor="white", edgecolor="#9a3b3b", linewidth=1.1, zorder=7)
+        ax.text(x, y, num, fontsize=6.3, ha="center", va="center", color="#9a3b3b",
+                fontweight="bold", zorder=8)
 
     ax.set_xlim(BBOX["lon_min"] - 6, BBOX["lon_max"] + 6)
     ax.set_ylim(BBOX["lat_min"] - 6, BBOX["lat_max"] + 6)
     mh.lonlat_axes(ax, dec=0, n=5)
-    rs.north_arrow(ax, x=0.08, y=0.92, color="black")
-    rs.scalebar_deg(ax, lat0, color="black", loc=(0.06, 0.04))
+    # Mui ten Bac dat o vinh Bengal (ngoai bbox, bien trong), khong de len goc khung bbox
+    rs.north_arrow(ax, x=0.045, y=0.80, color="black", size=0.06)
+    rs.scalebar_deg(ax, lat0, color="black", loc=(0.04, 0.04))
 
     handles, labels = ax.get_legend_handles_labels()
     missing_patch = mpatches.Patch(facecolor="#f6d4d4", edgecolor="#9a3b3b", hatch="///",
-                                   label="ASEAN, chưa có trạm (Singapore, Timor-Leste)")
-    ax.legend(handles=handles + [missing_patch], loc="lower right", fontsize=6.2, frameon=True,
-             framealpha=0.9, edgecolor="#ccc")
-    ax.set_title("Khu vực nghiên cứu: bbox thật dùng để tải ERA5 + 119 vị trí trạm/điểm",
+                                   label="Nước ASEAN chưa có trạm: (1) Singapore, (2) Timor-Leste")
+    bbox_handle = plt.Line2D([], [], color="#9a3b3b", linewidth=1.3, linestyle=(0, (5, 3)),
+                             label="Khung bbox tải ERA5")
+    # Chu giai dat duoi ban do, ngoai vung du lieu
+    ax.legend(handles=handles + [bbox_handle, missing_patch], loc="upper center",
+              bbox_to_anchor=(0.5, -0.07), ncol=2, fontsize=6.4, frameon=False,
+              columnspacing=1.2, handletextpad=0.5)
+    ax.set_title("Khu vực nghiên cứu: khung tải ERA5 và 119 vị trí trạm/điểm",
                  fontsize=9.5, fontweight="bold")
 
     os.makedirs(os.path.dirname(OUT_PNG), exist_ok=True)
