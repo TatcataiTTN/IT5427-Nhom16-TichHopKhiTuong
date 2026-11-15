@@ -1057,4 +1057,68 @@
   \slidenote{53}
 \end{frame}
 
+\begin{frame}{Kiến trúc PINN và huấn luyện}
+  \ychinh{\small Mạng 2 lớp ẩn 32 nơ-ron (Tanh); tổng mất mát = Data Loss + $\lambda\times$ phương trình liên tục}
+  \begin{columns}[T]
+    \begin{column}{0.40\textwidth}
+      \scriptsize
+      \texttt{WindFieldNet}: $(lon,lat)$ chuẩn hoá $\to$ Linear(2,32) $\to$ Tanh $\to$ Linear(32,32) $\to$ Tanh
+      $\to$ Linear(32,2) $\to (u,v)$\\[1.5mm]
+      Physics Loss (liên tục rút gọn Navier--Stokes 2D, autograd):
+      $\mathcal{L}_{phys}=\overline{(\partial u/\partial x+\partial v/\partial y)^{2}}$,
+      $\mathcal{L}=\mathcal{L}_{data}+\lambda\mathcal{L}_{phys}$\\[1.5mm]
+      \begin{itemize}\scriptsize\setlength\itemsep{0.3mm}
+        \item Adam, lr=$10^{-3}$, 300 epoch, seed cố định
+        \item 113 trạm ERA5 15--17/6/2021: 91 train / 22 test
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.58\textwidth}
+      \centering
+      \includegraphics[width=\textwidth,height=3.9cm,keepaspectratio]{images/pinn_training_curve.png}
+    \end{column}
+  \end{columns}
+  \ketluan{\scriptsize Data Loss hội tụ gần giống nhau ở cả hai $\lambda$; Physics Loss ($\lambda=0{,}1$) tăng rồi
+    chững chứ không về 0 -- ràng buộc còn yếu để ép bảo toàn khối lượng chặt, nên PINN chưa vượt rõ baseline}
+  \nguon{Chạy lại trực tiếp từ model/pinn\_wind\_field\_v2.py, không dùng số liệu lưu cache.}
+  \slidenote{54}
+\end{frame}
+
+\begin{frame}{Các loại dị thường khí hậu và bảng xu hướng}
+  \ychinh{\small 4 loại chỉ số dị thường/cực đoan, đối chứng bằng 4 nhãn để tách khí hậu thật khỏi lỗi dữ liệu}
+  \begin{columns}[T]
+    \begin{column}{0.56\textwidth}
+      \tiny
+      \renewcommand{\arraystretch}{0.88}
+      \begin{tabular}{@{}>{\bfseries}p{1.6cm}p{6.1cm}@{}}
+        \toprule
+        Loại & Định nghĩa đo được (chuẩn) \\
+        \midrule
+        Dị thường chung & $z=(x-\text{TB nền})/\sigma_{\text{nền}}$, cửa sổ $\pm$15 ngày theo ngày-trong-năm;
+          $|z|\geq2$ bất thường, $\geq3$ cực đoan (z-score) \\
+        Đợt nóng & $\geq$3 ngày liên tiếp nhiệt độ ngày $>$ P90 của nền (TG90p, ETCCDI/WMO) \\
+        Hạn hán & SPI-1/SPI-3: khớp Gamma theo tháng, nền 1991--2020 (McKee 1993) \\
+        Mưa cực đoan & PRCPTOT, Rx1day, R95p/R99p, R95pTOT (\%) theo năm (ETCCDI) \\
+        \bottomrule
+      \end{tabular}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \tiny
+      \renewcommand{\arraystretch}{0.88}
+      \begin{tabular}{@{}>{\bfseries}p{1.8cm}p{4.4cm}@{}}
+        \toprule
+        Nhãn đối chứng & Điều kiện (so ERA5 + trạm lân cận) \\
+        \midrule
+        xác\_nhận\_khí\_hậu & ERA5 hoặc $\geq$50\% lân cận cùng chiều $|z|\geq1$ \\
+        nghi\_lỗi\_dữ\_liệu & Cực đoan $|z|\geq3$, mọi đối chứng không ủng hộ \\
+        dị\_thường\_cục\_bộ & Có đối chứng nhưng chỉ ủng hộ yếu \\
+        không\_đối\_chứng & Không có ERA5 lẫn trạm lân cận cùng ngày \\
+        \bottomrule
+      \end{tabular}
+    \end{column}
+  \end{columns}
+  \ketluan{\scriptsize Bảng xu hướng (Mann-Kendall + độ dốc Sen) đo CHÍNH khí hậu nền có đang dịch chuyển theo
+    thời gian không -- khác z-score, vốn đo một ngày lệch bao nhiêu so với nền cố định}
+  \slidenote{55}
+\end{frame}
+
 \end{document}

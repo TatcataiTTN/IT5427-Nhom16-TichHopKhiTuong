@@ -2,7 +2,7 @@
 
 **Người nghe:** hội đồng IT5427 (cô Vũ Tuyết Trinh). **Mục đích:** bảo vệ project cuối kỳ (60% điểm).
 **Thời lượng:** 30 phút gồm cả hỏi đáp. Bài chính khoảng 20 phút, để lại khoảng 10 phút hỏi đáp.
-**Slide:** `final-defense.pdf`, bài chính trang 1–31, Phụ lục trang 32–53 (chỉ mở khi bị hỏi).
+**Slide:** `final-defense.pdf`, bài chính trang 1–31, Phụ lục trang 32–55 (chỉ mở khi bị hỏi).
 
 **Cô quan tâm nhất:** dữ liệu thu thập có đặc trưng gì, yêu cầu xử lý gì (thiếu, ngoài khoảng, đơn vị không đồng
 nhất…). Phần 3 trả lời thẳng câu này; đừng nói vội phần 3.
@@ -14,14 +14,13 @@ nhất…). Phần 3 trả lời thẳng câu này; đừng nói vội phần 3.
 | 0 | Mở đầu | Quang | 1–2 | 0:30 |
 | 1 | Đặt vấn đề | Quang | 3–5 | 2:00 |
 | 2 | Mục tiêu, dữ liệu và kiến trúc | Quang | 6–9 | 3:00 |
-| 3 | Đặc trưng dữ liệu và yêu cầu xử lý | Lương | 10–16 | 6:30 |
-| 4 | Tích hợp dữ liệu | Nghĩa | 17–20 | 3:00 |
+| 3 | Đặc trưng dữ liệu và yêu cầu xử lý | Quang | 10–16 | 6:30 |
+| 4 | Tích hợp dữ liệu | Lương | 17–20 | 3:00 |
 | 5 | Xử lý và phân tích | Nghĩa | 21–27 | 5:15 |
 | 6 | Kết luận | Nghĩa | 28–31 | 1:30 |
 | | **Tổng bài chính** | | **31 trang** | **khoảng 21:45** |
 
-Quang: 5:30 (slide 1–9). Lương: 6:30 (slide 10–16). Nghĩa: 9:45 (slide 17–31) — nặng nhất, vì gộp cả phần
-tích hợp lẫn xử lý/phân tích/kết luận.
+Quang: 11:30 (slide 1–16). Lương: 3:00 (slide 17–20). Nghĩa: 6:45 (slide 21–31).
 
 **Phụ lục (trang 32–53), ai hiểu chính/hiểu phụ nếu hội đồng hỏi** — người hiểu chính trả lời trước, người hiểu
 phụ chỉ bổ sung nếu được hỏi thêm hoặc người chính trả lời chưa đủ. Lời nói gợi ý cho từng trang nằm trong mục
@@ -51,6 +50,8 @@ trang phụ lục):
 | 51 | Sản phẩm của từng người theo mốc | Nghĩa | Lương |
 | 52 | Giới hạn hạ tầng | Nghĩa | Lương |
 | 53 | Mở rộng ra toàn cầu | Nghĩa | Lương |
+| 54 | Kiến trúc PINN và huấn luyện | Nghĩa | Lương |
+| 55 | Các loại dị thường khí hậu và bảng xu hướng | Nghĩa | Lương |
 
 Trang 32 chỉ là trang ngăn mục, không cần ai giải thích riêng. "Hiểu chính" ưu tiên người thật sự làm ra nội
 dung đó (Quang: ingestion/QC; Lương: schema/ER/Survivorship; Nghĩa: Spark/Kafka/PINN/dashboard), không nhất
@@ -71,8 +72,8 @@ Tích hợp dữ liệu khí tượng đa nguồn Đông Nam Á; mục lục 6 p
 **Lời nói**
 > Em chào cô. Nhóm 16 gồm Quang, Lương và Nghĩa, đề tài là tích hợp dữ liệu khí tượng đa nguồn cho Đông Nam Á.
 >
-> Bài gồm sáu phần. Em trình bày hai phần đầu: đặt vấn đề và mục tiêu. Lương trình bày phần đặc trưng dữ liệu.
-> Nghĩa trình bày phần tích hợp, xử lý, phân tích và kết luận.
+> Bài gồm sáu phần. Em trình bày ba phần đầu: vấn đề, mục tiêu và đặc trưng dữ liệu. Lương trình bày phần tích hợp.
+> Nghĩa trình bày phần xử lý, phân tích và kết luận.
 
 **Chuyển ý**
 > Trước hết là vì sao bài toán này cần tích hợp nhiều nguồn.
@@ -200,7 +201,7 @@ thường, PINN, Kafka/Streaming → Dashboard.
 > lại dữ liệu cho Spark Streaming. Cuối cùng là dashboard.
 
 **Chuyển ý**
-> Phần quan trọng nhất là tầng đầu tiên: dữ liệu thô có vấn đề gì và phải xử lý ra sao. Lương trình bày phần này.
+> Phần quan trọng nhất là tầng đầu tiên: dữ liệu thô có vấn đề gì và phải xử lý ra sao.
 
 ---
 
@@ -214,7 +215,7 @@ Bảng 6 nhóm: dữ liệu thiếu; ngoài khoảng, giá trị sai; đơn vị
 nhóm có đặc trưng đo được và yêu cầu xử lý.
 
 **Lời nói**
-> Em là Lương. Nhóm đo các vấn đề trực tiếp trên dữ liệu thật và chia làm sáu nhóm.
+> Nhóm đo các vấn đề trực tiếp trên dữ liệu thật và chia làm sáu nhóm.
 >
 > Thiếu dữ liệu. Giá trị ngoài khoảng và giá trị sai. Đơn vị đo khác nhau. Khác nhau về ngữ nghĩa, tức là trùng tên
 > nhưng khác đại lượng. Khác nhau về thời gian. Và khác nhau về không gian, định danh.
@@ -338,10 +339,10 @@ lớn.
 >
 > Hạn chế nhóm ghi nhận: khi trạm thiếu số liệu mưa, giá trị lấy từ ERA5 có sai số lớn.
 >
-> Còn vấn đề cùng một trạm có hai mã GHCN và ISD, Nghĩa sẽ trình bày ở phần tích hợp.
+> Còn vấn đề cùng một trạm có hai mã GHCN và ISD, Lương sẽ trình bày ở phần tích hợp.
 
 **Chuyển ý**
-> Dữ liệu đã sạch và cùng đơn vị. Nghĩa trình bày cách đưa năm nguồn về một kho.
+> Dữ liệu đã sạch và cùng đơn vị. Lương trình bày cách đưa năm nguồn về một kho.
 
 ---
 
@@ -355,7 +356,7 @@ Lược đồ `WeatherObs(...)`; ví dụ view NASA POWER; PIVOT GHCN, PARSE ISD
 chiếu 100%.
 
 **Lời nói**
-> Em là Nghĩa, em trình bày phần tích hợp, xử lý, phân tích và kết luận.
+> Em là Lương, em trình bày phần tích hợp.
 >
 > Nhóm định nghĩa một lược đồ trung gian là `WeatherObs`: vị trí, thời gian UTC, nguồn, các biến khí tượng, cùng hai
 > cột `temp_def` và `qc_flag` từ bước xử lý.
@@ -412,7 +413,7 @@ giải 856.452 dòng.
 > Kết quả là bảng hợp giải 856 nghìn dòng, mỗi vị trí mỗi ngày một dòng, ghi rõ giá trị lấy từ nguồn nào.
 
 **Chuyển ý**
-> Phần tiếp theo là xử lý và phân tích trên kho này.
+> Phần tiếp theo, Nghĩa trình bày xử lý và phân tích trên kho này.
 
 ---
 
@@ -425,7 +426,7 @@ giải 856.452 dòng.
 `cache()` giảm 69,4% thời gian truy vấn (0,36s → 0,11s); thử partition theo tháng; giữ `year/source`.
 
 **Lời nói**
-> Mục tiêu M3 là tối ưu Spark.
+> Em là Nghĩa. Mục tiêu M3 là tối ưu Spark.
 >
 > Với truy vấn tổng hợp nhiệt độ theo trạm và tháng, `cache()` giảm thời gian từ 0,36 giây xuống 0,11 giây, tức
 > giảm 69,4%, vượt ngưỡng 30%.
@@ -784,5 +785,41 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > 14.000 trạm, số cặp lên hàng trăm triệu; lưu trữ cần HDFS/S3/MinIO vì ERA5 toàn cầu tới hàng trăm TB; Kafka
 > cần RF từ 3 trở lên và nhiều partition; Spark cần cụm nhiều máy thật vì DuckDB chỉ nhanh hơn khi dữ liệu còn
 > vừa RAM một máy. Cùng lý do này, Mục 2.1 báo cáo không chọn kiến trúc Dataspace hay pay-as-you-go.
+
+## 54. Kiến trúc PINN và huấn luyện
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Lương.
+>
+> Mạng WindFieldNet nhận toạ độ (kinh độ, vĩ độ) đã chuẩn hoá, qua 2 lớp ẩn 32 nơ-ron, kích hoạt Tanh, xuất ra
+> vận tốc gió (u, v). Hàm mất mát vật lý là phương trình liên tục rút gọn của Navier–Stokes 2D: đạo hàm riêng
+> của u theo x cộng đạo hàm riêng của v theo y phải gần 0 (bảo toàn khối lượng), tính bằng autograd hai lần đạo
+> hàm bậc một. Tổng mất mát bằng Data Loss cộng lambda nhân Physics Loss.
+>
+> Huấn luyện bằng Adam, tốc độ học 0,001, 300 epoch, trên 113 trạm ERA5 ngày 15 đến 17 tháng 6 năm 2021, chia 91
+> trạm luyện và 22 trạm kiểm tra.
+>
+> Nhìn vào đồ thị: Data Loss hội tụ gần giống nhau ở cả lambda bằng 0 và lambda bằng 0,1. Nhưng Physics Loss ở
+> lambda 0,1 không giảm về 0 mà tăng lên rồi chững lại, vì mạng lúc đầu gần như hằng số nên độ phân kỳ gần 0 một
+> cách ngẫu nhiên; khi mạng học được biến thiên không gian thật thì độ phân kỳ xuất hiện, và lambda 0,1 chưa đủ
+> mạnh để ép nó về 0. Đây chính là lý do PINN chưa vượt rõ baseline trên RMSE thuần tuý.
+
+## 55. Các loại dị thường khí hậu và bảng xu hướng
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Lương.
+>
+> Nhóm đo bốn loại dị thường và cực đoan khác nhau, không gộp chung một chỉ số. Dị thường chung dùng z-score so
+> với khí hậu nền, cửa sổ trượt 15 ngày quanh mỗi ngày trong năm. Đợt nóng là từ ba ngày liên tiếp trở lên có
+> nhiệt độ vượt bách phân vị 90 của nền, theo đúng chỉ số TG90p chuẩn ETCCDI. Hạn hán dùng SPI, khớp phân bố
+> Gamma theo từng tháng trên nền 1991 đến 2020. Mưa cực đoan dùng bốn chỉ số ETCCDI: tổng mưa ngày ướt, mưa ngày
+> lớn nhất, và tổng mưa vượt bách phân vị 95, 99.
+>
+> Sau khi phát hiện, mỗi dị thường được gắn một trong bốn nhãn đối chứng: xác nhận khí hậu thật nếu ERA5 hoặc
+> phần lớn trạm lân cận đồng thuận; nghi lỗi dữ liệu nếu trạm báo cực đoan mà mọi đối chứng đều phản đối; dị
+> thường cục bộ nếu đối chứng chỉ ủng hộ yếu; và không đối chứng nếu không có dữ liệu để so.
+>
+> Bảng xu hướng khác với z-score ở chỗ nó đo chính khí hậu nền có đang dịch chuyển theo thời gian hay không,
+> dùng kiểm định Mann-Kendall cho ý nghĩa thống kê và độ dốc Sen cho tốc độ thay đổi mỗi thập kỷ.
 
 Không cắt phần 3: đây là phần cô hỏi trực tiếp.

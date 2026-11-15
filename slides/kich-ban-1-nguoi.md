@@ -17,7 +17,7 @@ Phụ lục trang 32–53 không có trong file này, chỉ mở khi hội đồ
 
 Em chào cô. Nhóm 16 gồm Quang, Lương và Nghĩa, đề tài là tích hợp dữ liệu khí tượng đa nguồn cho Đông Nam Á.
 
-Bài gồm sáu phần. Em trình bày hai phần đầu: đặt vấn đề và mục tiêu. Lương trình bày phần đặc trưng dữ liệu. Nghĩa trình bày phần tích hợp, xử lý, phân tích và kết luận.
+Bài gồm sáu phần. Em trình bày ba phần đầu: vấn đề, mục tiêu và đặc trưng dữ liệu. Lương trình bày phần tích hợp. Nghĩa trình bày phần xử lý, phân tích và kết luận.
 
 Trước hết là vì sao bài toán này cần tích hợp nhiều nguồn.
 
@@ -91,7 +91,7 @@ Sau đó dữ liệu ánh xạ vào lược đồ chung WeatherObs theo GAV, r�
 
 Từ kho, các bước phía sau cùng đọc chung: Entity Resolution, Survivorship, phát hiện dị thường, PINN. Kafka phát lại dữ liệu cho Spark Streaming. Cuối cùng là dashboard.
 
-Phần quan trọng nhất là tầng đầu tiên: dữ liệu thô có vấn đề gì và phải xử lý ra sao. Lương trình bày phần này.
+Phần quan trọng nhất là tầng đầu tiên: dữ liệu thô có vấn đề gì và phải xử lý ra sao.
 
 ---
 
@@ -99,9 +99,7 @@ Phần quan trọng nhất là tầng đầu tiên: dữ liệu thô có vấn �
 
 **[10–11] Tổng quan đặc trưng và yêu cầu xử lý (1:00)**
 
-*Chuyển người nói: Lương.*
-
-Em là Lương. Nhóm đo các vấn đề trực tiếp trên dữ liệu thật và chia làm sáu nhóm.
+Nhóm đo các vấn đề trực tiếp trên dữ liệu thật và chia làm sáu nhóm.
 
 Thiếu dữ liệu. Giá trị ngoài khoảng và giá trị sai. Đơn vị đo khác nhau. Khác nhau về ngữ nghĩa, tức là trùng tên nhưng khác đại lượng. Khác nhau về thời gian. Và khác nhau về không gian, định danh.
 
@@ -181,9 +179,9 @@ Trạm càng cao thì nhiệt độ càng lệch, vì lưới 0,25 độ không 
 
 Hạn chế nhóm ghi nhận: khi trạm thiếu số liệu mưa, giá trị lấy từ ERA5 có sai số lớn.
 
-Còn vấn đề cùng một trạm có hai mã GHCN và ISD, Nghĩa sẽ trình bày ở phần tích hợp.
+Còn vấn đề cùng một trạm có hai mã GHCN và ISD, Lương sẽ trình bày ở phần tích hợp.
 
-Dữ liệu đã sạch và cùng đơn vị. Nghĩa trình bày cách đưa năm nguồn về một kho.
+Dữ liệu đã sạch và cùng đơn vị. Lương trình bày cách đưa năm nguồn về một kho.
 
 ---
 
@@ -191,9 +189,9 @@ Dữ liệu đã sạch và cùng đơn vị. Nghĩa trình bày cách đưa nă
 
 **[17–18] Mediated Schema và ánh xạ GAV (1:00)**
 
-*Chuyển người nói: Nghĩa.*
+*Chuyển người nói: Lương.*
 
-Em là Nghĩa, em trình bày phần tích hợp, xử lý, phân tích và kết luận.
+Em là Lương, em trình bày phần tích hợp.
 
 Nhóm định nghĩa một lược đồ trung gian là WeatherObs: vị trí, thời gian UTC, nguồn, các biến khí tượng, cùng hai cột temp_def và qc_flag từ bước xử lý.
 
@@ -227,7 +225,7 @@ Bảng bên phải là tỷ lệ xung đột đo được. Áp suất mực bi�
 
 Kết quả là bảng hợp giải 856 nghìn dòng, mỗi vị trí mỗi ngày một dòng, ghi rõ giá trị lấy từ nguồn nào.
 
-Phần tiếp theo là xử lý và phân tích trên kho này.
+Phần tiếp theo, Nghĩa trình bày xử lý và phân tích trên kho này.
 
 ---
 
@@ -235,7 +233,9 @@ Phần tiếp theo là xử lý và phân tích trên kho này.
 
 **[21–22] Tối ưu Spark (1:00)**
 
-Mục tiêu M3 là tối ưu Spark.
+*Chuyển người nói: Nghĩa.*
+
+Em là Nghĩa. Mục tiêu M3 là tối ưu Spark.
 
 Với truy vấn tổng hợp nhiệt độ theo trạm và tháng, cache() giảm thời gian từ 0,36 giây xuống 0,11 giây, tức giảm 69,4%, vượt ngưỡng 30%.
 
