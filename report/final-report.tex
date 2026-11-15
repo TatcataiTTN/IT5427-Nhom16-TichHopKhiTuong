@@ -287,22 +287,22 @@ trong hình dưới đây là số liệu cuối cùng, không còn phần nào 
 \node[f, draw=goodgreen, fill=goodgreen!12] (s5) at (0,-1.5) {ERA5 CDS\\540/540 file\\4.954.824 dòng};
 
 \node[big, minimum width=3.0cm, minimum height=7.6cm, fill=hustblue!8, draw=hustblue] (ing) at (3.8,1.5) {};
-\node[font=\small\bfseries, align=center] at (3.8,4.7) {Ingestion\\+ QC 4 tầng};
-\node[font=\tiny, align=left, text width=2.7cm] at (3.8,1.4) {PIVOT (GHCN)\\PARSE (ISD)\\406 giá trị GHCN,\\3.255 ISD bị loại\\(cờ QC gốc)\\36 điểm nhảy giá trị\\393.155 bản tin ISD\\trùng được gộp};
+\node[font=\small\bfseries, align=center] at (3.8,5.0) {\includegraphics[height=0.5cm]{figures/logos/python.png}\\Ingestion\\+ QC 4 tầng};
+\node[font=\tiny, align=left, text width=2.7cm] at (3.8,1.2) {PIVOT (GHCN)\\PARSE (ISD)\\406 giá trị GHCN,\\3.255 ISD bị loại\\(cờ QC gốc)\\36 điểm nhảy giá trị\\393.155 bản tin ISD\\trùng được gộp};
 
-\node[big, minimum width=2.9cm, fill=goodgreen!10, draw=goodgreen] (ms) at (7.8,3.4) {Mediated Schema\\\texttt{WeatherObs}\\(GAV)};
-\node[big, minimum width=3.1cm, fill=goodgreen!15, draw=goodgreen] (pq) at (7.8,0.3) {Kho Parquet\\\texttt{year/source}\\\textbf{8.955.313 dòng}};
+\node[big, minimum width=2.9cm, fill=goodgreen!10, draw=goodgreen] (ms) at (7.8,3.4) {\includegraphics[height=0.45cm]{figures/logos/apachespark.png}\\Mediated Schema\\\texttt{WeatherObs} (GAV)};
+\node[big, minimum width=3.1cm, fill=goodgreen!15, draw=goodgreen] (pq) at (7.8,0.3) {\includegraphics[height=0.4cm]{figures/logos/duckdb.png}\\Kho Parquet\\\texttt{year/source}\\\textbf{8.955.313 dòng}};
 \draw[arr] (ms) -- (pq) node[midway, arrlabel] {ghi 5/5 nguồn};
 
-\node[big, minimum width=3.1cm] (er) at (12.2,5.4) {Entity Resolution\\GHCN--ISD\\\textbf{22/26 trạm khớp}};
-\node[big, minimum width=3.1cm] (surv) at (12.2,3.7) {Survivorship\\xung đột: 0,0\%(MSL)--91,6\%(mưa)};
+\node[big, minimum width=3.1cm] (er) at (12.2,5.9) {\includegraphics[height=0.4cm]{figures/logos/apachespark.png}\\Entity Resolution\\GHCN--ISD\\\textbf{22/26 trạm khớp}};
+\node[big, minimum width=3.1cm] (surv) at (12.2,3.9) {Survivorship\\xung đột: 0,0\%(MSL)--91,6\%(mưa)};
 \node[big, minimum width=3.1cm, draw=goodgreen] (anom) at (12.2,2.3) {Dị thường khí hậu\\\textbf{20.357 ca xác nhận}\\\textit{khí hậu thật}};
-\node[big, minimum width=3.1cm, draw=goodgreen] (pinn) at (12.2,-0.1) {PINN\\RMSE 1,058 vs\\baseline 1,047};
+\node[big, minimum width=3.1cm, draw=goodgreen] (pinn) at (12.2,-0.3) {\includegraphics[height=0.4cm]{figures/logos/pytorch.png}\\PINN\\RMSE 1,058 vs baseline 1,047};
 
-\node[big, minimum width=2.7cm, fill=badred!8, draw=badred] (kafka) at (11.9,-2.0) {Kafka topic\\(replay, 1 broker)};
-\node[big, minimum width=3.1cm, fill=badred!8, draw=badred] (stream) at (11.9,-3.9) {Spark Streaming\\179/179 khớp batch};
+\node[big, minimum width=2.7cm, fill=badred!8, draw=badred] (kafka) at (11.9,-2.3) {\includegraphics[height=0.4cm]{figures/logos/apachekafka.png}\\Kafka topic\\(replay, 1 broker)};
+\node[big, minimum width=3.1cm, fill=badred!8, draw=badred] (stream) at (11.9,-4.3) {\includegraphics[height=0.4cm]{figures/logos/apachespark.png}\\Spark Streaming\\179/179 khớp batch};
 
-\node[big, minimum width=2.8cm, minimum height=1.8cm, fill=hustblue!15, draw=hustblue] (dash) at (16.3,0.9) {Dashboard\\Streamlit\\(10 panel)};
+\node[big, minimum width=2.8cm, minimum height=1.9cm, fill=hustblue!15, draw=hustblue] (dash) at (16.3,0.9) {\includegraphics[height=0.4cm]{figures/logos/streamlit.png}\\Dashboard\\Streamlit\\(10 panel)};
 
 \foreach \s in {s1,s2,s3,s4} { \draw[arr] (\s) -- (ing); }
 \draw[arr] (s5) -- (ing) node[midway, arrlabel, yshift=-0.3cm] {nội suy Bilinear};
