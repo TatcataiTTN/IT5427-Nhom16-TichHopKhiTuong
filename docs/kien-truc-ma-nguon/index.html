@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Luồng code — Nhóm 16, IT5427</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#2B4C7E; --navy-ink:#17375E; --red:#C0443F; --paper:#FBFAF7; --panel:#FFFFFF;
+    --ink:#1B1F27; --muted:#5A6472; --line:#E4E1D9; --gold:#A8740A;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:Inter,Helvetica,Arial,sans-serif;
+    font-size:16px; line-height:1.6;
+    padding-block: env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px);
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px 80px}
+  header.top{
+    background:linear-gradient(135deg,var(--navy) 0%, var(--navy-ink) 100%);
+    color:#fff; padding:52px 20px 44px;
+  }
+  header.top .inner{max-width:1040px;margin:0 auto}
+  .kicker{font:600 13px/1 Inter,sans-serif; letter-spacing:.12em; text-transform:uppercase; color:#C9D6EE; margin:0 0 14px}
+  h1{
+    font-family:"Source Serif 4",Georgia,serif; font-weight:700;
+    font-size:clamp(28px,4vw,42px); line-height:1.15; margin:0 0 14px; text-wrap:balance;
+  }
+  .lede{font-size:16.5px; color:#DCE4F3; max-width:72ch; margin:0}
+  .meta{display:flex; flex-wrap:wrap; gap:10px 22px; margin-top:26px; font-size:13.5px; color:#C9D6EE}
+  .meta b{color:#fff; font-weight:600}
+  section{margin-top:56px}
+  h2{
+    font-family:"Source Serif 4",Georgia,serif; font-weight:700; color:var(--navy-ink);
+    font-size:24px; margin:0 0 6px; display:flex; align-items:baseline; gap:10px;
+  }
+  h2 .no{color:var(--red); font-family:"JetBrains Mono",monospace; font-size:16px; font-weight:500}
+  .sub{color:var(--muted); font-size:14.5px; margin:0 0 20px; max-width:76ch}
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:14px; box-shadow:0 1px 2px rgba(23,55,94,.04);
+  }
+  .panel img{width:100%; height:auto; display:block; border-radius:4px}
+  .stack{
+    margin-top:14px; display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:10px;
+  }
+  .stackcard{
+    border:1px solid var(--line); border-left:4px solid var(--gold); background:#FFFCF3;
+    border-radius:6px; padding:12px 14px;
+  }
+  .stackcard.blue{border-left-color:#3F78B8; background:#F3F8FD}
+  .stackcard.red{border-left-color:var(--red); background:#FDF3F2}
+  .stackcard.purple{border-left-color:#7557B0; background:#F7F4FC}
+  .stackcard b{display:block; font-size:14px; color:var(--navy-ink); margin-bottom:4px}
+  .stackcard span{font-size:13px; color:var(--muted)}
+  code,.mono{font-family:"JetBrains Mono",monospace; font-size:.92em}
+  table.ref{width:100%; border-collapse:collapse; margin-top:10px; font-size:14px}
+  table.ref th{
+    text-align:left; font:600 12px Inter,sans-serif; letter-spacing:.04em; text-transform:uppercase;
+    color:#fff; background:var(--navy); padding:9px 12px;
+  }
+  table.ref th:first-child{border-radius:6px 0 0 0}
+  table.ref th:last-child{border-radius:0 6px 0 0}
+  table.ref td{padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+  table.ref tr:nth-child(even) td{background:#F7F6F2}
+  footer{margin-top:64px; padding-top:22px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  a{color:var(--navy)}
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#15181F; --panel:#1C212B; --ink:#E7E9EE; --muted:#9AA3B2; --line:#2B303B;
+      color-scheme: dark;
+    }
+    :root:not([data-theme="light"]) .stackcard{background:#20262F}
+    :root:not([data-theme="light"]) .stackcard.blue{background:#19232F}
+    :root:not([data-theme="light"]) .stackcard.red{background:#2A1E1E}
+    :root:not([data-theme="light"]) .stackcard.purple{background:#241F2C}
+    :root:not([data-theme="light"]) table.ref tr:nth-child(even) td{background:#20242D}
+    :root:not([data-theme="light"]) .panel{box-shadow:none}
+  }
+  :root[data-theme="dark"]{
+    --paper:#15181F; --panel:#1C212B; --ink:#E7E9EE; --muted:#9AA3B2; --line:#2B303B;
+    color-scheme: dark;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="inner">
+    <p class="kicker">IT5427 — Tích hợp và xử lý dữ liệu lớn · Nhóm 16</p>
+    <h1>Luồng code: tích hợp dữ liệu khí tượng đa nguồn Đông Nam Á</h1>
+    <p class="lede">Bản đồ đầy đủ các script thật trong repo, đúng theo thứ tự chạy trong <code class="mono">README.md</code>,
+      kèm ngôn ngữ và nền tảng dùng ở từng tầng — từ tải dữ liệu thô tới báo cáo LaTeX cuối cùng.</p>
+    <div class="meta">
+      <span><b>7 tầng xử lý</b> · A–G</span>
+      <span><b>~35 file script</b> thật trong repo</span>
+      <span><b>8 ngôn ngữ/nền tảng</b></span>
+      <span>Nguồn: khảo sát cây thư mục + README.md, 15/11/2026</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <h2><span class="no">01</span> Tổng quan 7 tầng</h2>
+  <p class="sub">Một luồng chính từ trên xuống. Kiểm thử (pytest) chạy xuyên suốt mọi tầng, không phải một bước riêng ở cuối.</p>
+  <div class="panel"><img src="trang1-tong-quan.svg" alt="Sơ đồ tổng quan 7 tầng xử lý" loading="lazy"></div>
+</section>
+
+<section>
+  <h2><span class="no">02</span> Chi tiết mã nguồn — Thu thập → Tích hợp (tầng A–D)</h2>
+  <p class="sub">Mỗi khối bên phải là tên file script thật trong repo kèm vai trò, không phải tên rút gọn.</p>
+  <div class="panel"><img src="trang2-chi-tiet-A-D.svg" alt="Chi tiết mã nguồn tầng A đến D" loading="lazy"></div>
+</section>
+
+<section>
+  <h2><span class="no">03</span> Chi tiết mã nguồn — Phân tích → Phục vụ (tầng E–G)</h2>
+  <p class="sub">Tầng E rẽ thành hai nhánh con (phân tích thống kê bằng PySpark/DuckDB, và mô hình PINN bằng PyTorch) trước khi gộp lại ở tầng F–G.</p>
+  <div class="panel"><img src="trang3-chi-tiet-E-G.svg" alt="Chi tiết mã nguồn tầng E đến G" loading="lazy"></div>
+</section>
+
+<section>
+  <h2><span class="no">04</span> Ngôn ngữ và nền tảng dùng trong dự án</h2>
+  <p class="sub">Tổng hợp từ <code class="mono">requirements.txt</code>, hai file <code class="mono">docker-compose.*.yml</code>, và các thư mục mã nguồn thật.</p>
+  <table class="ref">
+    <tr><th>Ngôn ngữ / thư viện</th><th>Vai trò trong pipeline</th><th>Dùng ở đâu</th></tr>
+    <tr><td>Python 3</td><td>Ngôn ngữ chính, xuyên suốt mọi tầng</td><td><span class="mono">scripts/</span>, <span class="mono">ingestion/</span>, <span class="mono">warehouse/</span>, <span class="mono">model/</span>, <span class="mono">dashboard/</span></td></tr>
+    <tr><td>Bash</td><td>Script tự chạy lại khi tải ERA5 bị đứt mạng</td><td><span class="mono">scripts/era5_autoresume.sh</span></td></tr>
+    <tr><td>PySpark 4.2.0 (cần Java 17)</td><td>Xây kho Parquet, phân tích quy mô lớn, Structured Streaming</td><td><span class="mono">warehouse/build_warehouse.py</span>, <span class="mono">spark_analytics.py</span>, <span class="mono">spark_streaming_*.py</span></td></tr>
+    <tr><td>Pandas / NumPy / PyArrow</td><td>Parse, QC, Entity Resolution, Survivorship (dữ liệu vừa RAM)</td><td><span class="mono">ingestion/parsers.py</span>, <span class="mono">warehouse/entity_resolution.py</span>, <span class="mono">survivorship*.py</span></td></tr>
+    <tr><td>DuckDB</td><td>Truy vấn phân tích nhanh hơn Spark 7–8 lần ở quy mô hiện tại</td><td>Đối chiếu trong <span class="mono">scale_benchmark.py</span>, dùng khi demo trực tiếp</td></tr>
+    <tr><td>PyTorch</td><td>Huấn luyện mô hình PINN có ràng buộc vật lý cho trường gió</td><td><span class="mono">model/pinn_wind_field_v2.py</span> và các file <span class="mono">pinn_*.py</span> khác</td></tr>
+    <tr><td>Kafka (KRaft) + Spark Structured Streaming</td><td>Mô phỏng luồng thời gian thực bằng phát lại dữ liệu lịch sử</td><td><span class="mono">ingestion/kafka_producer.py</span>, <span class="mono">warehouse/spark_streaming_*.py</span></td></tr>
+    <tr><td>Docker / Docker Compose</td><td>Dựng cụm Spark (1 master + 2 worker) và Kafka (1 broker)</td><td><span class="mono">docker-compose.spark.yml</span>, <span class="mono">docker-compose.kafka.yml</span></td></tr>
+    <tr><td>Streamlit</td><td>Dashboard 10 panel đọc trực tiếp kho Parquet</td><td><span class="mono">dashboard/app.py</span></td></tr>
+    <tr><td>LaTeX (XeLaTeX / LuaLaTeX, Beamer)</td><td>Báo cáo cuối kỳ và slide bảo vệ</td><td><span class="mono">report/final-report.tex</span>, <span class="mono">slides/final-defense.tex</span></td></tr>
+    <tr><td>Matplotlib</td><td>Sinh hình cho báo cáo (phân bố, benchmark, bản đồ khu vực)</td><td><span class="mono">warehouse/plot_*.py</span></td></tr>
+    <tr><td>pytest</td><td>Kiểm thử tự động, 13 file, chạy xuyên suốt mọi tầng</td><td><span class="mono">tests/</span></td></tr>
+  </table>
+</section>
+
+<footer>
+  Nguồn: <code class="mono">docs/kien-truc-ma-nguon/kien-truc-ma-nguon.drawio</code> (3 trang, sinh bằng script
+  <code class="mono">src/gen_pages.py</code> trong cùng dự án diagram, không vẽ tay) · dựng ngày 15/11/2026.
+</footer>
+
+</div>
+</body>
+</html>
