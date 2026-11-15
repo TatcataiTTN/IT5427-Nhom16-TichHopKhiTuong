@@ -602,7 +602,7 @@
   \slidenote{5.6}
 \end{frame}
 \begin{frame}{PINN cho trường gió}
-  \ychinh{PINN chưa vượt baseline hồi quy thuần về RMSE}
+  \ychinh{PINN điền được trường gió nhất quán vật lý, sai số ngang hồi quy thuần}
   \begin{columns}[T]
     \begin{column}{0.44\textwidth}
       \centering\footnotesize
@@ -623,12 +623,13 @@
         \item \textbf{Loss vật lý} (liên tục 2D, autograd):
           $\mathcal{L}=\mathcal{L}_{data}+\lambda\cdot\mathrm{TB}\big[(\partial u/\partial x+\partial v/\partial y)^{2}\big]$
         \item Adam, lr=$10^{-3}$, 300 epoch; physics loss giảm theo $\lambda$ (0,53 $\to$ 0,011) nhưng RMSE không tốt hơn
-        \item \textbf{Giải quyết bao nhiêu \% dị thường?} 0\% trực tiếp (dị thường chỉ tính trên nhiệt độ, áp suất).
-          Mục tiêu tiếp: 375 ca cục bộ (6,3\%) mà ERA5 $\approx$28\,km không xác nhận được
+        \item \textbf{Giải quyết được:} 2/12 trường (độ ẩm, gió); \textbf{điền được} gió tại điểm thiếu số liệu
+          (22 vị trí giữ lại: RMSE 1,06\,m/s so với gió TB 2,26\,m/s, sai số còn cao); phần dư đánh dấu 4/113 vị trí
+          gió lệch $>$2,62\,m/s (Mandalay, Đồng Hới, Phú Quốc). Tiếp theo: phân xử 375 ca cục bộ
       \end{itemize}
     \end{column}
   \end{columns}
-  \ketluan{\small Baseline khớp RMSE tốt nhất; ràng buộc vật lý chưa đủ mạnh trên 1 thời điểm}
+  \ketluan{\small Tăng $\lambda$: vi phạm vật lý 0,53 $\to$ 0,011; RMSE 1,06 so với 1,05}
   \nguon{Kiến trúc mạng đầy đủ và đồ thị training cong: phụ lục trang 56.}
   \slidenote{5.7}
 \end{frame}
@@ -1134,7 +1135,7 @@
 \end{frame}
 
 \begin{frame}{Kiến trúc PINN và huấn luyện}
-  \ychinh{\small Hai mạng nhỏ (337 và 1.218 tham số); PINN giải quyết trực tiếp 0\% dị thường}
+  \ychinh{\small Hai mạng nhỏ (337 và 1.218 tham số) phủ thêm 2/12 trường và đánh dấu 4 vị trí gió bất thường}
   \begin{columns}[T]
     \begin{column}{0.47\textwidth}
       \tiny
@@ -1156,7 +1157,7 @@
       \includegraphics[width=\textwidth,height=3.2cm,keepaspectratio]{images/pinn_training_curve.png}
     \end{column}
   \end{columns}
-  \ketluan{\scriptsize 22.446 giá trị gắn cờ 2020--2024 đều là nhiệt độ/áp suất; mục tiêu đo được: 375 ca dị thường cục bộ (6,3\%)}
+  \ketluan{\scriptsize PINN mở rộng phát hiện sang độ ẩm và gió; mục tiêu đo được tiếp theo: 375 ca dị thường cục bộ (6,3\%)}
   \slidenote{56}
 \end{frame}
 

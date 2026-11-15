@@ -1163,20 +1163,27 @@ Ràng buộc vật lý & Clausius--Clapeyron (6.1), hệ số 0,1 & Liên tục 
 Huấn luyện & Adam, lr $5\times10^{-3}$, 200 epoch & Adam, lr $10^{-3}$, 300 epoch, quét $\lambda \in \{0;\,0{,}01;\,0{,}1;\,1\}$ \\
 Đầu ra & RH\% dự đoán cho từng bản ghi & \path{pinn_wind_field_output.parquet}: 113 dòng, $u,v$ dự đoán/quan trắc, phần dư, $\lambda=0{,}1$ \\
 Kết quả & Loss 1068 $\to$ 2,9; MAE 1,07 điểm \% & RMSE kiểm tra: $\lambda=0$ đạt 1,0473, PINN tốt nhất 1,0577 \\
-Giải quyết được & Chứng minh physics loss hội tụ đúng & Trường gió liên tục giữa các trạm, có ràng buộc bảo toàn khối lượng \\
+Giải quyết được & Trường \texttt{rh\_pct} cho 3.063.576 bản ghi ISD chỉ có điểm sương; mạng học lại đúng phương trình C--C & Điền gió tại điểm chưa có số liệu (thử trên 22 vị trí giữ lại: RMSE 1,06~m/s, sai số còn cao); phần dư đánh dấu 4 vị trí gió lệch trường vật lý $>$2,62~m/s \\
 Chưa giải quyết & Nhãn sinh từ chính công thức, chưa có RH\% đo độc lập & PINN chưa thắng hồi quy thuần; chưa có chiều thời gian \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{PINN giải quyết bao nhiêu phần trăm dị thường đã phát hiện?} Câu trả lời là \textbf{0\%}.
-Trong 2020--2024, Mục~6.8 gắn cờ 22.446 giá trị, gồm 12.209 về \texttt{temp\_mean} và 10.237 về
-\texttt{pmsl\_min}; không giá trị nào thuộc trường độ ẩm hay gió mà PINN xử lý. Cũng không còn ca nào thiếu
-đối chứng: 93,3\% trong 5.910 ca tại trạm đã được ERA5 hoặc trạm lân cận xác nhận
-(Hình~\ref{fig:anomaly-confirmation}). Chỗ PINN có thể đóng góp đo được là 375 ca \emph{dị thường cục bộ}
-(6,3\%), nơi lưới ERA5 khoảng 28~km không bắt được tín hiệu tại trạm. Một trường PINN cho nhiệt độ và áp
-suất, phân giải cao hơn và nhất quán vật lý giữa các trạm, có thể giúp phân xử các ca này; chỉ tiêu là số ca
-cục bộ giảm mà tỉ lệ nghi lỗi không tăng giả.
+\textbf{PINN giải quyết được gì cho bài toán dị thường?} Bộ dò ở Mục~6.8 làm việc trên nhiệt độ và áp suất
+(22.446 giá trị gắn cờ trong 2020--2024); PINN phủ thêm \textbf{2/12 trường} mà bộ dò chưa chạm tới, nên mở
+rộng phạm vi phát hiện thay vì trùng lặp. Mô hình (i) cho trường \texttt{rh\_pct} ở 3.063.576 bản ghi ISD chỉ có
+điểm sương, sai số 1,07 điểm \%. Mô hình (ii) nhận vào toạ độ nên \textbf{điền được gió} tại bất kỳ điểm nào
+giữa các ô lưới ERA5 hoặc tại trạm thiếu số liệu; trên 22 vị trí giữ lại không dùng để luyện, RMSE là 1,06~m/s
+so với tốc độ gió trung bình 2,26~m/s, tức sai số còn cao và cần thêm chiều thời gian. Cũng ở mô hình (ii), phần dư giữa gió quan trắc và trường PINN (trung bình
+1,03~m/s) đánh dấu \textbf{4/113 vị trí} lệch quá 2,62~m/s (trung bình + 2$\sigma$): Mandalay (cả mã ISD
+48600199999 và GHCN BMM00048042), Đồng Hới và Phú Quốc, đều là thung lũng, ven biển hoặc đảo. Đây là các ứng
+viên \emph{dị thường gió cục bộ} mà phép $z$ trên nhiệt độ, áp suất không thấy; trạm ISD Mandalay cũng nằm trong
+nhóm nhiều cờ QC nhất (Mục~6.12).
+
+Bước tiếp theo có chỉ tiêu đo được: 93,3\% trong 5.910 ca tại trạm đã được ERA5 hoặc trạm lân cận xác nhận
+(Hình~\ref{fig:anomaly-confirmation}), còn 375 ca \emph{dị thường cục bộ} (6,3\%) mà lưới ERA5 khoảng 28~km
+không bắt được. Một trường PINN cho nhiệt độ và áp suất, phân giải cao hơn và nhất quán vật lý giữa các trạm,
+sẽ dùng để phân xử các ca này; chỉ tiêu là số ca cục bộ giảm mà tỉ lệ nghi lỗi không tăng giả.
 
 \textbf{Hướng phát triển và các công trình liên quan.} Kashinath và cộng sự~\cite{kashinath2021physics}
 tổng hợp mười ca áp dụng ML có ràng buộc vật lý cho thời tiết và khí hậu. Bihlo và

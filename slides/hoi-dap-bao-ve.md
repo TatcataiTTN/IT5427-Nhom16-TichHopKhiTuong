@@ -574,8 +574,11 @@ dòng cờ QC và nhảy bậc nhiệt độ (Phụ lục trang 63).
 
 **H8. PINN giải quyết được bao nhiêu phần trăm dị thường? Mục tiêu tiếp theo có đo được không?**
 
-0%, nói thẳng: 22.446 giá trị bị gắn cờ trong 2020–2024 đều là nhiệt độ (12.209) hoặc áp suất (10.237), không
-thuộc trường độ ẩm hay gió mà PINN xử lý. Mục tiêu đo được là 375 ca dị thường cục bộ (6,3%), nơi lưới ERA5 khoảng
-28 km không xác nhận được: một trường PINN phân giải cao hơn có thể phân xử các ca này, chỉ tiêu là số ca cục bộ
-giảm mà tỉ lệ nghi lỗi không tăng giả (Phụ lục trang 56).
-
+PINN giải quyết được 2/12 trường của lược đồ chung, độ ẩm và gió, đúng hai trường mà bộ dò dị thường (chạy trên
+nhiệt độ 12.209 ca và áp suất 10.237 ca, 2020–2024) chưa phủ, nên nó mở rộng phạm vi phát hiện. Mô hình độ ẩm cho
+`rh_pct` ở 3.063.576 bản ghi ISD chỉ có điểm sương (sai số 1,07 điểm %). Mô hình gió điền được gió tại điểm thiếu
+số liệu giữa các ô lưới ERA5 hoặc tại trạm (22 vị trí giữ lại: RMSE 1,06 m/s so với gió trung bình 2,26 m/s, sai số
+còn cao, cần thêm chiều thời gian). Phần dư của mô hình gió đánh dấu 4/113
+vị trí lệch trường vật lý quá 2,62 m/s (Mandalay cả mã ISD lẫn GHCN, Đồng Hới, Phú Quốc), là ứng viên dị thường
+gió cục bộ. Mục tiêu tiếp theo đo được: dùng trường PINN phân xử 375 ca dị thường cục bộ (6,3%) mà lưới ERA5
+khoảng 28 km không xác nhận được; chỉ tiêu là số ca cục bộ giảm mà tỉ lệ nghi lỗi không tăng giả (Phụ lục trang 56).

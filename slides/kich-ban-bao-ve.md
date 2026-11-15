@@ -561,7 +561,7 @@ Biểu đồ phân loại 5.910 ca tại trạm 2020–2024: 93,3% xác nhận k
 
 **Trên slide**
 
-Bảng λ = 0; 0,01; 0,1; 1,0 với RMSE, MAE, physics loss. PINN chưa vượt baseline về RMSE; giải quyết trực tiếp 0% dị thường, mục tiêu tiếp là 375 ca cục bộ.
+Bảng λ = 0; 0,01; 0,1; 1,0 với RMSE, MAE, physics loss. PINN điền được trường gió nhất quán vật lý, sai số ngang hồi quy thuần (RMSE 1,06 so với 1,05); giải quyết được 2/12 trường (độ ẩm, gió), đánh dấu 4/113 vị trí gió bất thường; tiếp theo là 375 ca cục bộ.
 
 **Lời nói**
 > Mục đích là làm mịn trường gió giữa lưới ERA5 và trạm, có thêm ràng buộc vật lý là phương trình liên tục.
@@ -868,13 +868,19 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 > bình 1,07 điểm phần trăm. WindFieldNet dựng trường gió (u, v) từ toạ độ: 2 lớp ẩn 32 nơ-ron, 1.218 tham số,
 > ràng buộc phương trình liên tục tính bằng autograd; 113 trạm ERA5 ngày 15–17/6/2021, 91 luyện, 22 kiểm tra.
 >
-> Kết quả nói thẳng: hồi quy thuần lambda bằng 0 đạt RMSE 1,0473, PINN tốt nhất 1,0577, chưa vượt. Trên đồ thị,
+> PINN điền được trường gió tại mọi điểm, và tăng lambda làm vi phạm vật lý giảm từ 0,53 xuống 0,011. Về sai số thì
+> ngang hồi quy thuần: lambda bằng 0 đạt RMSE 1,0473, PINN tốt nhất 1,0577, nên cần thêm chiều thời gian để vượt hẳn. Trên đồ thị,
 > Physics Loss ở lambda 0,1 tăng rồi chững chứ không về 0: mạng lúc đầu gần như hằng số nên độ phân kỳ gần 0 một
 > cách ngẫu nhiên, khi học được biến thiên thật thì độ phân kỳ xuất hiện.
 >
-> PINN giải quyết trực tiếp 0% dị thường: 22.446 giá trị bị gắn cờ trong 2020–2024 đều là nhiệt độ hoặc áp suất,
-> không thuộc trường PINN xử lý. Mục tiêu đo được là 375 ca dị thường cục bộ, 6,3%, nơi lưới ERA5 khoảng 28 km
-> không xác nhận được tín hiệu tại trạm.
+> PINN giải quyết được hai trong mười hai trường, độ ẩm và gió, đúng hai trường mà bộ dò dị thường dựa trên
+> nhiệt độ và áp suất chưa phủ. Mô hình độ ẩm cho trường độ ẩm ở hơn ba triệu bản ghi ISD chỉ có điểm sương, sai số
+> 1,07 điểm phần trăm. Mô hình gió nhận vào toạ độ nên điền được gió ở bất kỳ điểm nào giữa các ô lưới ERA5 hay tại
+> trạm thiếu số liệu; thử trên 22 vị trí giữ lại, sai số 1,06 m/s so với gió trung bình 2,26 m/s, nên còn cao và cần
+> thêm chiều thời gian. Mô hình gió có thêm một tác dụng phát hiện: phần dư giữa gió quan trắc và trường PINN đánh dấu
+> 4 trên 113 vị trí lệch quá 2,62 m/s, là Mandalay, Đồng Hới và Phú Quốc, đều là thung lũng, ven biển hoặc đảo.
+> Bước tiếp theo đo được là dùng trường PINN phân xử 375 ca dị thường cục bộ, 6,3%, mà lưới ERA5 khoảng 28 km
+> không xác nhận được.
 
 ## 57. Các loại dị thường khí hậu và bảng xu hướng
 
