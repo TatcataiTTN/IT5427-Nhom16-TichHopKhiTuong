@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-# Builds notes.tex from the main part of the talk script (argv[1], default ../talk.md): for each slide `## 1.2.`, its
-# "Lời nói" and "Chuyển ý" become \slidenote{1.2}, so the speaker notes stay in one place (the script).
+# Builds notes.tex from the talk script (argv[1], default ../talk.md): for each slide header `## 1.2.` (main part,
+# phần.mục) or `## 32.` (phụ lục, so trang), its "Lời nói" and "Chuyển ý" become \slidenote{1.2} / \slidenote{32},
+# so the speaker notes stay in one place (the script).
 import re
 import sys
 from pathlib import Path
@@ -24,10 +25,8 @@ def tex(s):
 
 def main():
     text = SRC.read_text(encoding="utf-8")
-    if "\n# Phụ lục\n" in text:
-        text = text[: text.index("\n# Phụ lục\n")]
     notes = {}
-    for m in re.finditer(r"^## (\d\.\d+)\. .*?$(.*?)(?=^## |^# |\Z)", text, re.S | re.M):
+    for m in re.finditer(r"^## (\d+(?:\.\d+)?)\. .*?$(.*?)(?=^## |^# |\Z)", text, re.S | re.M):
         code, body = m.group(1), m.group(2)
         parts = []
         for label in ("Lời nói", "Lời nói (dẫn)", "Chuyển ý"):

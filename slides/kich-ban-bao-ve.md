@@ -23,17 +23,38 @@ nhất…). Phần 3 trả lời thẳng câu này; đừng nói vội phần 3.
 Quang: 5:30 (slide 1–9). Lương: 6:30 (slide 10–16). Nghĩa: 9:45 (slide 17–31) — nặng nhất, vì gộp cả phần
 tích hợp lẫn xử lý/phân tích/kết luận.
 
-**Phụ lục (trang 32–53), ai kiểm soát/giải thích nếu hội đồng hỏi** — theo đúng phần chính trên slide mà mỗi
-phụ lục mở rộng ra:
+**Phụ lục (trang 32–53), ai hiểu chính/hiểu phụ nếu hội đồng hỏi** — người hiểu chính trả lời trước, người hiểu
+phụ chỉ bổ sung nếu được hỏi thêm hoặc người chính trả lời chưa đủ. Lời nói gợi ý cho từng trang nằm trong mục
+"Phụ lục: lời nói gợi ý từng trang" ở cuối file (cũng in sẵn trong `final-defense-notes.pdf`, cột bên phải mỗi
+trang phụ lục):
 
-| Người | Trang phụ lục |
-|---|---|
-| Quang (mở rộng Phần 1–2) | 33 Dữ liệu nằm ở năm nguồn khác nhau, 34 Năm nguồn dữ liệu, 35 Vùng nghiên cứu, 36 Quy mô kho sau tích hợp, 38 Tải dữ liệu theo phạm vi đề cương, 41 Lỗi số liệu trong pipeline |
-| Lương (mở rộng Phần 3) | 37 Dữ liệu thô trước chuẩn hoá, 39 Tỷ lệ dữ liệu bị QC can thiệp, 40 Chọn IQR thay cho Z-score, 46 Phát hiện trôi cảm biến, 47 Tương quan và PCA |
-| Nghĩa (mở rộng Phần 4–6) | 42 Chiến lược partition, 43 Cụm Spark và Kafka, 44 Mưa cực đoan khi bão Yagi, 45 Xu hướng nhiệt độ dài hạn, 48 Các panel của dashboard, 49 Panel 1: tổng quan tích hợp, 50 Tiến độ theo từng người, 51 Sản phẩm của từng người theo mốc, 52 Giới hạn hạ tầng, 53 Mở rộng ra toàn cầu |
+| Trang | Nội dung | Hiểu chính | Hiểu phụ |
+|---|---|---|---|
+| 33 | Dữ liệu nằm ở năm nguồn khác nhau | Quang | Lương |
+| 34 | Năm nguồn dữ liệu | Quang | Nghĩa |
+| 35 | Vùng nghiên cứu | Quang | Lương |
+| 36 | Quy mô kho sau tích hợp | Quang | Nghĩa |
+| 37 | Dữ liệu thô trước chuẩn hoá | Lương | Quang |
+| 38 | Tải dữ liệu theo phạm vi đề cương | Quang | Nghĩa |
+| 39 | Tỷ lệ dữ liệu bị QC can thiệp | Quang | Lương |
+| 40 | Chọn IQR thay cho Z-score | Lương | Quang |
+| 41 | Lỗi số liệu trong pipeline | Quang | Nghĩa |
+| 42 | Chiến lược partition | Nghĩa | Quang |
+| 43 | Cụm Spark và Kafka | Nghĩa | Lương |
+| 44 | Mưa cực đoan khi bão Yagi | Nghĩa | Lương |
+| 45 | Xu hướng nhiệt độ dài hạn | Nghĩa | Lương |
+| 46 | Phát hiện trôi cảm biến | Lương | Nghĩa |
+| 47 | Tương quan và PCA | Lương | Nghĩa |
+| 48 | Các panel của dashboard | Nghĩa | Lương |
+| 49 | Panel 1: tổng quan tích hợp | Nghĩa | Quang |
+| 50 | Tiến độ theo từng người | Nghĩa | Quang |
+| 51 | Sản phẩm của từng người theo mốc | Nghĩa | Lương |
+| 52 | Giới hạn hạ tầng | Nghĩa | Lương |
+| 53 | Mở rộng ra toàn cầu | Nghĩa | Lương |
 
-Trang 32 chỉ là trang ngăn mục, không cần ai giải thích riêng. Khi hội đồng mở một trang phụ lục, đúng người
-phụ trách trả lời trước; người khác chỉ bổ sung nếu được hỏi thêm.
+Trang 32 chỉ là trang ngăn mục, không cần ai giải thích riêng. "Hiểu chính" ưu tiên người thật sự làm ra nội
+dung đó (Quang: ingestion/QC; Lương: schema/ER/Survivorship; Nghĩa: Spark/Kafka/PINN/dashboard), không nhất
+thiết trùng người đang nói phần chính tương ứng.
 
 Nếu bị nhắc giờ: xem mục "Slide có thể nói lướt" ở cuối file.
 
@@ -556,5 +577,212 @@ Bảng M1–M5 với kết quả đo được; 4/5 đạt đầy đủ, M4 đạ
 - 3.6 Không gian (30 giây): chỉ nói RMSE mưa kém.
 - 5.5 PINN (20 giây): "chưa vượt baseline, chênh 1%, chưa kết luận".
 - 5.6 Dashboard (15 giây).
+
+---
+
+# Phụ lục: lời nói gợi ý từng trang
+
+Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi. Người "hiểu chính" ở bảng đầu file trả lời trước,
+đọc thẳng gợi ý dưới đây rồi diễn giải tự nhiên; không cần đọc nguyên văn.
+
+## 33. Dữ liệu nằm ở năm nguồn khác nhau
+
+**Lời nói**
+> **Chính:** Quang · **Phụ:** Lương.
+>
+> Đây là bảng dị biệt 5 nguồn theo đúng 6 mức trong bài giảng Buổi 2: hệ thống, cú pháp, lược đồ, ngữ nghĩa, định
+> danh, chất lượng. Ví dụ hệ thống: NASA POWER và Open-Meteo là REST API JSON, GHCN và ISD là CSV trên AWS S3,
+> ERA5 là CDS API và Zarr. Ví dụ ngữ nghĩa: áp suất bề mặt khác áp suất mực nước biển, có 4 cách định nghĩa nhiệt
+> độ ngày. Mỗi hàng trong bảng ứng với đúng một vấn đề nhóm đã xử lý ở phần 3.
+
+## 34. Năm nguồn dữ liệu
+
+**Lời nói**
+> **Chính:** Quang · **Phụ:** Nghĩa.
+>
+> Bảng này cho thấy 5 nguồn không hoàn toàn độc lập: Open-Meteo lấy một phần dữ liệu từ ERA5, nên khi đối chứng
+> dị thường nhóm không tính Open-Meteo là một xác nhận độc lập. GHCN và ISD cùng của NOAA nhưng QC gốc khác
+> nhau, 406 so với 3.255 giá trị lỗi. Chỉ GHCN và ISD được dùng làm ground truth thật.
+
+## 35. Vùng nghiên cứu
+
+**Lời nói**
+> **Chính:** Quang · **Phụ:** Lương.
+>
+> Bbox ERA5 phủ 11 nước ASEAN nhưng trạm quan trắc chỉ có ở 9 nước: 119 vị trí gồm 113 trạm và 6 điểm lưới.
+> Singapore và Timor-Leste nằm trong bbox nhưng không có trạm GHCN, ISD hay NASA POWER nào nhóm chọn được. Ranh
+> giới dùng Natural Earth 10m, đã cập nhật Timor-Leste gia nhập ASEAN 26/10/2025.
+
+## 36. Quy mô kho sau tích hợp
+
+**Lời nói**
+> **Chính:** Quang · **Phụ:** Nghĩa.
+>
+> Kho có 8.955.313 bản ghi từ 5 nguồn, 119 vị trí, 9 nước, đưa về chung Mediated Schema WeatherObs. ERA5 lấy 5
+> năm 2020–2024 theo giờ, ISD 10 năm, GHCN từ 1943. Dữ liệu thô khoảng 23 GB, sau tích hợp còn 303 MB Parquet.
+
+## 37. Dữ liệu thô trước chuẩn hoá
+
+**Lời nói**
+> **Chính:** Lương · **Phụ:** Quang.
+>
+> Ba ví dụ dữ liệu thô thật: ISD ghi SLP=99999,9 là mã không đo của NOAA chứ không phải 9999,9 hPa; Open-Meteo
+> trả gió theo km/h nhưng parser cũ ghi thẳng vào cột m/s, phóng đại 3,6 lần; GHCN có TAVG thật khác
+> (TMAX+TMIN)/2 tới 0,4 độ nên nhóm giữ cả hai, thêm cột temp_def. Trích trực tiếp từ data_samples/, chi tiết ở
+> docs/17.
+
+## 38. Tải dữ liệu theo phạm vi đề cương
+
+**Lời nói**
+> **Chính:** Quang · **Phụ:** Nghĩa.
+>
+> Tải đủ phạm vi đề cương, kho tăng từ 1,08 lên 8,96 triệu bản ghi. ERA5 đủ 540/540 file qua CDS, 43.848/43.848
+> giờ mỗi biến, 0% NaN. Nút thắt là hàng đợi CDS, có lúc chờ hơn 1 giờ, nhóm chạy 2 tài khoản song song. Nếu lấy
+> qua kênh ARCO thì mỗi chunk là 1 giờ toàn cầu, giữ vùng Đông Nam Á 22 GB phải tải khoảng 1 TB, mất khoảng 27,8
+> giờ ở 10 MB/s.
+
+## 39. Tỷ lệ dữ liệu bị QC can thiệp
+
+**Lời nói**
+> **Chính:** Quang · **Phụ:** Lương.
+>
+> QC chỉ đặt NULL hoặc gắn cờ 0,09% số bản ghi, phần lớn do cờ lỗi gốc của ISD, 3.255 giá trị, nhiều hơn GHCN,
+> 406 giá trị. Tỷ lệ nhỏ vì đây là can thiệp ở tầng 1 và 2, trước khi tích hợp.
+
+## 40. Chọn IQR thay cho Z-score
+
+**Lời nói**
+> **Chính:** Lương · **Phụ:** Quang.
+>
+> Tiêm 5 outlier cực đoan vào dữ liệu mô phỏng N(25, 2): chính outlier làm độ lệch chuẩn phình từ 2,0 lên 72,2,
+> nên ngưỡng 3 sigma rộng tới mức Z-score chỉ bắt được 1/5. IQR tính trên tứ phân vị nên không bị kéo theo, bắt
+> được 5/5. Vì vậy nhóm chọn IQR làm chỉ số chính cho Data Quality Report.
+
+## 41. Lỗi số liệu trong pipeline
+
+**Lời nói**
+> **Chính:** Quang · **Phụ:** Nghĩa.
+>
+> Bốn lỗi thật đã gặp và đã sửa: gió Open-Meteo phóng đại 3,6 lần do đọc nhầm đơn vị; tương quan giả gió–độ ẩm
+> +0,57 do thay NaN bằng 0 trước khi tính, sửa bằng cách tính theo từng cặp thì còn −0,59; benchmark partition so
+> với bản sao cũ sai vì bản không partition chỉ ghi 1 lần nên lúc nào cũng có vẻ chậm hơn, đo lại công bằng thì
+> partition chậm hơn 1,5–2,5 lần; bức xạ ERA5 dùng nhầm đại lượng đỉnh khí quyển thay vì bề mặt, đã đổi lại để
+> cùng đại lượng với NASA POWER.
+
+## 42. Chiến lược partition
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Quang.
+>
+> Thử partition thêm theo tháng: data skew giảm từ 11,08% xuống 0,94%, nhưng số partition tăng 12 lần, từ 109
+> lên 1.306, gây vấn đề small-file. Đo lại công bằng trên 9 triệu dòng thì partition hiện tại chậm hơn không
+> partition 1,5–2,5 lần, vì Parquet đã tự bỏ qua dữ liệu nhờ thống kê min/max theo row-group. Nhóm giữ
+> year/source, vì lợi ích chỉ rõ ở quy mô lớn hơn hoặc trên S3/GCS.
+
+## 43. Cụm Spark và Kafka
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Lương.
+>
+> Cụm 3 container Docker trên cùng một máy: 1 master, 2 worker, Kafka 1 broker KRaft, RF 1, topic 1 partition.
+> spark_streaming_consumer.py đọc topic Kafka, in nhiệt độ trung bình từng trạm theo cửa sổ trượt 1 phút, trượt
+> 30 giây. Mốc 20/10 dựng xong cụm, mốc 9/11 streaming windowing chạy thật.
+
+## 44. Mưa cực đoan khi bão Yagi
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Lương.
+>
+> 7/9/2024 là ngày mưa lớn nhất 5 năm tại 4 trạm miền Bắc: Hà Đông 222,6 mm, Nội Bài 203,5 mm, Phù Liễn 187,4 mm,
+> Cát Bi 176,5 mm, gấp 2,6–3,1 lần ngưỡng p99. Vì mưa không phân bố chuẩn nên dùng chỉ số ETCCDI p95/p99 trên
+> ngày ướt, Rx1day, R95p. 11/13 cặp trạm–nguồn vượt p99 trong 6–11/9/2024. Trạm GHCN Phù Liễn mất số liệu đúng
+> lúc bão đổ bộ 7–8/9, rồi ghi 214 mm vào ngày 11/9.
+
+## 45. Xu hướng nhiệt độ dài hạn
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Lương.
+>
+> 25/27 trạm GHCN ấm lên có ý nghĩa thống kê giai đoạn 1975–2024, trung vị +0,21 độ C mỗi thập kỷ. Dùng
+> Mann-Kendall cho ý nghĩa thống kê, độ dốc Sen cho tốc độ, không giả định phân bố chuẩn. Nhanh nhất là Jakarta
+> +0,41, Penang +0,35, Bangkok +0,35, Cao Bằng +0,34 độ mỗi thập kỷ. Trừ xu hướng nền này thì năm 2024 vẫn nổi
+> bật. Xu hướng mưa chỉ có 1–6 trạm đủ 30 năm số liệu nên chưa đủ kết luận.
+
+## 46. Phát hiện trôi cảm biến
+
+**Lời nói**
+> **Chính:** Lương · **Phụ:** Nghĩa.
+>
+> Lấy chênh lệch trạm trừ ERA5 theo tháng: biến động khí hậu thật có ở cả hai nên triệt tiêu, phần còn lại là
+> lỗi cảm biến hoặc điểm đo. Trôi dần dùng Mann-Kendall và độ dốc Sen, nhảy bậc dùng kiểm định Pettitt. Rõ nhất
+> là áp suất Phnom Penh nhảy bậc −2,6 hPa từ 11/2022, tương đương trôi −0,65 hPa mỗi năm. Tiêm lỗi nhân tạo vào
+> 76 chuỗi thật đang ổn định: phát hiện 100% ca trôi, 95–98% ca nhảy bậc.
+
+## 47. Tương quan và PCA
+
+**Lời nói**
+> **Chính:** Lương · **Phụ:** Nghĩa.
+>
+> Tương quan tính theo từng cặp, không thay NaN bằng 0: nhiệt độ–độ ẩm −0,59 trên ISD, nhiệt độ–áp suất mực biển
+> −0,56 trên Open-Meteo. PCA theo Z-score: PC1 của Open-Meteo là nóng/áp thấp/gió, PC2 gom độ ẩm, mưa và áp thấp
+> kiểu bão mà không cần gán nhãn trước. PC1 và PC2 chỉ giải thích 48–56% phương sai, cần thêm thành phần để mô
+> tả đủ biến động khí tượng Đông Nam Á.
+
+## 48. Các panel của dashboard
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Lương.
+>
+> Dashboard Streamlit có 10 panel, đọc trực tiếp từ kho Parquet, đã kiểm tra trên trình duyệt không lỗi runtime.
+> Panel 5 cảnh báo bất thường theo IQR, panel 7 dị thường khí hậu, panel 9 trôi cảm biến, panel 10 cảnh báo theo
+> luồng Kafka. Bảng được cache theo ngày, đổi ngày hoặc trạm mất khoảng 0,6 giây.
+
+## 49. Panel 1: tổng quan tích hợp
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Quang.
+>
+> Ảnh chụp thật từ trình duyệt, chạy local trên bản warehouse rút gọn 1.076.473 dòng, 119 trạm/điểm, để chụp ảnh
+> nhanh. Các slide phân tích chính của bài dùng kho đầy đủ 8,96 triệu dòng, nêu ở Mục 6.1 báo cáo.
+
+## 50. Tiến độ theo từng người
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Quang.
+>
+> Mỗi thanh là một sản phẩm cụ thể có bằng chứng, không phải thanh trải đều cả kỳ. Nét liền là ba mốc chính
+> thức: đề cương 5/10, tiến độ 20/10, cuối kỳ 15/11. Nét đứt là hai mốc nội bộ nhóm tự đặt: kiểm thử 27/10, hội
+> tụ 2/11.
+
+## 51. Sản phẩm của từng người theo mốc
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Lương.
+>
+> Mỗi dòng gắn với một file hoặc mục báo cáo cụ thể, không phải lời kể chung chung: Quang có
+> check_data_sources.py và thư mục ingestion/, Lương có entity_resolution.py, Nghĩa có docker-compose và Mục
+> 6.4–6.7. Theo thông báo 15/11, buổi trình bày không có demo trực tiếp, nhưng cụm Docker và pytest vẫn chạy
+> được ngay nếu hội đồng yêu cầu.
+
+## 52. Giới hạn hạ tầng
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Lương.
+>
+> Hạ tầng chạy trên một máy nên chưa kết luận được về hiệu năng phân tán. Kafka chỉ 1 broker, RF 1, 1 partition
+> nên không chịu lỗi và Spark chỉ đọc bằng 1 task dù cụm có nhiều worker. AQE của Spark 4 để mặc định nên số đo
+> cache() chịu ảnh hưởng của việc tự gộp shuffle partition, nhóm chưa tách riêng. Entity Resolution có nhãn độc
+> lập ở 15/26 trạm, 11 trạm còn lại chưa có nhãn. Mạng trạm thưa và khí hậu nền ngắn khiến 15.938 dị thường chưa
+> có đối chứng.
+
+## 53. Mở rộng ra toàn cầu
+
+**Lời nói**
+> **Chính:** Nghĩa · **Phụ:** Lương.
+>
+> Mở rộng ra toàn cầu thì cả bốn thành phần đều phải đổi: Entity Resolution cần Blocking/LSH vì GHCN có hơn
+> 14.000 trạm, số cặp lên hàng trăm triệu; lưu trữ cần HDFS/S3/MinIO vì ERA5 toàn cầu tới hàng trăm TB; Kafka
+> cần RF từ 3 trở lên và nhiều partition; Spark cần cụm nhiều máy thật vì DuckDB chỉ nhanh hơn khi dữ liệu còn
+> vừa RAM một máy. Cùng lý do này, Mục 2.1 báo cáo không chọn kiến trúc Dataspace hay pay-as-you-go.
 
 Không cắt phần 3: đây là phần cô hỏi trực tiếp.
