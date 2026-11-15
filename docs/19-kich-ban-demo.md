@@ -11,6 +11,25 @@ code chạy thật, mở file này, copy đúng lệnh, không cần nhớ.
 Tất cả lệnh dưới đây chạy từ thư mục gốc dự án:
 `cd "/Users/tuannghiat/Downloads/HUST - Tích hợp và xử lý dữ liệu lớn - Vũ Tuyết Trinh/IT5427-Nhom16-TichHopKhiTuong"`
 
+**Mở tất cả trong một lệnh** (slide, bản có lời nói, báo cáo, 7 file source và các kịch bản trong VS Code,
+dashboard chạy nền, mỗi kịch bản demo một cửa sổ Terminal chờ nhấn Enter):
+
+```bash
+bash scripts/mo_demo_bao_ve.sh            # thêm --no-terminals nếu không muốn mở các cửa sổ Terminal
+```
+
+| Kịch bản | Lệnh | Thời gian đo thật |
+| --- | --- | --- |
+| 1. ER + Survivorship | `bash scripts/demo/1_er_survivorship.sh [location_id] [YYYY-MM-DD]` | dưới 2 giây |
+| 2. PINN trường gió | `bash scripts/demo/2_pinn.sh` | khoảng 5 giây |
+| 3. Kafka + Spark Streaming | `bash scripts/demo/3_streaming.sh [số giây]` | khoảng 1--2 phút, cần Docker |
+| 4. Dashboard | `bash scripts/demo/4_dashboard.sh` | vài giây, mở http://localhost:8501 |
+| 5. Fellegi--Sunter + luật phủ quyết | `bash scripts/demo/5_fellegi_sunter.sh` | dưới 1 giây |
+| 6. Liên kết trạm với lưới ERA5 | `bash scripts/demo/6_station_grid_link.sh` | khoảng 11 giây |
+
+Các script tự chọn Python của Anaconda (có đủ torch, pyspark, kafka, streamlit); kịch bản 1 dùng pandas nên không
+cần duckdb.
+
 ---
 
 ## Trước buổi bảo vệ — chuẩn bị 1 lần (không làm lúc đang hỏi-đáp)
@@ -83,9 +102,10 @@ lambda=0.1   test_RMSE=1.0577  ...
 PASS n_lambda_tested=4 best_lambda=0.0
 ```
 
-**Nói gì khi chạy xong**: "Đây là script thật, không phải số đã lưu sẵn — chạy lại từ đầu, quét 4
-giá trị λ cân bằng giữa khớp dữ liệu và ràng buộc vật lý Navier–Stokes rút gọn, baseline λ=0 vẫn
-thắng nhẹ về RMSE thuần — đúng kết luận trung thực đã trình bày, không chọn cấu hình đẹp số liệu."
+**Nói gì khi chạy xong**: "Đây là script thật, chạy lại từ đầu, quét 4 giá trị λ. PINN điền được trường gió
+nhất quán vật lý tại mọi điểm, vi phạm vật lý giảm từ 0,53 xuống 0,011 khi tăng λ, sai số ngang hồi quy thuần
+(1,06 so với 1,05). Phần cuối in ra 4 vị trí gió lệch trường vật lý quá 2,62 m/s: Mandalay hai mã, Đồng Hới,
+Phú Quốc, đều là thung lũng, ven biển hoặc đảo, là ứng viên dị thường gió cục bộ."
 
 ---
 
@@ -137,6 +157,28 @@ tăng vọt năm 2024).
 **Lưu ý nói rõ nếu được hỏi**: dashboard đang đọc kho Parquet đầy đủ (8,96 triệu dòng, không phải
 bản rút gọn dùng để chụp ảnh slide trước đây) — nếu load lần đầu chậm vài giây do đọc file lớn, nói
 luôn lý do thay vì để im lặng khó xử.
+
+---
+
+## Kịch bản 5 — Fellegi–Sunter + luật phủ quyết (dưới 1 giây)
+
+**Khi nào dùng**: hội đồng hỏi "ngưỡng 5 km có tuỳ tiện không?", "có mô hình xác suất cho Entity Resolution
+không?". Script chạy EM trên 2.262 cặp ứng viên GHCN × ISD, in ngưỡng θh = 6,64 và θl = −1,31, số cặp bị
+luật phủ quyết loại (khác nước, cách trên 10 km, chênh cao trên 100 m) và khác biệt với luật Haversine 5 km.
+
+**Nói gì**: "Fellegi–Sunter không chính xác hơn luật 5 km trên nhãn WMO (16/17 so với 17/17 khi ghép 1–1),
+nhưng luật phủ quyết chặn được 2 cặp sai chỉ vì trùng tên như Mandalay và Mandalay Intl."
+
+---
+
+## Kịch bản 6 — Liên kết trạm với lưới ERA5 thay vì gộp (khoảng 11 giây)
+
+**Khi nào dùng**: hội đồng hỏi "trạm và ô lưới ERA5 có phải cùng một thực thể không, sao không gộp?".
+Script nối 119 vị trí với ô 0,25° gần nhất (trung vị 9,42 km), tính chênh độ cao và bias nhiệt theo độ cao.
+
+**Nói gì**: "Trạm là một điểm, ô ERA5 là trung bình khoảng 28 km, nên phải liên kết chứ không gộp. 19 vị trí lệch
+độ cao trên 100 m; bias nhiệt theo độ cao −5,66 °C/km, gần gradient chuẩn −6,5 °C/km. Luang Prabang thấp hơn địa
+hình ERA5 458 m và ấm hơn 3,53 °C."
 
 ---
 
