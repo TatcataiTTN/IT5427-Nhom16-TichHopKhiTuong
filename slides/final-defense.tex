@@ -75,17 +75,17 @@
     {\footnotesize #2}\end{minipage}}
 % Thanh điều hướng 3 bước (theo mẫu Bước 1/2/3 của Lương cho Phần 4 Tích hợp dữ liệu).
 % Dùng: \buocnav{2} -> bước 2 "Ghép trạm" tô đậm, hai bước còn lại viền nhạt.
-\newcommand{\buocnodeA}[3]{\node[rounded corners=2.6mm, minimum height=5.8mm, inner xsep=2.8mm,
+\newcommand{\buocnodeA}[3]{\node[rounded corners=2.3mm, minimum height=5.0mm, inner xsep=3.4mm,
   fill=hustblue, draw=hustblue, text=white, font=\bfseries\scriptsize, #2] (#1) {#3};}
-\newcommand{\buocnodeB}[3]{\node[rounded corners=2.6mm, minimum height=5.8mm, inner xsep=2.8mm,
+\newcommand{\buocnodeB}[3]{\node[rounded corners=2.3mm, minimum height=5.0mm, inner xsep=3.4mm,
   fill=white, draw=hustblue!35, text=hustblue!70, font=\scriptsize, #2] (#1) {#3};}
 \newcommand{\buocnav}[1]{%
 \begin{tikzpicture}[baseline=-0.6ex]
   \ifnum#1=1 \buocnodeA{buocnavb1}{}{1~Lược đồ chung}\else \buocnodeB{buocnavb1}{}{1~Lược đồ chung}\fi
   \draw[-{Latex[length=1.8mm]}, hustblue!40] (buocnavb1.east) -- ++(0.32,0);
-  \ifnum#1=2 \buocnodeA{buocnavb2}{right=0.42cm of buocnavb1}{2~Ghép trạm}\else \buocnodeB{buocnavb2}{right=0.42cm of buocnavb1}{2~Ghép trạm}\fi
+  \ifnum#1=2 \buocnodeA{buocnavb2}{right=0.5cm of buocnavb1}{2~Ghép trạm}\else \buocnodeB{buocnavb2}{right=0.5cm of buocnavb1}{2~Ghép trạm}\fi
   \draw[-{Latex[length=1.8mm]}, hustblue!40] (buocnavb2.east) -- ++(0.32,0);
-  \ifnum#1=3 \buocnodeA{buocnavb3}{right=0.42cm of buocnavb2}{3~Chọn giá trị}\else \buocnodeB{buocnavb3}{right=0.42cm of buocnavb2}{3~Chọn giá trị}\fi
+  \ifnum#1=3 \buocnodeA{buocnavb3}{right=0.5cm of buocnavb2}{3~Chọn giá trị}\else \buocnodeB{buocnavb3}{right=0.5cm of buocnavb2}{3~Chọn giá trị}\fi
 \end{tikzpicture}}
 
 \begin{document}
@@ -394,15 +394,15 @@
 \hustsectionpage{4. Tích hợp dữ liệu}
 
 \begin{frame}{Bước 1 · Lược đồ chung WeatherObs (GAV)}
-  \buocnav{1}\par\vskip1.5mm
-  {\footnotesize\textcolor{hustblue}{\bfseries Vấn đề:} 5 nguồn, 5 kiểu cấu trúc (lưới, chuỗi trạm, JSON) $\to$
-  không truy vấn chung được\par}
-  {\footnotesize\textcolor{hustblue}{\bfseries Cách làm:} đưa mọi nguồn về một khuôn chung\par}
-  \vskip0.5mm
-  {\footnotesize\itshape
+  \buocnav{1}\par\vskip0.7mm
+  {\scriptsize\textcolor{hustblue}{\bfseries Vấn đề:} 5 nguồn, 5 kiểu cấu trúc (lưới, chuỗi trạm, JSON) $\to$
+  không truy vấn chung được \quad
+  \textcolor{hustblue}{\bfseries Cách làm:} đưa mọi nguồn về một khuôn chung\par}
+  \vskip0.4mm
+  \noindent\colorbox{hustblue!8}{\parbox{0.96\textwidth}{\scriptsize
   WeatherObs(vị trí, thời điểm, nguồn, nhiệt độ, độ ẩm, mưa, gió, \textcolor{hustred}{áp suất bề mặt},
-  \textcolor{hustred}{áp suất mực biển}, \ldots)\par}
-  \vskip1mm
+  \textcolor{hustred}{áp suất mực biển}, \ldots)}}
+  \vskip0.4mm
   \begin{columns}[T]
     \begin{column}{0.49\textwidth}
       \scriptsize\textbf{GHCN: mỗi dòng 1 biến $\to$ PIVOT}\\
@@ -414,71 +414,73 @@
       \scriptsize\texttt{TMP="+0250,1"}\quad$\to$\quad\begin{tabular}[t]{@{}l@{}}\scriptsize nhiệt độ = 25,0\,°C\\\scriptsize mã QC = 1\end{tabular}
     \end{column}
   \end{columns}
-  \vskip1mm
-  {\footnotesize\textbf{Vì sao GAV?} Số nguồn cố định (5) $\to$ truy vấn chỉ cần thay view vào (unfold). LAV hợp
-  khi nguồn hay thay đổi.\\
+  \vskip0.4mm
+  {\scriptsize\textbf{Vì sao GAV?} Số nguồn cố định (5) $\to$ truy vấn chỉ cần thay view vào (unfold). LAV hợp
+  khi nguồn hay thay đổi.\quad
   \textbf{Vì sao 2 cột áp suất?} Bề mặt $\neq$ mực nước biển (lệch \textasciitilde 12\,hPa mỗi 100\,m độ cao)
   $\to$ không gộp.\par}
-  \ketluan{\small Kết quả: 5/5 nguồn chung một lược đồ, toàn vẹn tham chiếu 100\% (83 test)}
+  \vskip0.8mm{\small\color{hustred}Kết quả: 5/5 nguồn chung một lược đồ, toàn vẹn tham chiếu 100\% (83 test)\par}
   \slidenote{4.1}
 \end{frame}
 \begin{frame}{Bước 2 · Entity Resolution: ghép trạm GHCN--ISD}
-  \buocnav{2}\par\vskip1.5mm
-  {\footnotesize\textcolor{hustblue}{\bfseries Vấn đề:} cùng một trạm vật lý nhưng hai cơ quan đặt hai mã khác
+  \buocnav{2}\par\vskip0.7mm
+  {\scriptsize\textcolor{hustblue}{\bfseries Vấn đề:} cùng một trạm vật lý nhưng hai cơ quan đặt hai mã khác
   nhau $\to$ không nối bằng khoá được\par}
   \vskip0.5mm
-  {\scriptsize Trạm Nội Bài:\quad GHCN \texttt{VMM00048820}\qquad ISD \texttt{48820099999}\qquad
-  {\itshape máy tính thấy: 2 trạm}\par}
-  \vskip1mm
+  \noindent\colorbox{hustblue!8}{\parbox{0.96\textwidth}{\scriptsize
+  Trạm Nội Bài:\quad GHCN \texttt{VMM00048820}\qquad ISD \texttt{48820099999}\qquad
+  {\itshape máy tính thấy: 2 trạm}}}
+  \vskip0.4mm
   \begin{columns}[T]
     \begin{column}{0.58\textwidth}
-      \footnotesize\textbf{Cách làm: ghép theo vị trí}
-      \begin{itemize}\footnotesize\setlength\itemsep{0.8mm}
+      \scriptsize\textbf{Cách làm: ghép theo vị trí}
+      \begin{itemize}\scriptsize\setlength\itemsep{0.3mm}
         \item Mỗi trạm ISD $\to$ tìm trạm GHCN gần nhất {\scriptsize\itshape(khoảng cách Haversine trên mặt cầu)}
         \item Cách $\leq$ 5\,km $\to$ cùng một trạm, ghép 1--1
         \item 26 trạm ISD $\times$ 41 trạm GHCN = 1.066 cặp $\to$ so hết {\scriptsize\itshape(ít cặp nên không cần Blocking)}
       \end{itemize}
-      {\footnotesize\textbf{Kiểm chứng:} so với mã WMO độc lập với toạ độ $\to$ 15 cặp có nhãn, precision/recall 100\%/100\%\par}
+      {\scriptsize\textbf{Kiểm chứng:} so với mã WMO độc lập với toạ độ $\to$ 15 cặp có nhãn, precision/recall 100\%/100\%\par}
     \end{column}
     \begin{column}{0.38\textwidth}
       \centering
-      \bignumS{22/26}{trạm ghép được (84,6\%)}{goodgreen}{4.2cm}\\[2mm]
+      \bignumS{22/26}{trạm ghép được (84,6\%)}{goodgreen}{4.2cm}\\[1mm]
       \bignumS{0,53 km}{khoảng cách trung bình}{goodgreen}{4.2cm}
     \end{column}
   \end{columns}
-  \ketluan{\small Kết quả: ghép được 22 cặp mã cùng chỉ một trạm $\to$ so sánh, gộp được hai nguồn}
+  \vskip0.8mm{\small\color{hustred}Kết quả: ghép được 22 cặp mã cùng chỉ một trạm $\to$ so sánh, gộp được hai nguồn\par}
   \slidenote{4.2}
 \end{frame}
 \begin{frame}{Bước 3 · Survivorship: chọn giá trị khi các nguồn lệch nhau}
-  \buocnav{3}\par\vskip1.5mm
-  {\footnotesize\textcolor{hustblue}{\bfseries Vấn đề:} cùng vị trí, cùng ngày, nhiều nguồn cho số khác nhau
-  $\to$ kho cần 1 giá trị duy nhất\\
+  \buocnav{3}\par\vskip0.7mm
+  {\scriptsize\textcolor{hustblue}{\bfseries Vấn đề:} cùng vị trí, cùng ngày, nhiều nguồn cho số khác nhau
+  $\to$ kho cần 1 giá trị duy nhất \quad
   \textcolor{hustblue}{\bfseries Cách làm:} gộp mỗi nguồn về 1 giá trị/ngày, rồi áp dụng 3 quy tắc\par}
-  \vskip1mm
+  \vskip0.4mm
   \begin{columns}[T]
     \begin{column}{0.33\textwidth}
-      \noindent\colorbox{hustblue}{\textcolor{white}{\footnotesize\textbf{1~Ưu tiên nguồn tin cậy}}}\\[1mm]
+      \noindent\colorbox{hustblue}{\textcolor{white}{\scriptsize\textbf{1~Ưu tiên nguồn tin cậy}}}\\[0.5mm]
       \scriptsize
-      \begin{enumerate}\setlength\itemsep{0.5mm}
-        \item \textbf{ISD, GHCN} {\scriptsize\itshape trạm đo thật, có cờ QC}
-        \item \textbf{ERA5} {\scriptsize\itshape mô hình có nạp số đo thật}
-        \item \textbf{Open-Meteo} {\scriptsize\itshape lấy lại từ ERA5}
-        \item \textbf{NASA POWER} {\scriptsize\itshape ô lưới thô nhất (0,5°)}
+      \begin{enumerate}\setlength\itemsep{0mm}\setlength\parskip{0mm}
+        \item \textbf{ISD, GHCN} -- trạm đo thật, có cờ QC
+        \item \textbf{ERA5} -- mô hình có nạp số đo thật
+        \item \textbf{Open-Meteo} -- lấy lại từ ERA5
+        \item \textbf{NASA POWER} -- lưới thô nhất (0,5°)
       \end{enumerate}
     \end{column}
     \begin{column}{0.33\textwidth}
-      \noindent\colorbox{hustblue}{\textcolor{white}{\footnotesize\textbf{2~Thiếu thì lấy hạng kế}}}\\[1mm]
+      \noindent\colorbox{hustblue}{\textcolor{white}{\scriptsize\textbf{2~Thiếu thì lấy hạng kế}}}\\[0.5mm]
       \scriptsize
-      \textbf{Hà Nội, 7/9/2024 (bão Yagi)}\\[1mm]
+      \textbf{Hà Nội, 7/9/2024 (bão Yagi)}\\[0.5mm]
       Nhiệt độ 25,9\,°C $\leftarrow$ \textbf{GHCN} {\scriptsize(hạng 1 có số liệu)}\\
       Mưa 8,48\,mm $\leftarrow$ \textbf{ERA5}\\
-      Áp suất 989,2\,hPa $\leftarrow$ \textbf{ERA5} {\scriptsize(GHCN thiếu $\to$ hạng 2)}\\[1mm]
+      Áp suất 989,2\,hPa $\leftarrow$ \textbf{ERA5} {\scriptsize(GHCN thiếu $\to$ hạng 2)}\\[0.5mm]
       {\scriptsize\itshape Ngày này: không biến nào bị cờ}
     \end{column}
     \begin{column}{0.33\textwidth}
-      \noindent\colorbox{hustblue}{\textcolor{white}{\footnotesize\textbf{3~Lệch nhiều thì gắn cờ}}}\\[1mm]
+      \noindent\colorbox{hustblue}{\textcolor{white}{\scriptsize\textbf{3~Lệch nhiều thì gắn cờ}}}\\[0.5mm]
       \scriptsize
-      Lệch = (lớn nhất $-$ nhỏ nhất) $\div$ giá trị được chọn\\[1mm]
+      Lệch = (lớn nhất $-$ nhỏ nhất) $\div$ giá trị được chọn\\[0.3mm]
+      \renewcommand{\arraystretch}{0.8}
       \begin{tabular}{@{}lr@{}}
         \toprule
         Biến & Ngưỡng \\
@@ -493,8 +495,7 @@
       \end{tabular}
     \end{column}
   \end{columns}
-  \ketluan{\small Kết quả: bảng 856.452 dòng, mỗi giá trị ghi rõ lấy từ nguồn nào + cờ xung đột}
-  \nguon{Đối chiếu đầy đủ 6 biến (gồm cả mưa 91,6\% xung đột) ở Bảng~\ref{tab:survivorship-conflict} báo cáo.}
+  \vskip0.6mm{\small\color{hustred}Kết quả: bảng 856.452 dòng, mưa xung đột nhiều nhất (91,6\%) -- đủ 6 biến ở báo cáo\par}
   \slidenote{4.3}
 \end{frame}
 
