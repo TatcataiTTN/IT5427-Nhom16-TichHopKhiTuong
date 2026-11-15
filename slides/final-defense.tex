@@ -73,6 +73,20 @@
   \begin{minipage}[t]{#4}\centering
     {\fontsize{22}{26}\selectfont\bfseries\color{#3}#1}\\[1pt]
     {\footnotesize #2}\end{minipage}}
+% Thanh điều hướng 3 bước (theo mẫu Bước 1/2/3 của Lương cho Phần 4 Tích hợp dữ liệu).
+% Dùng: \buocnav{2} -> bước 2 "Ghép trạm" tô đậm, hai bước còn lại viền nhạt.
+\newcommand{\buocnodeA}[3]{\node[rounded corners=2.6mm, minimum height=5.8mm, inner xsep=2.8mm,
+  fill=hustblue, draw=hustblue, text=white, font=\bfseries\scriptsize, #2] (#1) {#3};}
+\newcommand{\buocnodeB}[3]{\node[rounded corners=2.6mm, minimum height=5.8mm, inner xsep=2.8mm,
+  fill=white, draw=hustblue!35, text=hustblue!70, font=\scriptsize, #2] (#1) {#3};}
+\newcommand{\buocnav}[1]{%
+\begin{tikzpicture}[baseline=-0.6ex]
+  \ifnum#1=1 \buocnodeA{buocnavb1}{}{1~Lược đồ chung}\else \buocnodeB{buocnavb1}{}{1~Lược đồ chung}\fi
+  \draw[-{Latex[length=1.8mm]}, hustblue!40] (buocnavb1.east) -- ++(0.32,0);
+  \ifnum#1=2 \buocnodeA{buocnavb2}{right=0.42cm of buocnavb1}{2~Ghép trạm}\else \buocnodeB{buocnavb2}{right=0.42cm of buocnavb1}{2~Ghép trạm}\fi
+  \draw[-{Latex[length=1.8mm]}, hustblue!40] (buocnavb2.east) -- ++(0.32,0);
+  \ifnum#1=3 \buocnodeA{buocnavb3}{right=0.42cm of buocnavb2}{3~Chọn giá trị}\else \buocnodeB{buocnavb3}{right=0.42cm of buocnavb2}{3~Chọn giá trị}\fi
+\end{tikzpicture}}
 
 \begin{document}
 
@@ -379,72 +393,108 @@
 \hypertarget{sec4}{}
 \hustsectionpage{4. Tích hợp dữ liệu}
 
-\begin{frame}{Mediated Schema và ánh xạ GAV}
-  \ychinh{Năm nguồn ánh xạ vào một lược đồ chung \texttt{WeatherObs} theo Global-as-View}
-  {\scriptsize\ttfamily
-  WeatherObs(location\_id, timestamp\_utc, source, temp\_c, rh\_pct, dewpoint\_c, precip\_mm,\\
-  \hspace*{2.0cm}wind\_speed\_ms, wind\_dir\_deg, pressure\_surface\_hpa, pressure\_msl\_hpa,\\
-  \hspace*{2.0cm}solar\_rad\_wm2, cloud\_cover\_pct, temp\_def, qc\_flag)\par}
+\begin{frame}{Bước 1 · Lược đồ chung WeatherObs (GAV)}
+  \buocnav{1}\par\vskip1.5mm
+  {\footnotesize\textcolor{hustblue}{\bfseries Vấn đề:} 5 nguồn, 5 kiểu cấu trúc (lưới, chuỗi trạm, JSON) $\to$
+  không truy vấn chung được\par}
+  {\footnotesize\textcolor{hustblue}{\bfseries Cách làm:} đưa mọi nguồn về một khuôn chung\par}
+  \vskip0.5mm
+  {\footnotesize\itshape
+  WeatherObs(vị trí, thời điểm, nguồn, nhiệt độ, độ ẩm, mưa, gió, \textcolor{hustred}{áp suất bề mặt},
+  \textcolor{hustred}{áp suất mực biển}, \ldots)\par}
   \vskip1mm
-  {\footnotesize Ví dụ view của NASA POWER:\quad
-  $\text{WeatherObs}(\text{loc},t,\text{'NASA\_POWER'},\text{temp},\ldots) \supseteq \text{POWER}(\text{loc},t,\text{T2M},\text{RH2M},\ldots)$\par}
-  \begin{itemize}\footnotesize\setlength\itemsep{0.5mm}
-    \item GHCN dạng long (một dòng một biến một ngày): PIVOT sang dạng wide
-    \item ISD có trường phức hợp, ví dụ \texttt{TMP="+0250,1"}: PARSE để tách giá trị và mã QC
-    \item Chọn GAV vì số nguồn cố định: trả lời truy vấn chỉ cần khai triển (unfold) view, không phải viết lại truy vấn như LAV
-  \end{itemize}
-  \ketluan{\small Toàn vẹn tham chiếu 100\% với bảng \texttt{Location}, kiểm tra bằng bộ 83 test tự động}
-  \slidenote{4.1}
-\end{frame}
-\begin{frame}{Entity Resolution GHCN và ISD}
-  \ychinh{Ghép được 22/26 trạm ISD với trạm GHCN theo khoảng cách toạ độ}
-  \begin{center}
-    \bignumS{22/26}{cặp GHCN--ISD khớp (84,6\%)}{goodgreen}{4.6cm}
-    \bignumS{0,53 km}{khoảng cách trung bình}{goodgreen}{4.6cm}
-  \end{center}
-  \begin{itemize}\small\setlength\itemsep{1.5mm}
-    \item So khớp láng giềng gần nhất theo khoảng cách Haversine, ngưỡng 5\,km
-    \item Nhiều cặp cách nhau 0,000\,km vì dùng chung toạ độ WMO gốc, tức là cùng một trạm do GHCN và ISD đặt mã riêng
-    \item 4 trạm ISD còn lại không có trạm GHCN nào trong 5\,km
-    \item Kiểm chứng bằng mã WMO: precision/recall 100\%/100\% trên 15 cặp có nhãn
-  \end{itemize}
-  \slidenote{4.2}
-\end{frame}
-\begin{frame}{Hợp giải giá trị giữa các nguồn (Survivorship)}
-  \ychinh{Sau Entity Resolution, mỗi vị trí mỗi ngày lấy giá trị của nguồn hạng cao nhất; lệch quá ngưỡng thì gắn cờ xung đột}
   \begin{columns}[T]
-    \begin{column}{0.44\textwidth}
-      \centering\scriptsize
-      \begin{tabular}{@{}cll@{}}
-        \toprule
-        Hạng & Nguồn & Lý do \\
-        \midrule
-        1 & ISD, GHCN & Đo trực tiếp, có cờ QC \\
-        2 & ERA5 & Có đồng hoá số liệu quan trắc \\
-        3 & Open-Meteo & Nội suy từ ERA5 \\
-        4 & NASA POWER & Lưới thô nhất (0,5°) \\
-        \bottomrule
-      \end{tabular}\\[2mm]
-      {\tiny Ngưỡng xung đột theo biến: nhiệt độ 10\%, độ ẩm 20\%, mưa 50\%, gió 30\%, áp suất 2\%}
+    \begin{column}{0.49\textwidth}
+      \scriptsize\textbf{GHCN: mỗi dòng 1 biến $\to$ PIVOT}\\
+      \scriptsize\texttt{48820 | 7/9 | TMAX | 317}\\
+      \scriptsize\texttt{48820 | 7/9 | TMIN | 242}\quad$\to$\quad\begin{tabular}[t]{@{}l@{}}\scriptsize 1 dòng:\\\scriptsize\texttt{TMAX=31,7}\\\scriptsize\texttt{TMIN=24,2}\end{tabular}
     \end{column}
-    \begin{column}{0.54\textwidth}
-      \centering\scriptsize
-      \begin{tabular}{@{}lrr@{}}
-        \toprule
-        Biến & Nhóm có $\geq$ 2 nguồn & Xung đột \\
-        \midrule
-        Nhiệt độ & 119.504 & 3,2\% \\
-        Độ ẩm & 10.962 & 9,0\% \\
-        Mưa & 41.529 & \textcolor{badred}{91,6\%} \\
-        Gió & 58.101 & 44,6\% \\
-        Áp suất bề mặt & 33.921 & 5,3\% \\
-        Áp suất mực nước biển & 37.479 & 0,0\% \\
-        \bottomrule
-      \end{tabular}\\[1mm]
-      {\tiny Nhóm: một vị trí trong một ngày. Mưa lệch nhiều vì mỗi nguồn tích luỹ theo chu kỳ khác nhau}
+    \begin{column}{0.49\textwidth}
+      \scriptsize\textbf{ISD: nhiều thông tin trong 1 ô $\to$ PARSE}\\
+      \scriptsize\texttt{TMP="+0250,1"}\quad$\to$\quad\begin{tabular}[t]{@{}l@{}}\scriptsize nhiệt độ = 25,0\,°C\\\scriptsize mã QC = 1\end{tabular}
     \end{column}
   \end{columns}
-  \ketluan{\small Bảng hợp giải 856.452 dòng (mỗi vị trí, mỗi ngày một dòng), ghi rõ nguồn được chọn và cờ xung đột}
+  \vskip1mm
+  {\footnotesize\textbf{Vì sao GAV?} Số nguồn cố định (5) $\to$ truy vấn chỉ cần thay view vào (unfold). LAV hợp
+  khi nguồn hay thay đổi.\\
+  \textbf{Vì sao 2 cột áp suất?} Bề mặt $\neq$ mực nước biển (lệch \textasciitilde 12\,hPa mỗi 100\,m độ cao)
+  $\to$ không gộp.\par}
+  \ketluan{\small Kết quả: 5/5 nguồn chung một lược đồ, toàn vẹn tham chiếu 100\% (83 test)}
+  \slidenote{4.1}
+\end{frame}
+\begin{frame}{Bước 2 · Entity Resolution: ghép trạm GHCN--ISD}
+  \buocnav{2}\par\vskip1.5mm
+  {\footnotesize\textcolor{hustblue}{\bfseries Vấn đề:} cùng một trạm vật lý nhưng hai cơ quan đặt hai mã khác
+  nhau $\to$ không nối bằng khoá được\par}
+  \vskip0.5mm
+  {\scriptsize Trạm Nội Bài:\quad GHCN \texttt{VMM00048820}\qquad ISD \texttt{48820099999}\qquad
+  {\itshape máy tính thấy: 2 trạm}\par}
+  \vskip1mm
+  \begin{columns}[T]
+    \begin{column}{0.58\textwidth}
+      \footnotesize\textbf{Cách làm: ghép theo vị trí}
+      \begin{itemize}\footnotesize\setlength\itemsep{0.8mm}
+        \item Mỗi trạm ISD $\to$ tìm trạm GHCN gần nhất {\scriptsize\itshape(khoảng cách Haversine trên mặt cầu)}
+        \item Cách $\leq$ 5\,km $\to$ cùng một trạm, ghép 1--1
+        \item 26 trạm ISD $\times$ 41 trạm GHCN = 1.066 cặp $\to$ so hết {\scriptsize\itshape(ít cặp nên không cần Blocking)}
+      \end{itemize}
+      {\footnotesize\textbf{Kiểm chứng:} so với mã WMO độc lập với toạ độ $\to$ 15 cặp có nhãn, precision/recall 100\%/100\%\par}
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \centering
+      \bignumS{22/26}{trạm ghép được (84,6\%)}{goodgreen}{4.2cm}\\[2mm]
+      \bignumS{0,53 km}{khoảng cách trung bình}{goodgreen}{4.2cm}
+    \end{column}
+  \end{columns}
+  \ketluan{\small Kết quả: ghép được 22 cặp mã cùng chỉ một trạm $\to$ so sánh, gộp được hai nguồn}
+  \slidenote{4.2}
+\end{frame}
+\begin{frame}{Bước 3 · Survivorship: chọn giá trị khi các nguồn lệch nhau}
+  \buocnav{3}\par\vskip1.5mm
+  {\footnotesize\textcolor{hustblue}{\bfseries Vấn đề:} cùng vị trí, cùng ngày, nhiều nguồn cho số khác nhau
+  $\to$ kho cần 1 giá trị duy nhất\\
+  \textcolor{hustblue}{\bfseries Cách làm:} gộp mỗi nguồn về 1 giá trị/ngày, rồi áp dụng 3 quy tắc\par}
+  \vskip1mm
+  \begin{columns}[T]
+    \begin{column}{0.33\textwidth}
+      \noindent\colorbox{hustblue}{\textcolor{white}{\footnotesize\textbf{1~Ưu tiên nguồn tin cậy}}}\\[1mm]
+      \scriptsize
+      \begin{enumerate}\setlength\itemsep{0.5mm}
+        \item \textbf{ISD, GHCN} {\scriptsize\itshape trạm đo thật, có cờ QC}
+        \item \textbf{ERA5} {\scriptsize\itshape mô hình có nạp số đo thật}
+        \item \textbf{Open-Meteo} {\scriptsize\itshape lấy lại từ ERA5}
+        \item \textbf{NASA POWER} {\scriptsize\itshape ô lưới thô nhất (0,5°)}
+      \end{enumerate}
+    \end{column}
+    \begin{column}{0.33\textwidth}
+      \noindent\colorbox{hustblue}{\textcolor{white}{\footnotesize\textbf{2~Thiếu thì lấy hạng kế}}}\\[1mm]
+      \scriptsize
+      \textbf{Hà Nội, 7/9/2024 (bão Yagi)}\\[1mm]
+      Nhiệt độ 25,9\,°C $\leftarrow$ \textbf{GHCN} {\scriptsize(hạng 1 có số liệu)}\\
+      Mưa 8,48\,mm $\leftarrow$ \textbf{ERA5}\\
+      Áp suất 989,2\,hPa $\leftarrow$ \textbf{ERA5} {\scriptsize(GHCN thiếu $\to$ hạng 2)}\\[1mm]
+      {\scriptsize\itshape Ngày này: không biến nào bị cờ}
+    \end{column}
+    \begin{column}{0.33\textwidth}
+      \noindent\colorbox{hustblue}{\textcolor{white}{\footnotesize\textbf{3~Lệch nhiều thì gắn cờ}}}\\[1mm]
+      \scriptsize
+      Lệch = (lớn nhất $-$ nhỏ nhất) $\div$ giá trị được chọn\\[1mm]
+      \begin{tabular}{@{}lr@{}}
+        \toprule
+        Biến & Ngưỡng \\
+        \midrule
+        Nhiệt độ & 10\% \\
+        Độ ẩm & 20\% \\
+        Gió & 30\% \\
+        Mưa & 50\% \\
+        Áp suất bề mặt & 2\% \\
+        Áp suất mực biển & 2\% \\
+        \bottomrule
+      \end{tabular}
+    \end{column}
+  \end{columns}
+  \ketluan{\small Kết quả: bảng 856.452 dòng, mỗi giá trị ghi rõ lấy từ nguồn nào + cờ xung đột}
+  \nguon{Đối chiếu đầy đủ 6 biến (gồm cả mưa 91,6\% xung đột) ở Bảng~\ref{tab:survivorship-conflict} báo cáo.}
   \slidenote{4.3}
 \end{frame}
 
@@ -546,15 +596,20 @@
       \end{tabular}
     \end{column}
     \begin{column}{0.54\textwidth}
-      \begin{itemize}\scriptsize\setlength\itemsep{1mm}
-        \item Mục đích: làm mịn trường gió $(u,v)$ giữa lưới ERA5 và trạm, có ràng buộc continuity Navier-Stokes 2D rút gọn. Dữ liệu: 113 trạm, 15--17/6/2021
-        \item Baseline tốt hơn về RMSE, PINN $\lambda{=}0{,}1$ tốt hơn về MAE. Chênh khoảng 1\% trên 22 trạm kiểm tra, một seed
-        \item Lý do có thể: chỉ có 1 snapshot, ràng buộc vật lý cần chuỗi thời gian
-        \item Đã đổi trung bình hướng gió sang trung bình vector $(u,v)$, kết luận không đổi
+      \begin{itemize}\scriptsize\setlength\itemsep{0.8mm}
+        \item \textbf{Trường dữ liệu:} input $(lon,lat)$ chuẩn hoá; output $(u,v)$ -- vận tốc gió Đề-các, đổi
+          từ hướng gió khí tượng. 113 trạm ERA5, 15--17/6/2021, 91 train / 22 test
+        \item \textbf{Hàm mất mát vật lý} (liên tục Navier--Stokes 2D rút gọn, autograd):
+          $\mathcal{L}=\mathcal{L}_{data}+\lambda\overline{(\partial u/\partial x+\partial v/\partial y)^{2}}$
+        \item \textbf{Huấn luyện:} Adam, lr=$10^{-3}$, 300 epoch; Physics Loss giảm mạnh theo $\lambda$ tăng
+          (0,53 $\to$ 0,011) nhưng chỉ bảo toàn khối lượng chặt hơn, không tự làm RMSE tốt hơn
+        \item Baseline ($\lambda{=}0$) khớp dữ liệu tốt nhất về RMSE; PINN $\lambda{=}0{,}1$ tốt hơn về MAE.
+          Chênh khoảng 1\%, một seed -- chưa đủ để kết luận
       \end{itemize}
     \end{column}
   \end{columns}
-  \ketluan{Chưa đủ dữ liệu để kết luận mô hình nào tốt hơn}
+  \ketluan{Baseline khớp RMSE tốt nhất; ràng buộc vật lý chưa đủ mạnh để vượt trên dữ liệu 1 thời điểm}
+  \nguon{Kiến trúc mạng đầy đủ và đồ thị training cong: phụ lục trang 54.}
   \slidenote{5.5}
 \end{frame}
 \begin{frame}{Dashboard}
@@ -1119,6 +1174,38 @@
   \ketluan{\scriptsize Bảng xu hướng (Mann-Kendall + độ dốc Sen) đo CHÍNH khí hậu nền có đang dịch chuyển theo
     thời gian không -- khác z-score, vốn đo một ngày lệch bao nhiêu so với nền cố định}
   \slidenote{55}
+\end{frame}
+
+\begin{frame}{Ghép theo khoá, không theo thứ tự mảng}
+  \ychinh{\small Mọi phép ghép giữa 5 nguồn dùng khoá \texttt{location\_id} + \texttt{timestamp\_utc}, không
+    bao giờ dựa vào vị trí trong mảng API trả về}
+  \begin{columns}[T]
+    \begin{column}{0.52\textwidth}
+      \scriptsize
+      \textbf{Vì sao không ghép theo thứ tự?} Một API có thể trả thiếu, đổi thứ tự, hoặc timeout một phần --
+      ghép theo vị trí mảng sẽ gán sai giá trị cho sai vị trí ngay khi có bất kỳ sai lệch nào.\\[1.5mm]
+      \textbf{Cách làm:} \texttt{scripts/check\_data\_sources.py} so khớp toạ độ trả về với toạ độ đã gửi theo
+      từng điểm, gắn \texttt{location\_id} trước khi lưu; mọi merge sau đó
+      (\texttt{build\_warehouse.py}, \texttt{survivorship.py}) dùng đúng khoá này.\\[1.5mm]
+      \textbf{Bằng chứng:} \texttt{survivorship\_conflict\_by\_source.py} in tỷ lệ xung đột theo khoá
+      vị trí--ngày, không phải số liệu dựng tay.
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \scriptsize
+      \textbf{Nếu một nguồn thiếu/lệch thứ tự:}
+      \begin{itemize}\scriptsize\setlength\itemsep{0.6mm}
+        \item ISD thiếu mưa, GHCN thiếu gió/độ ẩm $\to$ dòng vẫn giữ đúng khoá, biến thiếu là NULL
+        \item 4/26 trạm ISD không có trạm GHCN trong 5\,km $\to$ giữ riêng, không ép ghép
+        \item Trùng bản ghi ISD: loại theo khoá (trạm, thời điểm, loại bản tin), không theo thứ tự dòng trong file
+      \end{itemize}
+      \vskip1mm
+      \textbf{Kết quả đo được:} 0 ca ghép nhầm vị trí phát hiện qua Entity Resolution (kiểm chứng chéo bằng
+      mã WMO, khoá độc lập với toạ độ): 100\%/100\% precision/recall trên 15 cặp có nhãn.
+    \end{column}
+  \end{columns}
+  \ketluan{\scriptsize Đây là điểm cô hỏi sâu nhất ở nhóm khác (ghép theo thứ tự mảng, chưa kiểm chứng) --
+    nhóm đã ghép theo khoá ngay từ khi thiết kế Mediated Schema, không phải sửa chữa sau khi bị hỏi}
+  \slidenote{56}
 \end{frame}
 
 \end{document}

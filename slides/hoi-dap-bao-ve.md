@@ -1,6 +1,6 @@
 # Hỏi đáp dự kiến: bảo vệ cuối kỳ IT5427, Nhóm 16
 
-Đi kèm slide `final-defense.pdf` và kịch bản `kich-ban-bao-ve.md`. Gồm 57 câu, chia 6 nhóm:
+Đi kèm slide `final-defense.pdf` và kịch bản `kich-ban-bao-ve.md`. Gồm 85 câu, chia 7 nhóm:
 
 - [A. Đặc trưng dữ liệu và xử lý](#a-đặc-trưng-dữ-liệu-và-xử-lý-cô-hỏi-nhiều-nhất): cô quan tâm nhất, ai cũng cần nắm
 - [B. Tích hợp](#b-tích-hợp-khái-niệm-môn-học): GAV, Entity Resolution, Survivorship
@@ -8,9 +8,12 @@
 - [D. Phân tích và mô hình](#d-phân-tích-và-mô-hình)
 - [E. Câu hỏi về nhóm](#e-câu-hỏi-về-nhóm)
 - [F. Phụ lục, trang 32–53](#f-phụ-lục-trang-3253-ai-hiểu-chínhphụ-xem-bảng-đầu-kich-ban-bao-vemd): 25 câu riêng cho các trang chỉ mở khi bị hỏi
+- [G. Kiểm chứng tích hợp — đúng kiểu câu cô hay hỏi](#g-kiểm-chứng-tích-hợp--đúng-kiểu-câu-cô-hay-hỏi): 28 câu, soạn
+  từ ghi chép thật buổi bảo vệ Nhóm 15 (cô hỏi rất sâu về nguồn dữ liệu, ghép theo khoá hay theo thứ tự, luật ưu
+  tiên, log đối chiếu) — áp đúng kiểu câu đó vào dữ liệu của nhóm mình
 
 **Cách trả lời:** một câu kết luận trước, rồi số liệu, rồi mở slide nếu cần. Câu nào nhóm chưa làm thì nói thẳng là
-chưa làm, đừng đoán. Số trang là trang trong `final-defense.pdf` (bài chính trang 1–31, Phụ lục trang 32–53).
+chưa làm, đừng đoán. Số trang là trang trong `final-defense.pdf` (bài chính trang 1–31, Phụ lục trang 32–56).
 
 **Lưu ý:** `docs/15-qa-bao-ve.md` là bản cũ, nhiều số đã lỗi thời (RMSE 1,02 °C trên 104 cặp, skew 33,28 %).
 Dùng file này.
@@ -357,3 +360,160 @@ thực hiện và kết quả đánh giá thực nghiệm" mà cô yêu cầu tr
 
 Từ bài giảng Buổi 2 (Mediation & Query reformulation / Schema Alignment). Nhóm áp dụng đúng 6 mức nhưng thay ví
 dụ lý thuyết bằng ví dụ thật đo được trên chính 5 nguồn của đồ án, không chỉ liệt kê định nghĩa suông.
+
+## G. Kiểm chứng tích hợp — đúng kiểu câu cô hay hỏi
+
+Soạn từ ghi chép thật buổi bảo vệ Nhóm 15 (tích hợp thời tiết + chất lượng không khí): cô hỏi rất sâu và liên
+tục về một chủ đề duy nhất — ghép dữ liệu giữa các nguồn có dựa vào giả định không, hay có bằng chứng (khoá, log
+đối chiếu) chứng minh khớp. Nhóm 15 bị hỏi dồn vì ghép theo thứ tự mảng toạ độ, chưa kiểm chứng thứ tự trả về.
+28 câu dưới đây áp đúng kiểu hỏi đó vào dữ liệu thật của nhóm mình — hầu hết đều có bằng chứng sẵn vì nhóm ghép
+theo khoá (`location_id`, `timestamp_utc`) ngay từ đầu, không theo vị trí mảng.
+
+**G1. Dữ liệu 5 nguồn có đều đặn theo khung thời gian cố định không, hay lúc có lúc không?**
+
+Không đều, và nhóm không giả định chúng đều nhau: GHCN theo ngày (1943–2026), ISD theo giờ/METAR-SYNOP
+(2015–2024), ERA5 theo giờ (2020–2024), NASA POWER và Open-Meteo theo giờ hoặc ngày (2020–2024). Mỗi nguồn ghi
+rõ độ phân giải và độ dài riêng trong bảng nguồn dữ liệu, không trộn lẫn.
+
+**G2. Sau khi gộp theo luật ưu tiên, có còn đúng 1 nguồn thời tiết thống nhất không?**
+
+Không phải "1 nguồn duy nhất cho tất cả", mà là 1 giá trị được chọn minh bạch cho từng biến, từng vị trí, từng
+ngày, ghi rõ trong bảng hợp giải (856.452 dòng) nguồn nào được chọn. Vì các nguồn phủ không gian/thời gian khác
+nhau, ép về một nguồn duy nhất sẽ mất dữ liệu ở nơi nguồn đó không phủ tới.
+
+**G3. Quy tắc ưu tiên khi trùng thời điểm là gì, nhóm có xác nhận lại rõ ràng không?**
+
+Rõ ràng và cố định trong code (`SOURCE_PRIORITY`): ISD/GHCN (đo thật) > ERA5 > Open-Meteo > NASA POWER. Không
+phải quy tắc ngầm hiểu, mà là một dict khai báo đầu file `warehouse/survivorship.py`.
+
+**G4. Nguồn khác bản chất (ví dụ một chỉ số phi khí tượng) có nên đi chung luồng ưu tiên với các nguồn khí tượng không?**
+
+Không nên, và nhóm không gặp tình huống này vì cả 5 nguồn đều là khí tượng cùng bản chất vật lý. Nếu có nguồn
+khác bản chất, sẽ phải tách luồng ưu tiên riêng chứ không gộp chung bảng hạng.
+
+**G5. Mỗi vị trí lấy dữ liệu ở điểm nào? Các nguồn có cùng vị trí không, hay lưới khác nhau gây sai lệch?**
+
+Quy về chung một tập toạ độ thật: trạm GHCN/ISD dùng toạ độ vật lý của trạm; ERA5 (lưới 0,25°) được nội suy
+Bilinear về đúng toạ độ đó trước khi so sánh, không so trực tiếp hai lưới khác nhau; NASA POWER/Open-Meteo gọi
+API đúng toạ độ trạm. Tất cả quy về 119 vị trí trong bảng Location.
+
+**G6. Nhóm ghép dữ liệu giữa các nguồn theo thứ tự trả về của API hay theo khoá?**
+
+Theo khoá `location_id` + `timestamp_utc`, không theo vị trí trong mảng trả về. Mọi phép merge trong
+`build_warehouse.py` và `survivorship.py` dùng khoá này, nên API trả thiếu hay đổi thứ tự cũng không gây ghép
+nhầm vị trí.
+
+**G7. Nếu một nguồn trả lệch thứ tự so với yêu cầu thì có ghép nhầm vị trí không?**
+
+Không, vì khoá ghép không dựa vào vị trí mảng. Nhóm đã gặp thật tình huống thiếu biến theo nguồn (ISD không có
+mưa, GHCN không có gió) — dòng vẫn giữ đúng khoá, chỉ biến thiếu là NULL, không lệch dòng.
+
+**G8. Cùng một mốc thời gian, giá trị ở các nguồn có khớp đúng vị trí/đúng trạm không? Có bằng chứng không?**
+
+Có log thật: `warehouse/survivorship_conflict_by_source.py` in ra tỷ lệ xung đột giữa các nguồn theo từng biến
+khi cùng vị trí, cùng ngày (ví dụ nhiệt độ lệch 3,2%, mưa lệch 91,6%). Đây là bảng đối chiếu chứng minh khớp
+theo khoá, không phải giả định.
+
+**G9. Vì sao không ghép đơn giản theo đúng thứ tự toạ độ đã gửi đi cho gọn?**
+
+Vì bất kỳ API nào trả thiếu, đổi thứ tự hay timeout một phần cũng sẽ làm ghép theo thứ tự mảng gán sai giá trị
+cho sai vị trí. Ghép theo khoá qua pandas/Spark merge an toàn với mọi kiểu thiếu dữ liệu đó.
+
+**G10. Luật hợp nhất khi dữ liệu thiếu là gì, có rõ ràng không hay tuỳ biến từng trường hợp?**
+
+Ba quy tắc cố định: ưu tiên nguồn hạng cao nhất có số liệu; nếu thiếu thì lấy hạng kế (ví dụ GHCN thiếu mưa ngày
+Yagi thì lấy ERA5); nếu các nguồn có số liệu nhưng lệch quá ngưỡng thì gắn cờ xung đột chứ không tự chọn. Không
+bao giờ nội suy để lấp khoảng thiếu.
+
+**G11. Vị trí của các nguồn có được kiểm chứng bằng bản đồ thật không, hay chỉ giả định cùng toạ độ?**
+
+Có bản đồ vùng nghiên cứu (phụ lục trang 35) vẽ đúng 119 vị trí theo toạ độ thật trong bảng Location, không vẽ
+minh hoạ giả định.
+
+**G12. Đồng bộ thời gian giữa các nguồn xử lý ra sao, có nguồn nào lệch múi giờ không?**
+
+Có và đã xử lý một phần: GHCN ghi ngày theo giờ địa phương, còn lại dùng UTC; mọi nguồn chuẩn hoá về UTC khi
+nạp. Riêng ranh giới NGÀY của GHCN (lệch 7–8 giờ so với UTC) nhóm ghi rõ là hạn chế chưa xử lý triệt để, không
+giấu.
+
+**G13. Nhóm có log nào để truy vết lại quá trình hợp nhất khi có nghi ngờ không?**
+
+Có: cột `qc_flag` ghi lý do mỗi giá trị bị đặt NULL (ví dụ `ISD_QC:SLP=2`); bảng Survivorship ghi cột nguồn được
+chọn và cờ xung đột cho từng biến. Truy vết được, không phải hộp đen.
+
+**G14. Nếu thêm một nguồn thứ sáu, có phải sửa lại toàn bộ luồng ưu tiên không?**
+
+Không, chỉ thêm một dòng trong `SOURCE_PRIORITY` và một hàm parse mới; Entity Resolution và Survivorship không
+hard-code số nguồn nên không phải sửa logic đã có.
+
+**G15. Nhóm giả định hay đã kiểm chứng thật rằng API trả đúng dữ liệu cho đúng trạm yêu cầu?**
+
+Đã kiểm chứng: `scripts/check_data_sources.py` gọi thật từng nguồn, so khớp toạ độ trả về với toạ độ đã gửi
+trước khi tải hàng loạt, kết quả lưu ở `data_samples/`.
+
+**G16. Hai nguồn lệch đơn vị thì nhóm phát hiện bằng cách nào, không phải chỉ đoán?**
+
+Đọc đơn vị trực tiếp từ metadata của từng nguồn (`hourly_units` Open-Meteo, thuộc tính NetCDF ERA5), không viết
+cứng; mỗi phép đổi đơn vị có test riêng — lỗi gió km/h bị phóng đại 3,6 lần trước đây chính là do viết cứng đơn
+vị, đã sửa và thêm test.
+
+**G17. Nếu được yêu cầu mở code ngay để xem đoạn xử lý ưu tiên nguồn, nhóm mở file nào?**
+
+`warehouse/survivorship.py`, có `SOURCE_PRIORITY` và `CONFLICT_THRESHOLD_PCT` khai báo ngay đầu file. Xem mục
+"Mở nhanh khi trình bày" trong `kich-ban-bao-ve.md` để mở đúng file trong một lệnh.
+
+**G18. Ghép trạm (Entity Resolution) có thật sự theo khoá như cô yêu cầu không, hay vẫn có yếu tố giả định vị trí?**
+
+Khoá ghép là toạ độ thật (khoảng cách Haversine), kiểm chứng độc lập bằng mã WMO — một khoá khác, không liên
+quan toạ độ. Hai khoá độc lập cho cùng kết quả 100% precision/recall trên 15 cặp có nhãn.
+
+**G19. Một trạm không tìm được trạm tương ứng trong bán kính ghép thì xử lý thế nào, có ép ghép không?**
+
+Không ép ghép: 4/26 trạm ISD không có trạm GHCN nào trong 5\,km thì giữ riêng, không gán nhầm sang trạm gần nhất
+ngoài ngưỡng.
+
+**G20. Bản ghi trùng lặp của một nguồn loại theo khoá gì, có phải theo thứ tự dòng trong file không?**
+
+Theo khoá (trạm, thời điểm, loại bản tin METAR/SYNOP), ưu tiên giữ METAR rồi SYNOP, lấy giá trị không rỗng —
+không loại theo thứ tự xuất hiện trong file. Giảm đúng 393.155 bản ghi trùng trong số 22,7% bản ghi ISD trùng.
+
+**G21. Nguồn nào khớp với trạm đo thật nhất? Đo bằng số hay chỉ đánh giá định tính?**
+
+Đo bằng số: ERA5 sau nội suy có RMSE nhiệt độ 1,14\,°C, gió 1,05\,m/s so với trạm trên 108.542 cặp. Chính con số
+này quyết định ERA5 xếp hạng 2 (sau trạm đo thật) trong luật ưu tiên, không phải nhận định chủ quan.
+
+**G22. Hai nguồn trong ngưỡng cho phép có tự động coi là khớp không, hay vẫn gắn cờ để theo dõi?**
+
+Bảng vẫn lưu trạng thái cờ xung đột (true/false) dù trong hay ngoài ngưỡng — không ẩn đi chỉ vì nằm trong
+ngưỡng, người dùng luôn thấy được trạng thái thật.
+
+**G23. Độ phân giải không gian khác nhau giữa các nguồn (lưới 0,25° vs 0,5° vs điểm trạm) ảnh hưởng gì tới luật ưu tiên?**
+
+Có ảnh hưởng trực tiếp và nhất quán: NASA POWER lưới thô nhất (0,5°) xếp hạng thấp nhất; ERA5 mịn hơn (0,25°)
+xếp hạng 2. Độ phân giải càng thô thì hạng ưu tiên càng thấp, phản ánh đúng mức tin cậy không gian.
+
+**G24. Timestamp giữa các nguồn có cùng định dạng khi so sánh trực tiếp không, hay phải quy đổi?**
+
+Phải quy đổi: mọi nguồn chuẩn hoá về `timestamp_utc` trước khi so sánh hay ghép, không so trực tiếp timestamp
+thô (vốn khác định dạng/múi giờ giữa các nguồn).
+
+**G25. Khi API trả mảng nhiều điểm trong một lần gọi, nhóm xác nhận đúng thứ tự thế nào, hay giả định API trả đúng thứ tự gửi đi?**
+
+`scripts/check_data_sources.py` so khớp toạ độ trả về với toạ độ gửi đi theo từng điểm trước khi gắn
+`location_id`, không giả định thứ tự — dù API trả đúng hay sai thứ tự, dữ liệu vẫn gắn đúng khoá trước khi vào
+kho.
+
+**G26. Toạ độ lat/lon trong bảng Location có ý nghĩa gì trong tích hợp, hay chỉ là cột mô tả?**
+
+Là khoá không gian chính, dùng ở ba bước: Entity Resolution (khoảng cách Haversine để ghép GHCN–ISD), nội suy
+ERA5 (Bilinear đúng lat/lon trạm), và đối chứng dị thường (tìm trạm lân cận trong bán kính 200\,km).
+
+**G27. Mục tiêu và công việc của từng người có đo được rõ ràng không, hay mô tả chung chung?**
+
+Đo được: Quang (M1 — kho đủ 5 nguồn đúng phạm vi), Lương (M2 — GAV/Entity Resolution/Survivorship có số đo),
+Nghĩa (M3 tối ưu Spark, M4 dị thường, M5 dashboard) — mỗi mục tiêu có ngưỡng đặt trước khi làm.
+
+**G28. Nếu cô yêu cầu xem ngay bảng đối chiếu chứng minh hai nguồn khớp nhau, nhóm đưa ra bằng chứng gì?**
+
+Bảng Survivorship (856.452 dòng, cột nguồn được chọn + cờ xung đột) và log `survivorship_conflict_by_source.py`
+(tỷ lệ xung đột theo biến) — cả hai đều tính trực tiếp từ kho, không phải bảng dựng tay để minh hoạ.

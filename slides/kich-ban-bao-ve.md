@@ -2,10 +2,17 @@
 
 **Người nghe:** hội đồng IT5427 (cô Vũ Tuyết Trinh). **Mục đích:** bảo vệ project cuối kỳ (60% điểm).
 **Thời lượng:** 30 phút gồm cả hỏi đáp. Bài chính khoảng 20 phút, để lại khoảng 10 phút hỏi đáp.
-**Slide:** `final-defense.pdf`, bài chính trang 1–31, Phụ lục trang 32–55 (chỉ mở khi bị hỏi).
+**Slide:** `final-defense.pdf`, bài chính trang 1–31, Phụ lục trang 32–56 (chỉ mở khi bị hỏi).
 
 **Cô quan tâm nhất:** dữ liệu thu thập có đặc trưng gì, yêu cầu xử lý gì (thiếu, ngoài khoảng, đơn vị không đồng
-nhất…). Phần 3 trả lời thẳng câu này; đừng nói vội phần 3.
+nhất…), và đặc biệt — theo đúng kiểu cô hỏi nhóm 15 — **ghép dữ liệu giữa các nguồn có dựa vào giả định không,
+hay có bằng chứng (khoá, log đối chiếu) chứng minh khớp**. Phần 3 trả lời thẳng câu đầu; mục G trong
+`hoi-dap-bao-ve.md` trả lời thẳng câu thứ hai. Đừng nói vội phần 3.
+
+**Mở nhanh khi trình bày (1 lệnh):** nếu cô yêu cầu "mở code ra xem" hoặc xem dashboard, chạy ngay
+`bash scripts/mo_demo_bao_ve.sh` từ thư mục gốc repo — mở sẵn slide PDF, 7 file source chính theo đúng thứ tự
+pipeline (Entity Resolution → Survivorship → Warehouse → Anomaly → PINN → parser → dashboard) trong VS Code, và
+chạy luôn Dashboard Streamlit tại `localhost:8501`.
 
 **Chia người nói:**
 
@@ -52,6 +59,7 @@ trang phụ lục):
 | 53 | Mở rộng ra toàn cầu | Nghĩa | Lương |
 | 54 | Kiến trúc PINN và huấn luyện | Nghĩa | Lương |
 | 55 | Các loại dị thường khí hậu và bảng xu hướng | Nghĩa | Lương |
+| 56 | Ghép theo khoá, không theo thứ tự mảng | Lương | Quang |
 
 Trang 32 chỉ là trang ngăn mục, không cần ai giải thích riêng. "Hiểu chính" ưu tiên người thật sự làm ra nội
 dung đó (Quang: ingestion/QC; Lương: schema/ER/Survivorship; Nghĩa: Spark/Kafka/PINN/dashboard), không nhất
@@ -352,8 +360,9 @@ lớn.
 
 **Trên slide**
 
-Lược đồ `WeatherObs(...)`; ví dụ view NASA POWER; PIVOT GHCN, PARSE ISD; chọn GAV vì số nguồn cố định. Toàn vẹn tham
-chiếu 100%.
+"Bước 1/3" (thanh điều hướng 3 bước ở đầu mỗi slide Phần 4). Lược đồ `WeatherObs(...)`; ví dụ PIVOT GHCN
+(48820|7/9|TMAX|317 → 1 dòng), PARSE ISD (TMP="+0250,1" → nhiệt độ 25,0°C); chọn GAV vì số nguồn cố định. Toàn
+vẹn tham chiếu 100%.
 
 **Lời nói**
 > Em là Lương, em trình bày phần tích hợp.
@@ -377,11 +386,13 @@ chiếu 100%.
 
 **Trên slide**
 
+"Bước 2/3". Ví dụ cụ thể: trạm Nội Bài có GHCN VMM00048820 và ISD 48820099999 — máy tính thấy 2 trạm khác nhau.
 22/26 cặp khớp, khoảng cách trung bình 0,53 km; láng giềng gần nhất Haversine ngưỡng 5 km; precision/recall
 100%/100% trên 15 cặp có nhãn.
 
 **Lời nói**
-> GHCN và ISD không có mã chung. Nhóm ghép theo khoảng cách: với mỗi trạm ISD, tìm trạm GHCN gần nhất theo khoảng cách
+> GHCN và ISD không có mã chung. Ví dụ trạm Nội Bài: GHCN ghi VMM00048820, ISD ghi 48820099999, máy tính thấy đây là
+> hai trạm riêng biệt. Nhóm ghép theo khoảng cách: với mỗi trạm ISD, tìm trạm GHCN gần nhất theo khoảng cách
 > Haversine, ngưỡng 5 km.
 >
 > Kết quả ghép được 22 trên 26 trạm. Nhiều cặp cách nhau đúng 0 km, vì hai cơ quan dùng chung toạ độ WMO gốc.
@@ -397,20 +408,23 @@ chiếu 100%.
 
 **Trên slide**
 
-Hạng nguồn: ISD/GHCN > ERA5 > Open-Meteo > NASA POWER; ngưỡng xung đột theo biến; tỷ lệ xung đột 6 biến; bảng hợp
-giải 856.452 dòng.
+"Bước 3/3", chia 3 cột: (1) hạng nguồn ISD/GHCN > ERA5 > Open-Meteo > NASA POWER; (2) ví dụ thật Hà Nội 7/9/2024
+(bão Yagi) — nhiệt độ lấy từ GHCN (hạng 1 có số liệu), mưa và áp suất lấy từ ERA5 (vì GHCN thiếu, tụt xuống hạng
+2); (3) bảng ngưỡng gắn cờ theo biến. Bảng hợp giải 856.452 dòng.
 
 **Lời nói**
 > Với mỗi vị trí, mỗi ngày, nếu nhiều nguồn cùng có giá trị thì lấy nguồn hạng cao nhất. Trạm đo trực tiếp đứng đầu,
 > rồi đến ERA5, Open-Meteo, NASA POWER.
 >
+> Ví dụ thật ngày bão Yagi, 7/9/2024 tại Hà Nội: nhiệt độ 25,9 độ lấy từ GHCN vì hạng 1 có số liệu; nhưng mưa và áp
+> suất GHCN lại thiếu, nên tụt xuống lấy từ ERA5, hạng 2. Ngày này không biến nào bị gắn cờ xung đột.
+>
 > Nếu các nguồn lệch quá ngưỡng thì gắn cờ xung đột. Ngưỡng đặt riêng cho từng biến, ví dụ nhiệt độ 10%, mưa 50%,
 > vì mưa tự nhiên đã biến động mạnh.
 >
-> Bảng bên phải là tỷ lệ xung đột đo được. Áp suất mực biển gần như không lệch, 0%. Mưa lệch tới 91,6%, vì mỗi
-> nguồn tích luỹ mưa theo chu kỳ khác nhau.
->
-> Kết quả là bảng hợp giải 856 nghìn dòng, mỗi vị trí mỗi ngày một dòng, ghi rõ giá trị lấy từ nguồn nào.
+> Kết quả là bảng hợp giải 856 nghìn dòng, mỗi vị trí mỗi ngày một dòng, ghi rõ giá trị lấy từ nguồn nào. Mưa là
+> biến xung đột nhiều nhất, tới 91,6%, vì mỗi nguồn tích luỹ mưa theo chu kỳ khác nhau — chi tiết đủ 6 biến có
+> trong báo cáo nếu cô hỏi thêm.
 
 **Chuyển ý**
 > Phần tiếp theo, Nghĩa trình bày xử lý và phân tích trên kho này.
@@ -821,5 +835,24 @@ Không phải kịch bản phải thuộc — chỉ mở khi hội đồng hỏi
 >
 > Bảng xu hướng khác với z-score ở chỗ nó đo chính khí hậu nền có đang dịch chuyển theo thời gian hay không,
 > dùng kiểm định Mann-Kendall cho ý nghĩa thống kê và độ dốc Sen cho tốc độ thay đổi mỗi thập kỷ.
+
+## 56. Ghép theo khoá, không theo thứ tự mảng
+
+**Lời nói**
+> **Chính:** Lương · **Phụ:** Quang.
+>
+> Mọi phép ghép giữa năm nguồn đều dùng khoá location_id cộng timestamp_utc, không bao giờ dựa vào vị trí trong
+> mảng mà API trả về. Lý do: một API có thể trả thiếu, đổi thứ tự, hoặc timeout một phần, ghép theo vị trí mảng
+> sẽ gán sai giá trị cho sai vị trí ngay khi có bất kỳ sai lệch nào.
+>
+> Cách làm cụ thể: check_data_sources.py so khớp toạ độ trả về với toạ độ đã gửi theo từng điểm trước, gắn
+> location_id rồi mới lưu. Mọi bước sau, từ build_warehouse đến survivorship, đều merge theo đúng khoá này.
+>
+> Khi một nguồn thiếu hoặc lệch, dữ liệu vẫn an toàn: ISD thiếu mưa hay GHCN thiếu gió thì dòng vẫn giữ đúng
+> khoá, chỉ biến đó là NULL. Bốn trạm ISD không tìm được trạm GHCN trong bán kính thì giữ riêng, không ép ghép.
+>
+> Bằng chứng đo được: Entity Resolution kiểm chứng chéo bằng mã WMO, một khoá hoàn toàn độc lập với toạ độ, vẫn
+> cho precision và recall đều 100% trên 15 cặp có nhãn — tức là ghép theo khoá vị trí và ghép theo khoá WMO cho
+> ra cùng kết quả, không phải trùng hợp ngẫu nhiên.
 
 Không cắt phần 3: đây là phần cô hỏi trực tiếp.
