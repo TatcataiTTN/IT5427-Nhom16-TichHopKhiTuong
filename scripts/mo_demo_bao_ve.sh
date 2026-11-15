@@ -43,7 +43,7 @@ fi
 if [ "${1:-}" != "--no-terminals" ]; then
   banner "Mo san cac cua so Terminal cho tung kich ban demo"
   open_term() {  # $1 = tieu de, $2 = script
-    local cmd="cd '$ROOT'; clear; printf '\\033]0;%s\\007' '$1'; echo '$1'; echo 'Lenh: bash scripts/demo/$2'; read -p 'Nhan Enter de chay...' _; bash scripts/demo/$2"
+    local cmd="cd '$ROOT'; clear; printf '\\033]0;%s\\007' '$1'; echo '$1'; echo 'Lenh: bash scripts/demo/$2'; printf 'Nhan Enter de chay... '; read _; bash scripts/demo/$2"
     cmd="${cmd//\\/\\\\}"; cmd="${cmd//\"/\\\"}"
     osascript -e "tell application \"Terminal\" to do script \"$cmd\"" >/dev/null
   }
