@@ -1096,23 +1096,83 @@ cả bốn mức dữ liệu. Kết luận: ở quy mô dữ liệu hiện có (
 chuẩn bị cho phạm vi đầy đủ hơn (toàn bộ lưới ERA5 thay vì 113 điểm đã nội suy, Mục~9).
 
 \section{Mô hình học máy ràng buộc vật lý (PINN)}
+\label{sec:pinn-full}
 
-Nhóm huấn luyện hai mô hình PINN trên dữ liệu thật: (i) dự báo độ ẩm tương đối từ nhiệt độ và điểm
-sương, dùng phương trình Clausius--Clapeyron làm ràng buộc vật lý, trên 5.000 bản ghi ISD thật
-(hàm mất mát giảm từ 1068 xuống 2,9, sai số tuyệt đối trung bình cuối cùng 1,07 điểm phần trăm);
-(ii) trường gió hai chiều trên 113 trạm ERA5 (gió trung bình 15--17/6/2021), dùng phương trình liên tục (continuity, dạng rút gọn
-của Navier--Stokes) làm ràng buộc, kết hợp với quét bốn giá trị hệ số cân bằng $\lambda \in
-\{0;\,0{,}01;\,0{,}1;\,1{,}0\}$.
+Nhóm huấn luyện hai mô hình PINN độc lập trên dữ liệu thật, cả hai đều là mạng nơ-ron truyền thẳng
+(fully-connected) nhỏ -- không dùng kiến trúc sâu, vì bài toán chỉ có 1--2 biến đầu vào liên tục và
+mục tiêu là minh chứng kỹ thuật physics loss, không phải tối ưu một mô hình sản xuất.
 
-Với mô hình (ii), kết quả so sánh trên tập kiểm tra giữ lại (22/113 trạm) cho thấy mô hình hồi quy
-thuần không ràng buộc vật lý ($\lambda=0$) đạt RMSE 1,0473 -- thấp hơn mô hình PINN tốt nhất
-($\lambda=0{,}1$, RMSE 1,0577): ở quy mô dữ liệu hiện tại, bài toán chỉ có một lát cắt không-thời gian duy
-nhất (không có chuỗi thời gian), trong khi ràng buộc liên tục phát huy lợi thế rõ rệt hơn khi có
-nhiều điểm lưới dày đặc hoặc chuỗi quan sát theo thời gian. Giá trị của physics loss ở quy mô này
-nằm ở việc đảm bảo tính hợp lý vật lý (gần đúng bảo toàn khối lượng) cho đầu ra mô hình, không
-phải ở việc tối ưu sai số bình phương trung bình. Kết quả huấn luyện đã được xác minh khả năng tái
-lập: cài đặt lại môi trường hoàn toàn mới từ \texttt{requirements.txt} và chạy lại cho kết quả RMSE
-giống hệt tới bốn chữ số thập phân.
+\subsection{Mô hình (i): độ ẩm tương đối từ điểm sương}
+
+\textbf{Bài toán.} Nhiều bản tin ISD chỉ có điểm sương (dew point), không có độ ẩm tương đối (RH\%)
+trực tiếp. \texttt{ingestion/parsers.py::clausius\_clapeyron\_rh()} đã tính RH\% bằng công thức
+Clausius--Clapeyron trực tiếp cho pipeline sản xuất (Mục~3.2) -- mô hình (i) là một \emph{thí
+nghiệm bổ sung}, đi xa hơn một bước: huấn luyện một mạng nơ-ron dự đoán RH\% từ $(T, T_d)$, có
+physics loss ép mạng tuân thủ đúng phương trình đó, thay vì chỉ khớp nhãn thuần tuý.
+
+\textbf{Kiến trúc} (\texttt{model/pinn\_rh\_from\_dewpoint.py::RHNet}): 2 đầu vào $(T, T_d)$ $\to$
+\texttt{Linear(2,16)} $\to$ Tanh $\to$ \texttt{Linear(16,16)} $\to$ Tanh $\to$ \texttt{Linear(16,1)}
+$\to$ Sigmoid $\to$ nhân 100 -- tổng cộng 2 lớp ẩn, 16 nơ-ron mỗi lớp, kích hoạt Tanh (lớp ẩn) và
+Sigmoid (đầu ra, ép về khoảng $(0,100)\%$ đúng miền giá trị vật lý của RH\%).
+
+\textbf{Phương trình vật lý.} Áp suất hơi bão hoà theo Clausius--Clapeyron (xấp xỉ Magnus):
+\begin{equation}
+e_s(T) = 6{,}112 \exp\!\left(\frac{17{,}67\,T}{T + 243{,}5}\right) \quad \text{(hPa, } T \text{ tính bằng } ^\circ\text{C)}
+\end{equation}
+Độ ẩm tương đối theo định nghĩa là $\mathrm{RH} = 100 \times e(T_d)/e_s(T)$, với $e(T_d) = e_s(T_d)$
+(áp suất hơi thực bằng áp suất hơi bão hoà tại điểm sương). Physics loss ép đầu ra mạng thoả định
+nghĩa này:
+\begin{equation}
+\mathcal{L}_{phys} = \frac{1}{N}\sum_i \left[\left(\frac{\widehat{\mathrm{RH}}_i}{100}\, e_s(T_i) - e_s(T_{d,i})\right)^2\right] \Big/ \overline{e_s(T_d)}^2, \qquad
+\mathcal{L} = \mathcal{L}_{data} + 0{,}1\,\mathcal{L}_{phys}
+\end{equation}
+(chuẩn hoá về không thứ nguyên bằng bình phương trung bình $e_s(T_d)$ để physics loss không bị áp
+suất hơi -- vốn có đơn vị hPa -- áp đảo thang đo).
+
+\textbf{Huấn luyện và kết quả.} Adam, tốc độ học $5\times10^{-3}$, 200 epoch, trên 5.000 bản ghi ISD
+thật (nhãn RH\% lấy trực tiếp từ công thức C-C vì ISD không có RH\% đo trực tiếp để đối chiếu --
+mục đích là kiểm chứng physics loss hội tụ đúng, không phải đánh giá so với ground truth độc lập).
+Hàm mất mát giảm từ 1068 xuống 2,9; sai số tuyệt đối trung bình cuối cùng 1,07 điểm phần trăm RH --
+\textbf{kết quả tốt cho mục đích minh chứng kỹ thuật}, nhưng nhóm không coi đây là đóng góp thay thế
+công thức trực tiếp (vốn rẻ hơn, chính xác tuyệt đối, và đã dùng trong pipeline sản xuất).
+
+\subsection{Mô hình (ii): trường gió hai chiều}
+
+\textbf{Kiến trúc} (\texttt{model/pinn\_wind\_field\_v2.py::WindFieldNet}): 2 đầu vào $(lon, lat)$ đã
+chuẩn hoá $\to$ \texttt{Linear(2,32)} $\to$ Tanh $\to$ \texttt{Linear(32,32)} $\to$ Tanh $\to$
+\texttt{Linear(32,2)} $\to$ đầu ra $(u,v)$ -- 2 lớp ẩn, 32 nơ-ron mỗi lớp, kích hoạt Tanh (không có
+hàm kích hoạt ở lớp ra vì $(u,v)$ là vận tốc, không bị ràng buộc miền giá trị).
+
+\textbf{Phương trình vật lý} (liên tục, dạng rút gọn 2D của Navier--Stokes -- bảo toàn khối lượng
+cho chất lỏng không nén):
+\begin{equation}
+\frac{\partial u}{\partial x} + \frac{\partial v}{\partial y} = 0,
+\qquad
+\mathcal{L}_{phys} = \overline{\left(\frac{\partial u}{\partial x} + \frac{\partial v}{\partial y}\right)^{2}},
+\qquad
+\mathcal{L} = \mathcal{L}_{data} + \lambda\,\mathcal{L}_{phys}
+\end{equation}
+với đạo hàm riêng tính bằng tự động vi phân (\texttt{torch.autograd.grad}) hai lần qua chính đồ thị
+tính toán của mạng, không xấp xỉ sai phân hữu hạn.
+
+\textbf{Huấn luyện.} Adam, tốc độ học $10^{-3}$, 300 epoch, trên 113 trạm có gió ERA5 trung bình vector
+15--17/6/2021 (91 trạm luyện, 22 trạm kiểm tra giữ lại, seed cố định), quét bốn giá trị hệ số cân
+bằng $\lambda \in \{0;\,0{,}01;\,0{,}1;\,1{,}0\}$ để so sánh.
+
+\textbf{Kết quả, nói thẳng tốt hay tệ.} Trên tập kiểm tra giữ lại, mô hình hồi quy thuần không ràng
+buộc vật lý ($\lambda=0$) đạt RMSE \textbf{1,0473} -- \emph{tốt hơn} mô hình PINN tốt nhất
+($\lambda=0{,}1$, RMSE 1,0577). Theo dõi quá trình huấn luyện: Data Loss hội tụ gần như giống hệt
+nhau giữa hai $\lambda$ (ràng buộc vật lý không phá hỏng việc khớp dữ liệu), nhưng Physics Loss ở
+$\lambda=0{,}1$ \emph{không} giảm dần về 0 như kỳ vọng trực giác -- nó tăng từ $\approx$0,002 lên
+$\approx$0,14 rồi mới chững lại, vì mạng khởi tạo gần như hằng số (độ phân kỳ gần 0 một cách ngẫu
+nhiên, không phải vì bảo toàn khối lượng), và khi mạng học được biến thiên không gian thật của dữ
+liệu thì độ phân kỳ xuất hiện, trong khi $\lambda=0{,}1$ còn quá yếu để ép nó về 0. Kết luận trung
+thực: \textbf{ở quy mô dữ liệu hiện tại (1 lát cắt không-thời gian, không có chuỗi thời gian), PINN
+chưa vượt được baseline hồi quy thuần}. Giá trị của physics loss ở quy mô này nằm ở việc đảm bảo
+tính hợp lý vật lý cho đầu ra mô hình, không phải ở việc tối ưu sai số bình phương trung bình -- đây
+là câu hỏi mở, không phải đóng góp đã khẳng định được (xem thêm Mục~\ref{sec:contributions}).
+Kết quả huấn luyện đã được xác minh khả năng tái lập: cài đặt lại môi trường hoàn toàn mới từ
+\texttt{requirements.txt} và chạy lại cho kết quả RMSE giống hệt tới bốn chữ số thập phân.
 
 \textit{Cập nhật 10/11/2026:} một thành viên nhóm (Ngô Văn Quang) phát hiện lỗi thống kê trong bước
 tiền xử lý: bản trước lấy trung bình cộng trực tiếp hướng gió (độ) theo trạm trước khi đổi sang
@@ -1120,6 +1180,27 @@ vector $(u,v)$ -- sai với đại lượng vòng tròn (trung bình cộng $350
 $180^\circ$, ngược hướng thật). Đã sửa bằng cách đổi từng bản ghi sang $(u,v)$ Decac trước, rồi mới
 lấy trung bình vector theo trạm. Số liệu RMSE/MAE trong đoạn trên đã được cập nhật theo kết quả sau
 khi sửa; kết luận (baseline thắng về RMSE thuần) không đổi.
+
+\subsection{Mức độ toàn diện: PINN giải quyết được bao nhiêu trường dữ liệu?}
+
+Trả lời thẳng: \textbf{không toàn diện, và nhóm không coi đây là hạng mục đã hoàn chỉnh.} Lược đồ
+chung \texttt{WeatherObs} có 12 trường khí tượng số (Mục~3.2); hai mô hình PINN ở trên chỉ chạm tới
+\textbf{2 trong 12 trường} -- \texttt{rh\_pct} (mô hình i, và chỉ như một thí nghiệm song song với
+công thức trực tiếp đã dùng trong sản xuất) và \texttt{wind\_speed\_ms}/\texttt{wind\_dir\_deg} (mô
+hình ii, gộp thành một bài toán trường vector). Mười trường còn lại
+(\texttt{temp\_c}, \texttt{dewpoint\_c}, \texttt{precip\_mm}, hai cột áp suất, \texttt{solar\_rad\_wm2},
+\texttt{cloud\_cover\_pct}, \texttt{soil\_temp\_c}, \texttt{soil\_moist\_m3m3}) hoàn toàn không có
+thành phần PINN -- nội suy không gian cho các trường đó (khi cần) dùng Bilinear thuần tuý (Mục~6.6),
+không có ràng buộc vật lý nào được thử. Lý do có chủ đích, không phải thiếu sót bị bỏ quên: kế
+hoạch thực hiện (Mục~2.3, 5.3) xác định PINN là \emph{hạng mục tuỳ chọn nâng cao, có phương án lùi
+rõ ràng}, không phải mục tiêu bắt buộc (Mục~2.4) -- với nguồn lực ba người cho một học kỳ, nhóm ưu
+tiên làm đúng và đủ sâu hai trường hợp có lý do vật lý rõ ràng nhất (độ ẩm thiếu số đo trực tiếp;
+trường gió cần làm mịn giữa lưới và trạm) thay vì dàn trải PINN cho mọi trường một cách hình thức.
+PINN ở đây cũng \textbf{chưa giải thích được hết} ngay cả trong phạm vi hai trường đã chọn: mô hình
+(ii) chưa trả lời được câu hỏi vì sao ràng buộc vật lý không thắng baseline (giả thuyết về thiếu
+chiều thời gian chưa được kiểm chứng bằng thực nghiệm thêm dữ liệu chuỗi thời gian), và mô hình (i)
+chưa được đối chiếu với bất kỳ phép đo RH\% độc lập nào ngoài chính công thức sinh ra nhãn huấn
+luyện. Hướng mở rộng cụ thể đã ghi ở Mục~\ref{sec:future-work}.
 
 \section{Hạ tầng tính toán phân tán}
 
@@ -1471,6 +1552,7 @@ thực hiện.
 Sản phẩm cuối cùng của đề tài là một kho dữ liệu khí tượng đã chuẩn hoá cho khu vực Đông Nam Á, có thể tái sử dụng cho nhiều bài toán phân tích khác nhau thay vì chỉ phục vụ một ứng dụng đơn lẻ. Trên nền kho dữ liệu này, nhóm đã cài đặt phát hiện dị thường khí hậu theo khu vực/thời điểm, đối chứng với ba sự kiện thật (Mục~6.8--6.10). Thống kê hỗ trợ nông nghiệp/năng lượng tái tạo và khuyến nghị khung giờ bay UAV an toàn dựa trên dự báo gió/mưa là hai ứng dụng khác mà kho dữ liệu đủ khả năng phục vụ, nhưng nhóm chưa cài đặt trong phạm vi đồ án này -- xem hướng phát triển ở Chương~9.
 
 \section{Đóng góp về phương pháp}
+\label{sec:contributions}
 
 Đề tài không đề xuất kỹ thuật lý thuyết mới, mà đóng góp một trường hợp áp dụng và kiểm chứng có hệ thống các kỹ thuật tích hợp dữ liệu lớn đã được thiết lập (Chương 2) trên một miền dữ liệu có đặc điểm dị biệt không-thời gian rõ nét hơn hẳn các ví dụ minh hoạ dạng bảng quan hệ thường gặp trong tài liệu gốc. Cụ thể, đề tài minh chứng bằng số liệu thực nghiệm: (i) cách một mediated schema GAV đơn giản vẫn xử lý được năm nguồn có tới ba dạng cấu trúc cú pháp khác nhau nếu có bước tiền xử lý PIVOT/PARSE tường minh; (ii) cách tách riêng hai cột \texttt{pressure\_surface\_hpa} và \texttt{pressure\_msl\_hpa} ngay từ bước thiết kế Mediated Schema (Mục~3.2) tránh được lỗi gộp nhầm hai đại lượng vật lý khác nhau (áp suất bề mặt và áp suất mực nước biển); quy tắc Survivorship dựa trên xếp hạng độ tin cậy nguồn (thay vì trung bình cộng ngây thơ, Mục~3.3) sau đó xử lý đúng xung đột giá trị giữa các nguồn đo cùng một đại lượng đã được tách đúng. Về ranh giới giữa nội suy không gian thông thường và ràng buộc vật lý (PINN, Mục~6.5), kết quả hiện tại \emph{chưa} cho thấy PINN vượt baseline hồi quy thuần ở quy mô dữ liệu một lát cắt không-thời gian đang có -- đây là câu hỏi mở, không phải đóng góp đã khẳng định được.
 
