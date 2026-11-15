@@ -7,18 +7,33 @@
 **Cô quan tâm nhất:** dữ liệu thu thập có đặc trưng gì, yêu cầu xử lý gì (thiếu, ngoài khoảng, đơn vị không đồng
 nhất…). Phần 3 trả lời thẳng câu này; đừng nói vội phần 3.
 
-**Chia người nói** (theo phân công trong deck cũ, chỉnh lại nếu nhóm chia khác):
+**Chia người nói:**
 
 | Phần | Nội dung | Người nói | Slide (trang) | Thời lượng |
 |---|---|---|---|---|
 | 0 | Mở đầu | Quang | 1–2 | 0:30 |
 | 1 | Đặt vấn đề | Quang | 3–5 | 2:00 |
 | 2 | Mục tiêu, dữ liệu và kiến trúc | Quang | 6–9 | 3:00 |
-| 3 | Đặc trưng dữ liệu và yêu cầu xử lý | Quang | 10–16 | 6:00 |
-| 4 | Tích hợp dữ liệu | Lương | 17–20 | 3:00 |
-| 5 | Xử lý và phân tích | Nghĩa | 21–27 | 5:00 |
+| 3 | Đặc trưng dữ liệu và yêu cầu xử lý | Lương | 10–16 | 6:30 |
+| 4 | Tích hợp dữ liệu | Nghĩa | 17–20 | 3:00 |
+| 5 | Xử lý và phân tích | Nghĩa | 21–27 | 5:15 |
 | 6 | Kết luận | Nghĩa | 28–31 | 1:30 |
-| | **Tổng bài chính** | | **31 trang** | **khoảng 21 phút** |
+| | **Tổng bài chính** | | **31 trang** | **khoảng 21:45** |
+
+Quang: 5:30 (slide 1–9). Lương: 6:30 (slide 10–16). Nghĩa: 9:45 (slide 17–31) — nặng nhất, vì gộp cả phần
+tích hợp lẫn xử lý/phân tích/kết luận.
+
+**Phụ lục (trang 32–53), ai kiểm soát/giải thích nếu hội đồng hỏi** — theo đúng phần chính trên slide mà mỗi
+phụ lục mở rộng ra:
+
+| Người | Trang phụ lục |
+|---|---|
+| Quang (mở rộng Phần 1–2) | 33 Dữ liệu nằm ở năm nguồn khác nhau, 34 Năm nguồn dữ liệu, 35 Vùng nghiên cứu, 36 Quy mô kho sau tích hợp, 38 Tải dữ liệu theo phạm vi đề cương, 41 Lỗi số liệu trong pipeline |
+| Lương (mở rộng Phần 3) | 37 Dữ liệu thô trước chuẩn hoá, 39 Tỷ lệ dữ liệu bị QC can thiệp, 40 Chọn IQR thay cho Z-score, 46 Phát hiện trôi cảm biến, 47 Tương quan và PCA |
+| Nghĩa (mở rộng Phần 4–6) | 42 Chiến lược partition, 43 Cụm Spark và Kafka, 44 Mưa cực đoan khi bão Yagi, 45 Xu hướng nhiệt độ dài hạn, 48 Các panel của dashboard, 49 Panel 1: tổng quan tích hợp, 50 Tiến độ theo từng người, 51 Sản phẩm của từng người theo mốc, 52 Giới hạn hạ tầng, 53 Mở rộng ra toàn cầu |
+
+Trang 32 chỉ là trang ngăn mục, không cần ai giải thích riêng. Khi hội đồng mở một trang phụ lục, đúng người
+phụ trách trả lời trước; người khác chỉ bổ sung nếu được hỏi thêm.
 
 Nếu bị nhắc giờ: xem mục "Slide có thể nói lướt" ở cuối file.
 
@@ -35,8 +50,8 @@ Tích hợp dữ liệu khí tượng đa nguồn Đông Nam Á; mục lục 6 p
 **Lời nói**
 > Em chào cô. Nhóm 16 gồm Quang, Lương và Nghĩa, đề tài là tích hợp dữ liệu khí tượng đa nguồn cho Đông Nam Á.
 >
-> Bài gồm sáu phần. Em trình bày ba phần đầu: vấn đề, mục tiêu và đặc trưng dữ liệu. Lương trình bày phần tích hợp.
-> Nghĩa trình bày phần xử lý, phân tích và kết luận.
+> Bài gồm sáu phần. Em trình bày hai phần đầu: đặt vấn đề và mục tiêu. Lương trình bày phần đặc trưng dữ liệu.
+> Nghĩa trình bày phần tích hợp, xử lý, phân tích và kết luận.
 
 **Chuyển ý**
 > Trước hết là vì sao bài toán này cần tích hợp nhiều nguồn.
@@ -164,7 +179,7 @@ thường, PINN, Kafka/Streaming → Dashboard.
 > lại dữ liệu cho Spark Streaming. Cuối cùng là dashboard.
 
 **Chuyển ý**
-> Phần quan trọng nhất là tầng đầu tiên: dữ liệu thô có vấn đề gì và phải xử lý ra sao.
+> Phần quan trọng nhất là tầng đầu tiên: dữ liệu thô có vấn đề gì và phải xử lý ra sao. Lương trình bày phần này.
 
 ---
 
@@ -178,7 +193,7 @@ Bảng 6 nhóm: dữ liệu thiếu; ngoài khoảng, giá trị sai; đơn vị
 nhóm có đặc trưng đo được và yêu cầu xử lý.
 
 **Lời nói**
-> Nhóm đo các vấn đề trực tiếp trên dữ liệu thật và chia làm sáu nhóm.
+> Em là Lương. Nhóm đo các vấn đề trực tiếp trên dữ liệu thật và chia làm sáu nhóm.
 >
 > Thiếu dữ liệu. Giá trị ngoài khoảng và giá trị sai. Đơn vị đo khác nhau. Khác nhau về ngữ nghĩa, tức là trùng tên
 > nhưng khác đại lượng. Khác nhau về thời gian. Và khác nhau về không gian, định danh.
@@ -302,10 +317,10 @@ lớn.
 >
 > Hạn chế nhóm ghi nhận: khi trạm thiếu số liệu mưa, giá trị lấy từ ERA5 có sai số lớn.
 >
-> Còn vấn đề cùng một trạm có hai mã GHCN và ISD, Lương sẽ trình bày ở phần tích hợp.
+> Còn vấn đề cùng một trạm có hai mã GHCN và ISD, Nghĩa sẽ trình bày ở phần tích hợp.
 
 **Chuyển ý**
-> Dữ liệu đã sạch và cùng đơn vị. Lương trình bày cách đưa năm nguồn về một kho.
+> Dữ liệu đã sạch và cùng đơn vị. Nghĩa trình bày cách đưa năm nguồn về một kho.
 
 ---
 
@@ -319,7 +334,7 @@ Lược đồ `WeatherObs(...)`; ví dụ view NASA POWER; PIVOT GHCN, PARSE ISD
 chiếu 100%.
 
 **Lời nói**
-> Em là Lương, em trình bày phần tích hợp.
+> Em là Nghĩa, em trình bày phần tích hợp, xử lý, phân tích và kết luận.
 >
 > Nhóm định nghĩa một lược đồ trung gian là `WeatherObs`: vị trí, thời gian UTC, nguồn, các biến khí tượng, cùng hai
 > cột `temp_def` và `qc_flag` từ bước xử lý.
@@ -376,7 +391,7 @@ giải 856.452 dòng.
 > Kết quả là bảng hợp giải 856 nghìn dòng, mỗi vị trí mỗi ngày một dòng, ghi rõ giá trị lấy từ nguồn nào.
 
 **Chuyển ý**
-> Phần tiếp theo, Nghĩa trình bày xử lý và phân tích trên kho này.
+> Phần tiếp theo là xử lý và phân tích trên kho này.
 
 ---
 
@@ -389,7 +404,7 @@ giải 856.452 dòng.
 `cache()` giảm 69,4% thời gian truy vấn (0,36s → 0,11s); thử partition theo tháng; giữ `year/source`.
 
 **Lời nói**
-> Em là Nghĩa. Mục tiêu M3 là tối ưu Spark.
+> Mục tiêu M3 là tối ưu Spark.
 >
 > Với truy vấn tổng hợp nhiệt độ theo trạm và tháng, `cache()` giảm thời gian từ 0,36 giây xuống 0,11 giây, tức
 > giảm 69,4%, vượt ngưỡng 30%.
