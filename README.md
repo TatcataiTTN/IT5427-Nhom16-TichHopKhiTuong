@@ -11,7 +11,7 @@
 | Slide bảo vệ | [`slides/final-defense.pdf`](slides/final-defense.pdf) (66 trang: bài chính 1–34, phụ lục 35–66), nguồn `slides/final-defense.tex` | XeLaTeX, theme `beamerthemeHUST.sty` |
 | Mã nguồn | `ingestion/`, `warehouse/`, `model/`, `dashboard/`, `viz/` | 122 test trong `tests/` |
 
-## Đội hình
+## Thành viên nhóm
 
 | Thành viên | MSSV | Phụ trách |
 |---|---|---|
