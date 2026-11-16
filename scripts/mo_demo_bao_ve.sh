@@ -10,7 +10,7 @@ DEMO="$(cd "$(dirname "$0")/demo" && pwd)"
 source "$DEMO/_env.sh"
 
 banner "Mo slide va bao cao"
-for f in slides/final-defense.pdf slides/final-defense-notes.pdf report/final-report.pdf; do
+for f in slides/final-defense.pdf archived/slides/final-defense-notes.pdf report/final-report.pdf; do
   [ -f "$f" ] && open "$f" || echo "  thieu $f"
 done
 
@@ -23,9 +23,9 @@ FILES=(
   model/pinn_wind_field_v2.py
   ingestion/parsers.py
   dashboard/app.py
-  docs/19-kich-ban-demo.md
-  slides/kich-ban-bao-ve.md
-  slides/hoi-dap-bao-ve.md
+  archived/docs/19-kich-ban-demo.md
+  archived/slides/kich-ban-bao-ve.md
+  archived/slides/hoi-dap-bao-ve.md
 )
 if command -v code >/dev/null 2>&1; then
   code "$ROOT" "${FILES[@]}"
@@ -57,7 +57,7 @@ fi
 
 banner "Xong"
 cat <<'EOF'
-  Kich ban demo (chi tiet loi noi: docs/19-kich-ban-demo.md)
+  Kich ban demo (chi tiet loi noi: archived/docs/19-kich-ban-demo.md)
     1  bash scripts/demo/1_er_survivorship.sh [location_id] [YYYY-MM-DD]
     2  bash scripts/demo/2_pinn.sh
     3  bash scripts/demo/3_streaming.sh [so_giay]

@@ -479,8 +479,8 @@ Copernicus CDS cắt vùng phía máy chủ, được dùng để tải đủ 5 
 Năm nguồn không ngang hàng: hai nguồn là quan trắc trực tiếp, hai nguồn là sản phẩm mô hình, và
 Open-Meteo là lớp trung gian tổng hợp lại từ nguồn khác. Bản chất này quyết định nguồn nào làm
 ``ground truth'' và nguồn nào không được coi là độc lập khi đối chứng chéo
-(Bảng~\ref{tab:source-credibility}, theo tài liệu kỹ thuật của từng tổ chức và \texttt{docs/02},
-\texttt{docs/12}).
+(Bảng~\ref{tab:source-credibility}, theo tài liệu kỹ thuật của từng tổ chức và \texttt{archived/docs/02},
+\texttt{archived/docs/12}).
 
 \begin{table}[!htbp]
 \centering\footnotesize
@@ -822,7 +822,7 @@ gian đó (cùng dữ liệu với Bảng~\ref{tab:team-progress})}
 \midrule
 Ngô Văn Quang & 5/10 & Script tải GHCN/ISD/ERA5 mẫu, kiểm chứng 4 nguồn lõi & \path{check_data_sources.py} \\
 Ngô Văn Quang & 20/10--15/11 & Tải đầy đủ 5 nguồn, QC 4 tầng, sửa 4 lỗi pipeline & \path{ingestion/}, Mục~6.12 \\
-Nguyễn Cao Lương & 5/10 & Thiết kế Mediated Schema nháp & \texttt{docs/06} \\
+Nguyễn Cao Lương & 5/10 & Thiết kế Mediated Schema nháp & \texttt{archived/docs/06} \\
 Nguyễn Cao Lương & 20/10--15/11 & Schema chính thức, Survivorship, Entity Resolution & \path{entity_resolution.py}, \path{survivorship.py} \\
 Trương Tuấn Nghĩa & 5/10 & Dựng môi trường Spark, Docker & \path{docker-compose.*.yml} \\
 Trương Tuấn Nghĩa & 20/10 & Cụm Spark+Kafka, dashboard khung, streaming cơ bản & Mục~6.6 \\
@@ -850,8 +850,8 @@ liệu thật được làm xong trước mọi hạng mục nâng cao.
 % ==========================================================
 
 Mọi số liệu trong chương này lấy từ các lần chạy thật trên dữ liệu thật, đối chiếu với kiến trúc ở
-Chương~3 và kế hoạch ở Chương~5. Chi tiết và script tái lập nằm tại \texttt{docs/10} và
-\texttt{docs/14} trong kho mã nguồn.
+Chương~3 và kế hoạch ở Chương~5. Chi tiết và script tái lập nằm tại \texttt{archived/docs/10} và
+\texttt{archived/docs/14} trong kho mã nguồn.
 
 \section{Quy mô dữ liệu đã tích hợp}
 
@@ -1493,13 +1493,13 @@ ISD & 29,9\% & 56,1\% & Nóng + khô + gió mạnh & Điểm sương cao (ẩm t
 Trong thí nghiệm có đối chứng (tiêm 5 giá trị cực đoan vào dữ liệu mô phỏng), Z-score chỉ bắt được 1/5
 vì chính các giá trị cực đoan làm độ lệch chuẩn phình từ 2,0 lên 72,2 (\textit{masking effect}), còn
 IQR dựa trên tứ phân vị bắt đủ 5/5. Vì vậy IQR là chỉ số chính của báo cáo chất lượng tự động
-(\texttt{docs/13-data-quality-report.md}). Chạy lại trên bộ đầy đủ còn lộ bốn lỗi của pipeline, đã sửa:
+(\texttt{archived/docs/13-data-quality-report.md}). Chạy lại trên bộ đầy đủ còn lộ bốn lỗi của pipeline, đã sửa:
 (i) gió Open-Meteo theo km/h bị ghi thẳng vào \texttt{wind\_speed\_ms} (phóng đại 3,6 lần), nay đọc đơn
 vị từ \texttt{hourly\_units}; (ii) tương quan tính sau khi điền 0 tạo tương quan giả, tính lại theo cặp
 cho nhiệt độ--độ ẩm $-0{,}59$ và nhiệt độ--áp suất $-0{,}61$; (iii) phép đo partition so với bản sao cũ;
 (iv) ERA5 bị ánh xạ bức xạ đỉnh khí quyển thay vì bức xạ bề mặt.
 
-Bốn tầng QC ở Ingestion (\texttt{docs/17}) đặt rỗng giá trị lỗi và ghi lý do vào cột \texttt{qc\_flag},
+Bốn tầng QC ở Ingestion (\texttt{archived/docs/17}) đặt rỗng giá trị lỗi và ghi lý do vào cột \texttt{qc\_flag},
 không xoá dòng (Hình~\ref{fig:qc-flags}). Tầng 1 đọc cờ QC của NOAA: trước đó pipeline vẫn dùng 406 giá
 trị GHCN và 3.255 giá trị ISD bị NOAA đánh dấu sai, kể cả hai bản tin gió 83~m/s. Tầng 2 kiểm tra giới
 hạn vật lý, tầng 3--4 kiểm tra nhất quán nội bộ và bước nhảy phi vật lý (18 điểm nhiệt độ, 18 điểm áp
@@ -1804,7 +1804,7 @@ trong 92,26 giây trên môi trường ở Mục~A.2; dựng kho đầy đủ m�
 
 \section*{A.6 Nguồn dữ liệu, dung lượng và giấy phép}
 
-Bảng~\ref{tab:data-appendix} tổng hợp giấy phép (chi tiết tại \texttt{docs/ingestion.md}, Mục~6), số
+Bảng~\ref{tab:data-appendix} tổng hợp giấy phép (chi tiết tại \texttt{archived/docs/ingestion.md}, Mục~6), số
 bản ghi trong kho (Bảng~\ref{tab:final-volume}) và dung lượng thô đã tải (Mục~4.3, 6.1). Không nguồn nào
 cấm dùng cho nghiên cứu, học thuật phi thương mại.
 

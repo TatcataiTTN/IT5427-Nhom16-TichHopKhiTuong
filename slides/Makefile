@@ -2,7 +2,7 @@
 #   make        -> final-defense.pdf (XeLaTeX, như trước)
 #   make notes  -> final-defense-notes.pdf: slide bên trái, lời nói bên phải. Dùng LuaLaTeX vì XeLaTeX làm mất
 #                  màu chữ ở nửa slide khi có pgfpages.
-TALK ?= kich-ban-bao-ve.md
+TALK ?= ../archived/slides/kich-ban-bao-ve.md
 XE  := xelatex -interaction=nonstopmode -halt-on-error
 LUA := lualatex -interaction=nonstopmode -halt-on-error
 
